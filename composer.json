@@ -1,0 +1,30 @@
+{
+	"name": "phpbbmodders/oneclickban",
+	"type": "phpbb-extension",
+	"description": "Allows one click ban from users profile",
+	"homepage": "https://phpbbmodders.net",
+	"version": "1.0.0",
+	"time": "2015-01-29",
+	"keywords": ["phpbb", "extension", "one click ban"],
+	"license": "Gnu GPL v2",
+	"authors": [
+		{
+			"name": "Jari Kanerva",
+			"homepage": "https://phpbbmodders.net",
+			"email": "tumba25@phpbbmodders.net",
+			"role": "Developer"
+		}
+	],
+	"require": {
+		"php": ">=5.3.3"
+	},
+	"require-dev": {
+		"phpbb/epv": "dev-master"
+	},
+	"extra": {
+		"display-name": "One Click Ban",
+		"soft-require": {
+			"phpbb/phpbb": ">=3.1.0-RC2,<3.2.*@dev"
+		}
+	}
+}

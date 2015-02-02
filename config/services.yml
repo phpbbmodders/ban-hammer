@@ -1,0 +1,15 @@
+services:
+    phpbbmodders.oneclickban.listener:
+        class: phpbbmodders\oneclickban\event\oneclickban_listener
+        arguments:
+            - @controller.helper
+            - @template
+            - @user
+            - @dbal.conn
+            - @auth
+            - @request
+            - @cache.driver
+            - %core.root_path%
+            - %core.php_ext%
+        tags:
+            - { name: event.listener }
