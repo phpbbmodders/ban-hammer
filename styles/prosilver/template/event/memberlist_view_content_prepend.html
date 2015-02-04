@@ -13,10 +13,11 @@
 </div>
 
 <!-- ELSEIF S_SHOW_OCB -->
-<div class="panel bg2" id="ocb-options" style="display: none;">
+<div class="panel bg2">
 	<div class="inner" style="padding: 0 0; font-size: 1.1em;">
+		<a href="" onclick="$('#ocb-options').toggle('slow'); return(false);">{L_OCB_THIS_USER}</a>
 		<form id="ocb-form" method="post" action="{U_OCBAN}">
-			<fieldset>
+			<fieldset id="ocb-options" style="display: none;">
 				<dl onmouseover="this.style.background='#ecf3f7';" onmouseout="this.style.background='#e1ebf2';">
 					<dt><label>{L_OCB_BAN_EMAIL}:</label></dt>
 					<dd>
@@ -87,11 +88,6 @@
 				</dl>
 			</fieldset>
 		</form>
-	</div>
-</div>
-<div class="panel bg2" style="float: left;">
-	<div class="inner" style="padding: 0 0; font-size: 1.1em;">
-		<a href="" onclick="$('#ocb-options').toggle('slow'); return(false);">{L_OCB_THIS_USER}</a>
 	</div>
 </div>
 <!-- ENDIF -->

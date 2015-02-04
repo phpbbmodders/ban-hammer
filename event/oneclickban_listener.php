@@ -42,9 +42,10 @@ class oneclickban_listener implements EventSubscriberInterface
 
 	public function do_ocb_stuff($event)
 	{
-		$this->data = $event['member'];
-		$this->user_id = (int) $this->data['user_id'];
-		$curl_exists = @function_exists('curl_init') ? true : false;
+		$this->data		= $event['member'];
+		$this->user_id	= (int) $this->data['user_id'];
+		$curl_exists	= (function_exists('curl_init')) ? true : false;
+
 		/**
 		 * Split these up and give error messages? Later maybe.
 		 */
@@ -174,8 +175,8 @@ class oneclickban_listener implements EventSubscriberInterface
 			$message .= ($hidden_fields['del_avatar'])		? $this->user->lang['OCB_DEL_AVATAR'] . '<br />' : '';
 			$message .= ($hidden_fields['del_signature'])	? $this->user->lang['OCB_DEL_SIGNATURE'] . '<br />' : '';
 			$message .= ($hidden_fields['del_profile'])		? $this->user->lang['OCB_DEL_PROFILE'] . '<br />' : '';
-			$message .= (!empty($group_name) && $hidden_fields['move_group']) ? sprintf($this->user->lang['OCB_MOVE_GROUP'], $group_name) . '<br />' : '';
-			$message .= ($hidden_fields['sfs_report'] && $curl_exists)		? $this->user->lang['OCB_SUBMIT_SFS'] . '<br />' : '';
+			$message .= (!empty($group_name) && $hidden_fields['move_group'])	? sprintf($this->user->lang['OCB_MOVE_GROUP'], $group_name) . '<br />' : '';
+			$message .= ($hidden_fields['sfs_report'] && $curl_exists)			? $this->user->lang['OCB_SUBMIT_SFS'] . '<br />' : '';
 
 			confirm_box(false, $message, build_hidden_fields($hidden_fields));
 		}
@@ -188,7 +189,7 @@ class oneclickban_listener implements EventSubscriberInterface
 
 		$error = array();
 
-		// The username is the user so that is always banned.
+		// The username is the user so it's always banned.
 		$success = user_ban('user', $this->data['username'], 0, '', false, '');
 
 		if (!$success)
@@ -406,6 +407,6 @@ class oneclickban_listener implements EventSubscriberInterface
 		{
 			return false;
 		}
-		return $contents;
+		return(true);
 	}
 }

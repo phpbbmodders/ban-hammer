@@ -31,10 +31,12 @@ $lang = array_merge($lang, array(
 	'ERROR_MOVE_GROUP'	=> 'Move user to the selected group failed.',
 	'ERROR_SFS'			=> 'Stop Forum Spam',
 
-	'OCB_BAN_EMAIL'		=> 'Ban this users email address',
-	'OCB_BAN_IP'		=> 'Ban this users IP address',
+	'OCB_BAN_EMAIL'			=> 'Ban this users email address',
+	'OCB_BAN_IP'			=> 'Ban this users IP address',
 	'OCB_BAN_IP_EXPLAIN'	=> '<strong>Be careful with this.</strong> Most home users have dynamic IP addresses and only need to reboot their router/modem to get a new IP address. The next day that IP address might be assigned to a user you want on your site. Spammers also uses internet anonymity proxies or the Tor network making a IP ban pointless.',
-	'OCB_BAN_USER'		=> 'Ban this user',
+	'OCB_BAN_GIVE_REASON'	=> 'The internal reason for this ban',
+	'OCB_BAN_REASON'		=> 'The reason for this ban shown to the user',
+	'OCB_BAN_USER'			=> 'Ban this user',
 
 	'OCB_DEL_AVATAR'	=> 'Delete this users avatar',
 	'OCB_DEL_POSTS'		=> 'Delete this users posts',
