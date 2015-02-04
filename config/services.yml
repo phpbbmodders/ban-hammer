@@ -2,7 +2,6 @@ services:
     phpbbmodders.oneclickban.listener:
         class: phpbbmodders\oneclickban\event\oneclickban_listener
         arguments:
-            - @controller.helper
             - @template
             - @user
             - @dbal.conn

@@ -28,6 +28,7 @@ class install_oneclickban extends \phpbb\db\migration\migration
 		$settings_ary = array(
 			'ban_username'	=> 1,
 			'ban_email'		=> 1,
+			'ban_ip'		=> 0,
 			'del_posts'		=> 0,
 			'del_avatar'	=> 0,
 			'del_signature'	=> 0,

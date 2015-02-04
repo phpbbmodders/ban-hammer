@@ -40,6 +40,7 @@ class oneclickban_module
 			$settings = array(
 				'ban_username'	=> 1,
 				'ban_email'		=> 1,
+				'ban_ip'		=> 0,
 				'del_posts'		=> 0,
 				'del_avatar'	=> 0,
 				'del_signature'	=> 0,
@@ -78,6 +79,7 @@ class oneclickban_module
 			$settings = array(
 				'ban_username'	=> $request->variable('ban_username', 0),
 				'ban_email'		=> $request->variable('ban_email', 0),
+				'ban_ip'		=> $request->variable('ban_ip', 0),
 				'del_posts'		=> $request->variable('del_posts', 0),
 				'del_avatar'	=> $request->variable('del_avatar', 0),
 				'del_signature'	=> $request->variable('del_signature', 0),
@@ -116,6 +118,7 @@ class oneclickban_module
 		$template->assign_vars(array(
 			'BAN_USERNAME'	=> $settings['ban_username'],
 			'BAN_EMAIL'		=> $settings['ban_email'],
+			'BAN_IP'		=> $settings['ban_ip'],
 			'DEL_POSTS'		=> $settings['del_posts'],
 			'DEL_AVATAR'	=> $settings['del_avatar'],
 			'DEL_SIGNATURE'	=> $settings['del_signature'],

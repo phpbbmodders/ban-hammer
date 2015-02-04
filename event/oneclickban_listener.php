@@ -27,9 +27,8 @@ class oneclickban_listener implements EventSubscriberInterface
 		));
 	}
 
-	public function __construct(\phpbb\controller\helper $helper, \phpbb\template\template $template, \phpbb\user $user, \phpbb\db\driver\driver_interface $db, \phpbb\auth\auth $auth,\phpbb\request\request $request, \phpbb\cache\driver\driver_interface $cache, $phpbb_root_path, $phpExt)
+	public function __construct(\phpbb\template\template $template, \phpbb\user $user, \phpbb\db\driver\driver_interface $db, \phpbb\auth\auth $auth,\phpbb\request\request $request, \phpbb\cache\driver\driver_interface $cache, $phpbb_root_path, $phpExt)
 	{
-		$this->helper		= $helper;
 		$this->template		= $template;
 		$this->user			= $user;
 		$this->db			= $db;
@@ -38,7 +37,6 @@ class oneclickban_listener implements EventSubscriberInterface
 		$this->cache		= $cache;
 		$this->root_path	= $phpbb_root_path;
 		$this->php_ext		= $phpExt;
-		//$this->data			= array();
 	}
 
 	public function do_ocb_stuff($event)
@@ -47,7 +45,7 @@ class oneclickban_listener implements EventSubscriberInterface
 		$this->user_id = (int) $this->data['user_id'];
 
 		/**
-		 * Split these up and give error messages, later.
+		 * Split these up and give error messages? Later maybe.
 		 */
 		if (!$this->auth->acl_get('m_ban') || ($this->data['user_type'] == USER_FOUNDER && $this->user->data['user_type'] != USER_FOUNDER) || $this->user_id == $this->user->data['user_id'])
 		{
@@ -74,21 +72,6 @@ class oneclickban_listener implements EventSubscriberInterface
 			return;
 		}
 
-		if (!$this->request->is_set('ocb') || ($this->request->is_set('ocb') && $this->request->is_set('confirm_key') && !confirm_box(true)))
-		{
-			$params = array(
-				'mode'	=> 'viewprofile',
-				'u'		=> $this->user_id,
-				'ocb'	=> 1,
-			);
-
-			$this->template->assign_vars(array(
-				'S_SHOW_OCB'	=> true,
-				'U_OCBAN'		=> append_sid($this->root_path . 'memberlist.' . $this->php_ext, $params),
-			));
-			return;
-		}
-
 		// Get OCB settings
 		$sql = 'SELECT * FROM ' . CONFIG_TEXT_TABLE . "
 				WHERE config_name = 'oneclickban_settings'";
@@ -112,6 +95,33 @@ class oneclickban_listener implements EventSubscriberInterface
 			}
 		}
 
+		if (!$this->request->is_set('ocb') || ($this->request->is_set('ocb') && $this->request->is_set('confirm_key') && !confirm_box(true)))
+		{
+			$params = array(
+				'mode'	=> 'viewprofile',
+				'u'		=> $this->user_id,
+				'ocb'	=> 1,
+			);
+
+			$this->template->assign_vars(array(
+				'OCB_BAN_USERNAME'	=> $settings['ban_username'],
+				'OCB_BAN_EMAIL'		=> $settings['ban_email'],
+				'OCB_BAN_IP'		=> $settings['ban_ip'],
+				'OCB_DEL_POSTS'		=> $settings['del_posts'],
+				'OCB_DEL_AVATAR'	=> $settings['del_avatar'],
+				'OCB_DEL_SIGNATURE'	=> $settings['del_signature'],
+				'OCB_DEL_PROFILE'	=> $settings['del_profile'],
+
+				'L_OCB_MOVE_GROUP'	=> (!empty($group_name)) ? sprintf($this->user->lang['OCB_MOVE_GROUP'], $group_name) : '',
+
+				'S_SHOW_OCB'	=> true,
+				'S_OCB_SFS'		=> (!empty($settings['sfs_api_key'])) ? true : false,
+
+				'U_OCBAN'	=> append_sid($this->root_path . 'memberlist.' . $this->php_ext, $params),
+			));
+			return;
+		}
+
 		// Time to ban a user. But are you sure?
 		if (!confirm_box(true))
 		{
@@ -127,7 +137,8 @@ class oneclickban_listener implements EventSubscriberInterface
 			$message .= (!empty($settings['del_avatar']))	? $this->user->lang['OCB_DEL_AVATAR'] . '<br />' : '';
 			$message .= (!empty($settings['del_signature']))	? $this->user->lang['OCB_DEL_SIGNATURE'] . '<br />' : '';
 			$message .= (!empty($settings['del_profile']))	? $this->user->lang['OCB_DEL_PROFILE'] . '<br />' : '';
-			$message .= (!empty($group_name))	? sprintf($this->user->lang['OCB_MOVE_GROUP'], $group_name) . '<br />' : '';
+			$message .= (!empty($group_name)) ? sprintf($this->user->lang['OCB_MOVE_GROUP'], $group_name) . '<br />' : '';
+			$message .= (!empty($settings['sfs_api_key']))	? $this->user->lang['SFS_REPORT'] . '<br />' : '';
 
 			confirm_box(false, $message, build_hidden_fields($hidden_fields));
 		}
@@ -147,13 +158,22 @@ class oneclickban_listener implements EventSubscriberInterface
 			if (!$success)
 			{
 				$error[] = $this->user->lang['ERROR_BAN_USERNAME'];
-				$error[] = $this->user->lang[''];
 			}
 		}
 
 		if (!empty($settings['ban_email']))
 		{
 			$success = user_ban('email', $this->data['user_email'], 0, '', false, '');
+
+			if (!$success)
+			{
+				$error[] = $this->user->lang['ERROR_BAN_EMAIL'];
+			}
+		}
+
+		if (!empty($settings['ban_ip']))
+		{
+			$success = user_ban('ip', $this->data['user_ip'], 0, '', false, '');
 
 			if (!$success)
 			{
@@ -207,7 +227,6 @@ class oneclickban_listener implements EventSubscriberInterface
 		if (!empty($settings['sfs_api_key']))
 		{
 			// Inform Stop Forum Spam
-
 		}
 
 		// Need to purge the cache.
