@@ -20,6 +20,7 @@ use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 */
 class oneclickban_listener implements EventSubscriberInterface
 {
+
 	static public function getSubscribedEvents()
 	{
 		return(array(
@@ -43,7 +44,7 @@ class oneclickban_listener implements EventSubscriberInterface
 	{
 		$this->data = $event['member'];
 		$this->user_id = (int) $this->data['user_id'];
-
+		$curl_exists = @function_exists('curl_init') ? true : false;
 		/**
 		 * Split these up and give error messages? Later maybe.
 		 */
@@ -174,7 +175,7 @@ class oneclickban_listener implements EventSubscriberInterface
 			$message .= ($hidden_fields['del_signature'])	? $this->user->lang['OCB_DEL_SIGNATURE'] . '<br />' : '';
 			$message .= ($hidden_fields['del_profile'])		? $this->user->lang['OCB_DEL_PROFILE'] . '<br />' : '';
 			$message .= (!empty($group_name) && $hidden_fields['move_group']) ? sprintf($this->user->lang['OCB_MOVE_GROUP'], $group_name) . '<br />' : '';
-			$message .= ($hidden_fields['sfs_report'])		? $this->user->lang['SFS_REPORT'] . '<br />' : '';
+			$message .= ($hidden_fields['sfs_report'] && $curl_exists)		? $this->user->lang['OCB_SUBMIT_SFS'] . '<br />' : '';
 
 			confirm_box(false, $message, build_hidden_fields($hidden_fields));
 		}
@@ -252,9 +253,21 @@ class oneclickban_listener implements EventSubscriberInterface
 			}
 		}
 
-		if ($this->request->variable('sfs_report', 0) && !empty($settings['sfs_api_key']))
+		if ($this->request->variable('sfs_report', 0) && !empty($settings['sfs_api_key']) && $curl_exists)
 		{
-			// Inform Stop Forum Spam
+			// add the spammer to the SFS database
+			$http_request = 'http://www.stopforumspam.com/add.php';
+			$http_request .= '?username=' . $this->data['username'];
+			$http_request .= '&ip_addr=' . $this->data['user_ip'];
+			$http_request .= '&email=' . $this->data['user_email'];
+			$http_request .= '&api_key=' . $settings['sfs_api_key'];
+
+			$response = $this->get_file($http_request);
+
+			if (!$response)
+			{
+				$error[] = $this->user->lang['ERROR_SFS'];
+			}
 		}
 
 		// Need to purge the cache.
@@ -375,12 +388,24 @@ class oneclickban_listener implements EventSubscriberInterface
 		$this->db->sql_query('DELETE FROM ' . TOPICS_WATCH_TABLE .		" WHERE user_id = $user_id");
 		$this->db->sql_query('DELETE FROM ' . USER_NOTIFICATIONS_TABLE .	" WHERE user_id = $user_id");
 	}
+
+	// use curl to get response from SFS
+	private function get_file($url)
+	{
+		$ch = curl_init();
+		curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+		curl_setopt($ch, CURLOPT_URL, $url);
+		curl_setopt($ch, CURLOPT_TIMEOUT, 5);
+		curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 5);
+		$contents = curl_exec($ch);
+		$httpcode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+		curl_close($ch);
+
+		// if nothing is returned (SFS is down)
+		if($httpcode != 200)
+		{
+			return false;
+		}
+		return $contents;
+	}
 }
-
-
-
-
-
-
-
-//
