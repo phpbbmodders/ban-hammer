@@ -25,15 +25,15 @@ $lang = array_merge($lang, array(
 	'BANNED_ERROR'		=> 'There where some error(s) banning this user',
 	'BANNED_SUCCESS'	=> 'This user was successfully banned.',
 
-	'ERROR_BAN_EMAIL'		=> 'Banning email',
-	'ERROR_BAN_USERNAME'	=> 'Banning username',
-	'ERROR_DEL_AVATAR'		=> 'Delete avatar',
-	'ERROR_DEL_POSTS'		=> 'Delete posts',
+	'ERROR_BAN_EMAIL'	=> 'Banning email failed.',
+	'ERROR_BAN_USER'	=> 'Banning user failed.',
+	'ERROR_DEL_POSTS'	=> 'Delete users posts failed.',
+	'ERROR_MOVE_GROUP'	=> 'Move user to the selected group failed.',
 
 	'OCB_BAN_EMAIL'		=> 'Ban this users email address',
 	'OCB_BAN_IP'		=> 'Ban this users IP address',
 	'OCB_BAN_IP_EXPLAIN'	=> '<strong>Be careful with this.</strong> Most home users have dynamic IP addresses and only need to reboot their router/modem to get a new IP address. The next day that IP address might be assigned to a user you want on your site. Spammers also uses internet anonymity proxies or the Tor network making a IP ban pointless.',
-	'OCB_BAN_USERNAME'	=> 'Ban this users username',
+	'OCB_BAN_USER'		=> 'Ban this user',
 
 	'OCB_DEL_AVATAR'	=> 'Delete this users avatar',
 	'OCB_DEL_POSTS'		=> 'Delete this users posts',
@@ -46,7 +46,7 @@ $lang = array_merge($lang, array(
 	'OCB_THIS_USER'	=> 'One Click Ban this user',
 
 	'SFS_REPORT'	=> 'Report this user to Stop Forum Spam',
-	'SURE_BAN'		=> 'Are you sure you want to one click ban <strong>%s</strong>?', // %s will be a username.
+	'SURE_BAN'		=> 'Are you sure you want to ban <strong>%s</strong>?', // %s will be a username.
 
 	'THIS_WILL'	=> 'This will',
 ));

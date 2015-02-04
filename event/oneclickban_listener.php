@@ -67,7 +67,7 @@ class oneclickban_listener implements EventSubscriberInterface
 
 		if (!empty($banned))
 		{
-			$ocb_result = $this->request->variable('ocb', '');
+			$ocb_result = $this->request->variable('ocb_res', '');
 
 			if (!empty($ocb_result))
 			{
@@ -88,7 +88,7 @@ class oneclickban_listener implements EventSubscriberInterface
 				}
 
 				$this->template->assign_vars(array(
-					'OCB_STYLE'		=> ($ocb_result == 'success') ? 'green' : '#ba1b1b; font-size: 1.2em',
+					'OCB_STYLE'		=> ($ocb_result == 'success') ? 'green' : '#ba1b1b',
 					'OCB_MESSAGE'	=> $ocb_message,
 				));
 			}
@@ -133,7 +133,6 @@ class oneclickban_listener implements EventSubscriberInterface
 			);
 
 			$this->template->assign_vars(array(
-				'OCB_BAN_USERNAME'	=> $settings['ban_username'],
 				'OCB_BAN_EMAIL'		=> $settings['ban_email'],
 				'OCB_BAN_IP'		=> $settings['ban_ip'],
 				'OCB_DEL_POSTS'		=> $settings['del_posts'],
@@ -155,19 +154,27 @@ class oneclickban_listener implements EventSubscriberInterface
 		if (!confirm_box(true))
 		{
 			$hidden_fields = array(
-				'mode'	=> 'viewprofile',
+				'ban_email'		=> $this->request->variable('ban_email', 0),
+				'ban_ip'		=> $this->request->variable('ban_ip', 0),
+				'del_posts'		=> $this->request->variable('del_posts', 0),
+				'del_avatar'	=> $this->request->variable('del_avatar', 0),
+				'del_signature'	=> $this->request->variable('del_signature', 0),
+				'del_profile'	=> $this->request->variable('del_profile', 0),
+				'move_group'	=> $this->request->variable('move_group', 0),
+				'sfs_report'	=> $this->request->variable('sfs_report', 0),
+				'mode'			=> 'viewprofile',
 			);
 
 			$message = sprintf($this->user->lang['SURE_BAN'], $this->data['username']) . '<br /><br />';
-			$message .= $this->user->lang['THIS_WILL'] . ':<br />';
-			$message .= (!empty($settings['ban_username']))	? $this->user->lang['OCB_BAN_USERNAME'] . '<br />' : '';
-			$message .= (!empty($settings['ban_email']))	? $this->user->lang['OCB_BAN_EMAIL'] . '<br />' : '';
-			$message .= (!empty($settings['del_posts']))	? $this->user->lang['OCB_DEL_POSTS'] . '<br />' : '';
-			$message .= (!empty($settings['del_avatar']))	? $this->user->lang['OCB_DEL_AVATAR'] . '<br />' : '';
-			$message .= (!empty($settings['del_signature']))	? $this->user->lang['OCB_DEL_SIGNATURE'] . '<br />' : '';
-			$message .= (!empty($settings['del_profile']))	? $this->user->lang['OCB_DEL_PROFILE'] . '<br />' : '';
-			$message .= (!empty($group_name)) ? sprintf($this->user->lang['OCB_MOVE_GROUP'], $group_name) . '<br />' : '';
-			$message .= (!empty($settings['sfs_api_key']))	? $this->user->lang['SFS_REPORT'] . '<br />' : '';
+			$message .= $this->user->lang['THIS_WILL'] . ':<br />' . $this->user->lang['OCB_BAN_USER'] . ':<br />';
+			$message .= ($hidden_fields['ban_email'])		? $this->user->lang['OCB_BAN_EMAIL'] . '<br />' : '';
+			$message .= ($hidden_fields['ban_ip'])			? $this->user->lang['OCB_BAN_IP'] . '<br />' : '';
+			$message .= ($hidden_fields['del_posts'])		? $this->user->lang['OCB_DEL_POSTS'] . '<br />' : '';
+			$message .= ($hidden_fields['del_avatar'])		? $this->user->lang['OCB_DEL_AVATAR'] . '<br />' : '';
+			$message .= ($hidden_fields['del_signature'])	? $this->user->lang['OCB_DEL_SIGNATURE'] . '<br />' : '';
+			$message .= ($hidden_fields['del_profile'])		? $this->user->lang['OCB_DEL_PROFILE'] . '<br />' : '';
+			$message .= (!empty($group_name) && $hidden_fields['move_group']) ? sprintf($this->user->lang['OCB_MOVE_GROUP'], $group_name) . '<br />' : '';
+			$message .= ($hidden_fields['sfs_report'])		? $this->user->lang['SFS_REPORT'] . '<br />' : '';
 
 			confirm_box(false, $message, build_hidden_fields($hidden_fields));
 		}
@@ -180,17 +187,15 @@ class oneclickban_listener implements EventSubscriberInterface
 
 		$error = array();
 
-		if (!empty($settings['ban_username']))
-		{
-			$success = user_ban('user', $this->data['username'], 0, '', false, '');
+		// The username is the user so that is always banned.
+		$success = user_ban('user', $this->data['username'], 0, '', false, '');
 
-			if (!$success)
-			{
-				$error[] = 'ERROR_BAN_USERNAME';
-			}
+		if (!$success)
+		{
+			$error[] = 'ERROR_BAN_USER';
 		}
 
-		if (!empty($settings['ban_email']))
+		if ($this->request->variable('ban_email', 0))
 		{
 			$success = user_ban('email', $this->data['user_email'], 0, '', false, '');
 
@@ -200,7 +205,7 @@ class oneclickban_listener implements EventSubscriberInterface
 			}
 		}
 
-		if (!empty($settings['ban_ip']))
+		if ($this->request->variable('ban_ip', 0) && !empty($this->data['user_ip']))
 		{
 			$success = user_ban('ip', $this->data['user_ip'], 0, '', false, '');
 
@@ -210,22 +215,17 @@ class oneclickban_listener implements EventSubscriberInterface
 			}
 		}
 
-		if (!empty($settings['del_posts']))
+		if ($this->request->variable('del_posts', 0))
 		{
 			$this->ocb_del_posts();
 		}
 
-		if (!empty($settings['del_avatar']))
+		if ($this->request->variable('del_avatar', 0))
 		{
-			$success = avatar_delete('user', $this->data, true);
-
-			if (!$success)
-			{
-				$error[] = 'ERROR_DEL_AVATAR';
-			}
+			avatar_delete('user', $this->data, true);
 		}
 
-		if (!empty($settings['del_signature']))
+		if ($this->request->variable('del_signature', 0))
 		{
 			$sql = 'UPDATE ' . USERS_TABLE . "
 					SET user_sig ='',
@@ -235,24 +235,24 @@ class oneclickban_listener implements EventSubscriberInterface
 			$this->db->sql_query($sql);
 		}
 
-		if (!empty($settings['del_profile']))
+		if ($this->request->variable('del_profile', 0))
 		{
 			$sql = 'DELETE FROM ' . PROFILE_FIELDS_DATA_TABLE . '
 					WHERE user_id = ' . $this->user_id;
 			$this->db->sql_query($sql);
 		}
 
-		if (!empty($group_name))
+		if ($this->request->variable('move_group', 0) && !empty($group_name))
 		{
 			$return = group_user_add($settings['group_id'], array($this->user_id), array($this->data['username']), $group_name, true);
 
-			//if (!$success)
-			//{
-			//	$error[] = $this->user->lang['ERROR_DEL_AVATAR'];
-			//}
+			if ($return != false)
+			{
+				$error[] = $this->user->lang['ERROR_MOVE_GROUP'];
+			}
 		}
 
-		if (!empty($settings['sfs_api_key']))
+		if ($this->request->variable('sfs_report', 0) && !empty($settings['sfs_api_key']))
 		{
 			// Inform Stop Forum Spam
 		}
@@ -263,8 +263,8 @@ class oneclickban_listener implements EventSubscriberInterface
 		// The page needs to be reloaded.
 		$url	= generate_board_url();
 		$url	.= ((substr($url, -1) == '/') ? '' : '/') . 'memberlist.' . $this->php_ext;
-		$args	= 'mode=viewprofile&amp;u=' . $this->user_id;
-		$args	.= (empty($error)) ? '&amp;ocb=success' : '&amp;ocb=' . urlencode(implode('+', $error));
+		$args	= "mode=viewprofile&amp;u={$this->user_id}";
+		$args	.= (empty($error)) ? '&amp;ocb_res=success' : '&amp;ocb_res=' . urlencode(implode('+', $error));
 		$url	= append_sid($url, $args);
 		redirect($url);
 	}
