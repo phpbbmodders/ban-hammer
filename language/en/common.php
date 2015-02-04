@@ -22,7 +22,7 @@ if (empty($lang) || !is_array($lang))
 }
 
 $lang = array_merge($lang, array(
-	'BANNED_ERROR'		=> 'There where some error(s) banning this user.',
+	'BANNED_ERROR'		=> 'There where some error(s) banning this user',
 	'BANNED_SUCCESS'	=> 'This user was successfully banned.',
 
 	'ERROR_BAN_EMAIL'		=> 'Banning email',

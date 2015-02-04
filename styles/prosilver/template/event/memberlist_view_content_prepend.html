@@ -1,4 +1,11 @@
-<!-- IF S_IS_BANNED -->
+<!-- IF OCB_MESSAGE -->
+<div class="panel bg2" style="background-color: {OCB_STYLE};">
+	<div class="inner" style="padding: 5px 0; text-align: center; font-size: 1.1em; color: white;">
+		{OCB_MESSAGE}
+	</div>
+</div>
+
+<!-- ELSEIF S_IS_BANNED -->
 <div class="panel bg2" style="float: left;">
 	<div class="inner">
 		<h3 style="text-align: center; border-bottom: none;">{L_OCB_BANNED}</h3>
@@ -94,19 +101,6 @@
 <div class="panel bg2" style="float: left;">
 	<div class="inner" style="padding: 0 0; font-size: 1.1em;">
 		<a href="" onclick="$('#ocb-options').toggle('slow'); return(false);">{L_OCB_THIS_USER}</a>
-	</div>
-</div>
-<!-- ELSEIF S_SUCCESS -->
-<div class="panel bg2" style="float: left; background-color: green;">
-	<div class="inner" style="padding: 5px 0; text-align: center; font-size: 1.1em; color: white;">
-		{L_OCB_THIS_USER}
-	</div>
-</div>
-
-<!-- ELSEIF S_ERROR -->
-<div class="panel bg2" style="background-color: red;" style="float: left;">
-	<div class="inner" style="padding: 5px 0; text-align: center; font-size: 1.1em;">
-		{L_OCB_THIS_USER}
 	</div>
 </div>
 <!-- ENDIF -->

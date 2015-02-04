@@ -67,8 +67,37 @@ class oneclickban_listener implements EventSubscriberInterface
 
 		if (!empty($banned))
 		{
-			// It's enough to ban them once.
-			$this->template->assign_var('S_IS_BANNED', true);
+			$ocb_result = $this->request->variable('ocb', '');
+
+			if (!empty($ocb_result))
+			{
+				if ($ocb_result == 'success')
+				{
+					$ocb_message = $this->user->lang['BANNED_SUCCESS'];
+				}
+				else
+				{
+					// One or more actions failed.
+					$message_ary = explode('+', urldecode($ocb_result));
+					$ocb_message = $this->user->lang['BANNED_ERROR'];
+
+					foreach ($message_ary as $error)
+					{
+						$ocb_message .= '<br />' . $this->user->lang[$error];
+					}
+				}
+
+				$this->template->assign_vars(array(
+					'OCB_STYLE'		=> ($ocb_result == 'success') ? 'green' : '#ba1b1b; font-size: 1.2em',
+					'OCB_MESSAGE'	=> $ocb_message,
+				));
+			}
+			else
+			{
+				// It's enough to ban them once.
+				$this->template->assign_var('S_IS_BANNED', true);
+			}
+
 			return;
 		}
 
@@ -157,7 +186,7 @@ class oneclickban_listener implements EventSubscriberInterface
 
 			if (!$success)
 			{
-				$error[] = $this->user->lang['ERROR_BAN_USERNAME'];
+				$error[] = 'ERROR_BAN_USERNAME';
 			}
 		}
 
@@ -167,7 +196,7 @@ class oneclickban_listener implements EventSubscriberInterface
 
 			if (!$success)
 			{
-				$error[] = $this->user->lang['ERROR_BAN_EMAIL'];
+				$error[] = 'ERROR_BAN_EMAIL';
 			}
 		}
 
@@ -177,7 +206,7 @@ class oneclickban_listener implements EventSubscriberInterface
 
 			if (!$success)
 			{
-				$error[] = $this->user->lang['ERROR_BAN_EMAIL'];
+				$error[] = 'ERROR_BAN_EMAIL';
 			}
 		}
 
@@ -192,7 +221,7 @@ class oneclickban_listener implements EventSubscriberInterface
 
 			if (!$success)
 			{
-				$error[] = $this->user->lang['ERROR_DEL_AVATAR'];
+				$error[] = 'ERROR_DEL_AVATAR';
 			}
 		}
 
@@ -217,11 +246,10 @@ class oneclickban_listener implements EventSubscriberInterface
 		{
 			$return = group_user_add($settings['group_id'], array($this->user_id), array($this->data['username']), $group_name, true);
 
-
-			if (!$success)
-			{
-				$error[] = $this->user->lang['ERROR_DEL_AVATAR'];
-			}
+			//if (!$success)
+			//{
+			//	$error[] = $this->user->lang['ERROR_DEL_AVATAR'];
+			//}
 		}
 
 		if (!empty($settings['sfs_api_key']))
@@ -236,6 +264,7 @@ class oneclickban_listener implements EventSubscriberInterface
 		$url	= generate_board_url();
 		$url	.= ((substr($url, -1) == '/') ? '' : '/') . 'memberlist.' . $this->php_ext;
 		$args	= 'mode=viewprofile&amp;u=' . $this->user_id;
+		$args	.= (empty($error)) ? '&amp;ocb=success' : '&amp;ocb=' . urlencode(implode('+', $error));
 		$url	= append_sid($url, $args);
 		redirect($url);
 	}
