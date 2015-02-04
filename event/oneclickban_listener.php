@@ -46,7 +46,7 @@ class oneclickban_listener implements EventSubscriberInterface
 	{
 		$this->data = $event['member'];
 		$this->user_id = (int) $this->data['user_id'];
-
+		$curl_exists = @function_exists('curl_init') ? true : false;
 		/**
 		 * Split these up and give error messages, later.
 		 */
@@ -128,8 +128,8 @@ class oneclickban_listener implements EventSubscriberInterface
 			$message .= (!empty($settings['del_avatar']))	? $this->user->lang['OCB_DEL_AVATAR'] . '<br />' : '';
 			$message .= (!empty($settings['del_signature']))	? $this->user->lang['OCB_DEL_SIGNATURE'] . '<br />' : '';
 			$message .= (!empty($settings['del_profile']))	? $this->user->lang['OCB_DEL_PROFILE'] . '<br />' : '';
-			$message .= (!empty($group_name))	? sprintf($this->user->lang['OCB_MOVE_GROUP'], $group_name) . '<br />' : '';
-			$message .= (!empty($settings['sfs_api_key']))	? $this->user->lang['OCB_SUBMIT_SFS'] . '<br />' : '';
+			$message .= (!empty($group_name)) ? sprintf($this->user->lang['OCB_MOVE_GROUP'], $group_name) . '<br />' : '';
+			$message .= (!empty($settings['sfs_api_key']) && $curl_exists)	? $this->user->lang['OCB_SUBMIT_SFS'] . '<br />' : '';
 
 			confirm_box(false, $message, build_hidden_fields($hidden_fields));
 		}
@@ -205,7 +205,7 @@ class oneclickban_listener implements EventSubscriberInterface
 			}
 		}
 
-		if (!empty($settings['sfs_api_key']))
+		if (!empty($settings['sfs_api_key']) && $curl_exists)
 		{
 			// add the spammer to the SFS database
 			$http_request = 'http://www.stopforumspam.com/add.php';
@@ -215,7 +215,7 @@ class oneclickban_listener implements EventSubscriberInterface
 			$http_request .= '&api_key=' . $settings['sfs_api_key'];
 
 			$response = $this->get_file($http_request);
-				
+
 			if (!$response)
 			{
 				$error[] = $this->user->lang['ERROR_SFS'];
