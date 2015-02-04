@@ -26,6 +26,7 @@ $lang = array_merge($lang, array(
 	'ERROR_BAN_USERNAME'	=> 'Banning username',
 	'ERROR_DEL_AVATAR'		=> 'Delete avatar',
 	'ERROR_DEL_POSTS'		=> 'Delete posts',
+	'ERROR_SFS'				=> 'Stop Forum Spam',
 
 	'OCB_BAN_EMAIL'		=> 'Ban this users email address',
 	'OCB_BAN_USERNAME'	=> 'Ban this users username',
@@ -34,6 +35,7 @@ $lang = array_merge($lang, array(
 	'OCB_DEL_POSTS'		=> 'Delete this users posts',
 	'OCB_DEL_PROFILE'	=> 'Delete this users profile fields',
 	'OCB_DEL_SIGNATURE'	=> 'Delete this users signature',
+	'OCB_SUBMIT_SFS'	=> 'Submit to stop forum spam',
 
 	'OCB_MOVE_GROUP'	=> 'Move this user to group &quot;%s&quot;', // %s will be a group name
 
