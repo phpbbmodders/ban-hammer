@@ -56,7 +56,7 @@
 		</dl>
 		<dl>
 			<dt><label for="sfs_api_key">{L_SFS_API_KEY}:</label><br /><span>{L_SFS_API_KEY_EXPLAIN}</span></dt>
-			<dd><input type="text" class="input small" name="sfs_api_key" id="sfs_api_key" value="{SFS_API_KEY}" /><!-- IF not SFS_CURL --><br /> {L_SFS_NEEDS_CURL}<!-- ENDIF --></dd>
+			<dd><!-- IF not SFS_CURL -->{L_SFS_NEEDS_CURL}<!-- ELSE --><input type="text" class="input small" name="sfs_api_key" id="sfs_api_key" value="{SFS_API_KEY}" /><!-- ENDIF --></dd>
 		</dl>
 
 		<p class="submit-buttons">

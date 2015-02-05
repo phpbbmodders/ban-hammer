@@ -122,7 +122,7 @@ class oneclickban_module
 			'DEL_PROFILE'	=> $settings['del_profile'],
 			'MOVE_GROUP'	=> (!empty($group_name)) ? $group_name : '',
 			'SFS_API_KEY'	=> $settings['sfs_api_key'],
-			'SFS_CURL'		=> @function_exists('curl_init') ? true : false,
+			'SFS_CURL'		=> (function_exists('curl_init')) ? true : false,
 		));
 	}
 }
