@@ -40,13 +40,6 @@ branches:
     - develop
     - /^develop-.*$/
 
-before_install:
-  - sudo mkdir travis
-  - git clone "https://github.com/phpbbmodders/phpbb-3.1-one-click-ban.git"
-  - sudo cp phpbb-3.1-one-click-ban/phpunit.xml.dist ./
-  - sudo cp phpbb-3.1-one-click-ban/travis/prepare-phpbb.sh travis
-  - sudo rm -rf phpbb-3.1-one-click-ban
-
 install:
   - composer install --dev --no-interaction --prefer-source
   - travis/prepare-phpbb.sh $EXTNAME $PHPBB_BRANCH
