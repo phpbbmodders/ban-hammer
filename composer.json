@@ -3,8 +3,8 @@
 	"type": "phpbb-extension",
 	"description": "Allows one click ban from users profile",
 	"homepage": "https://phpbbmodders.net",
-	"version": "1.0.0",
-	"time": "2015-01-29",
+	"version": "1.0.0-RC2",
+	"time": "2015-02-05",
 	"keywords": ["phpbb", "extension", "one click ban"],
 	"license": "Gnu GPL v2",
 	"authors": [

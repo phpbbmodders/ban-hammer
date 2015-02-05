@@ -90,14 +90,14 @@ class oneclickban_listener implements EventSubscriberInterface
 				}
 
 				$this->template->assign_vars(array(
-					'OCB_STYLE'		=> ($ocb_result == 'success') ? 'green' : '#ba1b1b',
+					'OCB_STYLE'		=> ' style="background-color: ' . (($ocb_result == 'success') ? 'green' : '#ba1b1b') . '; color: white;"',
 					'OCB_MESSAGE'	=> $ocb_message,
 				));
 			}
 			else
 			{
 				// It's enough to ban them once.
-				$this->template->assign_var('S_IS_BANNED', true);
+				$this->template->assign_var('OCB_MESSAGE', $this->user->lang['OCB_BANNED']);
 			}
 
 			return;
@@ -156,15 +156,17 @@ class oneclickban_listener implements EventSubscriberInterface
 		if (!confirm_box(true))
 		{
 			$hidden_fields = array(
-				'ban_email'		=> $this->request->variable('ban_email', 0),
-				'ban_ip'		=> $this->request->variable('ban_ip', 0),
-				'del_posts'		=> $this->request->variable('del_posts', 0),
-				'del_avatar'	=> $this->request->variable('del_avatar', 0),
-				'del_signature'	=> $this->request->variable('del_signature', 0),
-				'del_profile'	=> $this->request->variable('del_profile', 0),
-				'move_group'	=> $this->request->variable('move_group', 0),
-				'sfs_report'	=> $this->request->variable('sfs_report', 0),
-				'mode'			=> 'viewprofile',
+				'ban_email'			=> $this->request->variable('ban_email', 0),
+				'ban_ip'			=> $this->request->variable('ban_ip', 0),
+				'del_posts'			=> $this->request->variable('del_posts', 0),
+				'del_avatar'		=> $this->request->variable('del_avatar', 0),
+				'del_signature'		=> $this->request->variable('del_signature', 0),
+				'del_profile'		=> $this->request->variable('del_profile', 0),
+				'move_group'		=> $this->request->variable('move_group', 0),
+				'sfs_report'		=> $this->request->variable('sfs_report', 0),
+				'ocb_reason'		=> $this->request->variable('ocb_reason', ''),
+				'ocb_reason_user'	=> $this->request->variable('ocb_reason_user', ''),
+				'mode'				=> 'viewprofile',
 			);
 
 			$message = sprintf($this->user->lang['SURE_BAN'], $this->data['username']) . '<br /><br />';
@@ -177,6 +179,8 @@ class oneclickban_listener implements EventSubscriberInterface
 			$message .= ($hidden_fields['del_profile'])		? $this->user->lang['OCB_DEL_PROFILE'] . '<br />' : '';
 			$message .= (!empty($group_name) && $hidden_fields['move_group'])	? sprintf($this->user->lang['OCB_MOVE_GROUP'], $group_name) . '<br />' : '';
 			$message .= ($hidden_fields['sfs_report'] && $curl_exists)			? $this->user->lang['OCB_SUBMIT_SFS'] . '<br />' : '';
+			$message .= ($hidden_fields['ocb_reason'])		? sprintf($this->user->lang['OCB_REASON'], $hidden_fields['ocb_reason']) . '<br />' : '';
+			$message .= ($hidden_fields['ocb_reason_user'])	? sprintf($this->user->lang['OCB_REASON_USER'], $hidden_fields['ocb_reason_user']) . '<br />' : '';
 
 			confirm_box(false, $message, build_hidden_fields($hidden_fields));
 		}
@@ -189,8 +193,12 @@ class oneclickban_listener implements EventSubscriberInterface
 
 		$error = array();
 
+		// Any reason for this ban?
+		$ocb_reason			= $this->request->variable('ocb_reason', '');
+		$ocb_reason_user	= $this->request->variable('ocb_reason_user', '');
+
 		// The username is the user so it's always banned.
-		$success = user_ban('user', $this->data['username'], 0, '', false, '');
+		$success = user_ban('user', $this->data['username'], 0, '', false, $ocb_reason, $ocb_reason_user);
 
 		if (!$success)
 		{
@@ -199,7 +207,7 @@ class oneclickban_listener implements EventSubscriberInterface
 
 		if ($this->request->variable('ban_email', 0))
 		{
-			$success = user_ban('email', $this->data['user_email'], 0, '', false, '');
+			$success = user_ban('email', $this->data['user_email'], 0, '', false, $ocb_reason, $ocb_reason_user);
 
 			if (!$success)
 			{
@@ -209,7 +217,7 @@ class oneclickban_listener implements EventSubscriberInterface
 
 		if ($this->request->variable('ban_ip', 0) && !empty($this->data['user_ip']))
 		{
-			$success = user_ban('ip', $this->data['user_ip'], 0, '', false, '');
+			$success = user_ban('ip', $this->data['user_ip'], 0, '', false, $ocb_reason, $ocb_reason_user);
 
 			if (!$success)
 			{

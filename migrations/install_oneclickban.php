@@ -14,7 +14,7 @@ class install_oneclickban extends \phpbb\db\migration\migration
 {
 	public function effectively_installed()
 	{
-		return(isset($this->config['oneclickban_version']) && version_compare($this->config['oneclickban_version'], '1.0.0', '>='));
+		return(isset($this->config['oneclickban_version']) && version_compare($this->config['oneclickban_version'], '1.0.0-RC2', '>='));
 	}
 
 	static public function depends_on()
@@ -38,7 +38,7 @@ class install_oneclickban extends \phpbb\db\migration\migration
 		$settings = serialize($settings_ary);
 
 		return(array(
-			array('config.add', array('oneclickban_version', '1.0.0')),
+			array('config.add', array('oneclickban_version', '1.0.0-RC2')),
 			array('config_text.add', array('oneclickban_settings', $settings)),
 
 			array('module.add', array(

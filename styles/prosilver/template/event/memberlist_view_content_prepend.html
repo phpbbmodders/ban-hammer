@@ -1,21 +1,14 @@
 <!-- IF OCB_MESSAGE -->
-<div class="panel bg2" style="background-color: {OCB_STYLE};">
-	<div class="inner" style="padding: 5px 0; text-align: center; font-size: 1.2em; color: white;">
+<div class="panel bg2"{OCB_STYLE}>
+	<div class="inner" style="padding: 5px 0; font-size: 1.2em; text-align: center;">
 		{OCB_MESSAGE}
-	</div>
-</div>
-
-<!-- ELSEIF S_IS_BANNED -->
-<div class="panel bg2" style="float: left;">
-	<div class="inner">
-		<h3 style="text-align: center; border-bottom: none;">{L_OCB_BANNED}</h3>
 	</div>
 </div>
 
 <!-- ELSEIF S_SHOW_OCB -->
 <div class="panel bg2">
 	<div class="inner" style="padding: 0 0; font-size: 1.1em;">
-		<a href="" onclick="$('#ocb-options').toggle('slow'); return(false);">{L_OCB_THIS_USER}</a>
+		<p style="font-size: 1.2em; margin: 0;"><a href="" onclick="$('#ocb-options').toggle('slow', 'linear'); return(false);">{L_OCB_THIS_USER}</a></p>
 		<form id="ocb-form" method="post" action="{U_OCBAN}">
 			<fieldset id="ocb-options" style="display: none;">
 				<dl onmouseover="this.style.background='#ecf3f7';" onmouseout="this.style.background='#e1ebf2';">
@@ -78,6 +71,14 @@
 					</dd>
 				</dl>
 				<!-- ENDIF -->
+				<dl onmouseover="this.style.background='#ecf3f7';" onmouseout="this.style.background='#e1ebf2';">
+					<dt><label for="ocb_reason">{L_OCB_BAN_REASON}:</label></dt>
+					<dd><input type="text" class="input medium" name="ocb_reason" id="ocb_reason" maxlength="255" value="" /></dd>
+				</dl>
+				<dl onmouseover="this.style.background='#ecf3f7';" onmouseout="this.style.background='#e1ebf2';">
+					<dt><label for="ocb_reason_user">{L_OCB_BAN_GIVE_REASON}:</label></dt>
+					<dd><input type="text" class="input medium" name="ocb_reason_user" id="ocb_reason_user" maxlength="255" value="" /></dd>
+				</dl>
 
 				<dl style="margin-top: 5px;">
 					<dt></dt>
