@@ -20,6 +20,15 @@ use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 */
 class oneclickban_listener implements EventSubscriberInterface
 {
+	/**
+	 * Member data
+	 */
+	private $data = array();
+
+	/**
+	 * Member userid
+	 */
+	private $user_id = 0;
 
 	static public function getSubscribedEvents()
 	{
