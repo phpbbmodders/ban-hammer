@@ -38,14 +38,14 @@ if (empty($lang) || !is_array($lang))
 $lang = array_merge($lang, array(
 	'ACP_BAN_EMAIL'		=> 'Ban users email address',
 	'ACP_BAN_IP'		=> 'Ban users IP address',
-	'ACP_BAN_IP_EXPLAIN'	=> '<strong>Be careful with this.</strong> Most home users have dynamic IP addresses and only need to reboot their router/modem to get a new IP address. The next day that IP address might be assigned to a user you want on your site. Spammers also uses internet anonymity proxies or the Tor network making a IP ban pointless.',
+	'ACP_BAN_IP_EXPLAIN'	=> '<strong>Be careful with this.</strong> Most home users have dynamic IP addresses and only need to reboot their router/modem to get a new IP address. The next day that IP address might be assigned to a user you want on your site. Spammers also use internet anonymity proxies or the Tor network making an IP ban pointless.',
 
 	'ACP_DEL_AVATAR'	=> 'Delete users avatar',
 	'ACP_DEL_POSTS'		=> 'Delete users posts',
 	'ACP_DEL_PROFILE'	=> 'Delete users profile fields',
 	'ACP_DEL_SIGNATURE'	=> 'Delete users signature',
 
-	'ACP_GROUP_MISSING'	=> 'The group &quot;%s&quot; do not exist.', // %s is the group name.
+	'ACP_GROUP_MISSING'	=> 'The group &quot;%s&quot; does not exist.', // %s is the group name.
 
 	'ACP_MOVE_GROUP'			=> 'Move to group',
 	'ACP_MOVE_GROUP_EXPLAIN'	=> 'Name of the group to which banned users should be moved. This will also be their default group.<br /><strong>This is case sensitive.</strong>',
@@ -53,9 +53,9 @@ $lang = array_merge($lang, array(
 	'ACP_OCB_TITLE'		=> 'One Click Ban',
 	'ACP_OCB_SETTINGS'	=> 'Settings',
 
-	'SETTINGS_ERROR'		=> 'There was some error saving your settings. Please submit the backtrace with your error report.',
-	'SETTINGS_SUCCESS'		=> 'The settings was successfully saved',
+	'SETTINGS_ERROR'		=> 'There was an error saving your settings. Please submit the back trace with your error report.',
+	'SETTINGS_SUCCESS'		=> 'The settings were successfully saved',
 	'SFS_API_KEY'			=> 'SFS API key',
-	'SFS_API_KEY_EXPLAIN'	=> 'If you want to report spammers automatically to StopForumSpam you need a API key, <a href="http://www.stopforumspam.com/signup">http://www.stopforumspam.com/signup</a>.',
-	'SFS_NEEDS_CURL'		=> '<span style="color:red;">Your server needs cURL installed to use stop forum spam.</span>',
+	'SFS_API_KEY_EXPLAIN'	=> 'If you want to report spammers automatically to StopForumSpam you need an API key, <a href="http://www.stopforumspam.com/signup">http://www.stopforumspam.com/signup</a>.',
+	'SFS_NEEDS_CURL'		=> '<span style="color:red;">Your server needs cURL installed to use stop forum spam service.</span>',
 ));
