@@ -48,7 +48,7 @@ $lang = array_merge($lang, array(
 	'ACP_GROUP_MISSING'	=> 'The group &quot;%s&quot; does not exist.', // %s is the group name.
 
 	'ACP_MOVE_GROUP'			=> 'Move to group',
-	'ACP_MOVE_GROUP_EXPLAIN'	=> 'Name of the group to which banned users should be moved. This will also be their default group.<br /><strong>This is case sensitive.</strong>',
+	'ACP_MOVE_GROUP_EXPLAIN'	=> 'Name of the group to which banned users should be moved. This will also be their default group.<br /><strong>If nothing but <em>“No group specified.”</em> is in the drop down then you have not set up any groups.</strong>',
 
 	'ACP_OCB_TITLE'		=> 'One Click Ban',
 	'ACP_OCB_SETTINGS'	=> 'Settings',

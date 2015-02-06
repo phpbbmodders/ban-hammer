@@ -16,7 +16,9 @@ class oneclickban_module
 
 	function main($id, $mode)
 	{
-		global $config, $db, $request, $template, $user, $phpbb_root_path, $phpEx, $phpbb_container, $phpbb_admin_path;
+		global $db, $request, $template, $user;
+
+		$user->add_lang('acp/groups');
 
 		$this->page_title = $user->lang['ACP_OCB_TITLE'];
 		$this->tpl_name = 'oneclickban_body';
@@ -56,24 +58,7 @@ class oneclickban_module
 			{
 				trigger_error($user->lang['FORM_INVALID'] . adm_back_link($this->u_action), E_USER_WARNING);
 			}
-
-			$group_name = $request->variable('move_group', '', true);
-
-			if ($group_name)
-			{
-				$sql = 'SELECT group_id, group_name FROM ' . GROUPS_TABLE . "
-						WHERE group_name = '" . $db->sql_escape($group_name) . "'";
-				$result = $db->sql_query($sql);
-				$group_id = $db->sql_fetchfield('group_id');
-				$db->sql_freeresult($result);
-
-				// No group. Name misspelled?
-				if (!$group_id)
-				{
-					$error = sprintf($user->lang['ACP_GROUP_MISSING'], $group_name) . adm_back_link($this->u_action);
-					trigger_error($error, E_USER_WARNING);
-				}
-			}
+			$group_id = $request->variable('move_group', 0);
 
 			$settings = array(
 				'ban_email'		=> $request->variable('ban_email', 0),
@@ -103,15 +88,10 @@ class oneclickban_module
 				trigger_error($user->lang['SETTINGS_SUCCESS'] . adm_back_link($this->u_action));
 			}
 		}
-		else if ($settings['group_id'])
-		{
-			// Get group name for banned users, if any.
-			$sql = 'SELECT group_id, group_name FROM ' . GROUPS_TABLE . '
-					WHERE group_id = ' . (int) $settings['group_id'];
-			$result = $db->sql_query($sql);
-			$group_name = $db->sql_fetchfield('group_name');
-			$db->sql_freeresult($result);
-		}
+
+		// Get the groups, so that the user can be added to them
+		// don't rely on user input, well just because
+		$s_group_options = $this->get_groups($settings['group_id']);
 
 		$template->assign_vars(array(
 			'BAN_EMAIL'		=> $settings['ban_email'],
@@ -120,9 +100,35 @@ class oneclickban_module
 			'DEL_AVATAR'	=> $settings['del_avatar'],
 			'DEL_SIGNATURE'	=> $settings['del_signature'],
 			'DEL_PROFILE'	=> $settings['del_profile'],
-			'MOVE_GROUP'	=> (!empty($group_name)) ? $group_name : '',
+			'MOVE_GROUP'	=> $s_group_options,
 			'SFS_API_KEY'	=> $settings['sfs_api_key'],
 			'SFS_CURL'		=> (function_exists('curl_init')) ? true : false,
 		));
+	}
+
+	//function to return groups that are allowed
+	private function get_groups($group_selected)
+	{
+		global $db, $user;
+
+		// Don't display any of the default groups
+		// highly doubt an admin would want to ban someone into a default group
+		$ignore_groups = array('BOTS', 'GUESTS', 'REGISTERED', 'REGISTERED_COPPA', 'NEWLY_REGISTERED', 'ADMINISTRATORS', 'GLOBAL_MODERATORS');
+
+		$sql = 'SELECT group_name, group_id, group_type
+			FROM ' . GROUPS_TABLE . '
+			WHERE ' . $db->sql_in_set('group_name', $ignore_groups, true) . '
+			ORDER BY group_name ASC';
+		$result = $db->sql_query($sql);
+
+		$s_group_options = '<option value="0">' . $user->lang['NO_GROUP'] . '</option>';
+		while ($row = $db->sql_fetchrow($result))
+		{
+			$selected = $row['group_id'] == $group_selected ? ' selected="selected"' : '';
+			$s_group_options .= '<option value="' . $row['group_id'] . '"' . $selected . '>' . (($row['group_type'] == GROUP_SPECIAL) ? $user->lang['G_' . $row['group_name']] : $row['group_name']) . '</option>';
+		}
+		$db->sql_freeresult($result);
+
+		return $s_group_options;
 	}
 }
