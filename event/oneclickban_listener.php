@@ -69,12 +69,12 @@ class oneclickban_listener implements EventSubscriberInterface
 		$this->user->add_lang_ext('phpbbmodders/oneclickban', 'common');
 
 		// Check if this user already is banned.
-		$sql = 'SELECT ban_userid, ban_exclude FROM ' . BANLIST_TABLE . '
-				WHERE ban_exclude = 0
-					AND ban_userid =' . $this->user_id;
-		$result = $this->db->sql_query($sql);
-		$banned = $this->db->sql_fetchfield('ban_userid');
-		$this->db->sql_freeresult($result);
+		if (!function_exists('phpbb_get_banned_user_ids'))
+		{
+			include($this->root_path . 'includes/functions_user.' . $this->php_ext);
+		}
+
+		$banned = phpbb_get_banned_user_ids(array($this->user_id));
 
 		if (!empty($banned))
 		{
@@ -154,7 +154,7 @@ class oneclickban_listener implements EventSubscriberInterface
 				'L_OCB_MOVE_GROUP'	=> (!empty($group_name)) ? sprintf($this->user->lang['OCB_MOVE_GROUP'], $group_name) : '',
 
 				'S_SHOW_OCB'	=> true,
-				'S_OCB_SFS'		=> (!empty($settings['sfs_api_key'])) ? true : false,
+				'S_OCB_SFS'		=> (!empty($settings['sfs_api_key']) && $curl_exists) ? true : false,
 
 				'U_OCBAN'	=> append_sid($this->root_path . 'memberlist.' . $this->php_ext, $params),
 			));
