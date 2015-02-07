@@ -1,0 +1,17 @@
+<!-- IF S_SHOW_OCB -->
+<script type="text/javascript">
+(function($) {  // Avoid conflicts with other libraries
+	'use strict';
+	$('.ocb-click').click(function() {
+		$('#ocb-options').toggle('slow');
+	});
+
+    $(".ocb_hover").hover(
+    function() {
+        $(this).css('background-color', '#ecf3f7')
+    }, function() {
+        $(this).css('background-color', '')
+    });	
+})(jQuery);
+</script>
+<!-- ENDIF -->

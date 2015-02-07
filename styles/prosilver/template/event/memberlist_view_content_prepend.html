@@ -1,94 +1,95 @@
 <!-- IF OCB_MESSAGE -->
-<div class="panel bg2"{OCB_STYLE}>
-	<div class="inner" style="padding: 5px 0; font-size: 1.2em; text-align: center;">
+<div class="panel bg2" style="background-color: {OCB_STYLE};">
+	<div class="inner ocb">
 		{OCB_MESSAGE}
+	</div>
+</div>
+
+<!-- ELSEIF S_IS_BANNED -->
+<div class="panel bg2">
+	<div class="inner ocb">
+		<h3 style="text-align: center; border-bottom: none;">{L_OCB_BANNED}</h3>
 	</div>
 </div>
 
 <!-- ELSEIF S_SHOW_OCB -->
 <div class="panel bg2">
-	<div class="inner" style="padding: 0 0; font-size: 1.1em;">
-		<p style="font-size: 1.2em; margin: 0;"><a href="" onclick="$('#ocb-options').toggle('slow', 'linear'); return(false);">{L_OCB_THIS_USER}</a></p>
-		<form id="ocb-form" method="post" action="{U_OCBAN}">
-			<fieldset id="ocb-options" style="display: none;">
-				<dl onmouseover="this.style.background='#ecf3f7';" onmouseout="this.style.background='#e1ebf2';">
-					<dt><label>{L_OCB_BAN_EMAIL}:</label></dt>
-					<dd>
-						<label><input type="radio" class="radio" name="ban_email" value="1" <!-- IF OCB_BAN_EMAIL -->checked="checked"<!-- ENDIF -->/> {L_YES}</label> &nbsp;
-						<label><input type="radio" class="radio" name="ban_email" value="0" <!-- IF not OCB_BAN_EMAIL -->checked="checked"<!-- ENDIF -->/> {L_NO}</label>
-					</dd>
-				</dl>
-				<dl onmouseover="this.style.background='#ecf3f7';" onmouseout="this.style.background='#e1ebf2';">
-					<dt><label>{L_OCB_BAN_IP}:</label><br /><span>{L_OCB_BAN_IP_EXPLAIN}</span></dt>
-					<dd>
-						<label><input type="radio" class="radio" name="ban_ip" value="1" <!-- IF OCB_BAN_IP -->checked="checked"<!-- ENDIF -->/> {L_YES}</label> &nbsp;
-						<label><input type="radio" class="radio" name="ban_ip" value="0" <!-- IF not OCB_BAN_IP -->checked="checked"<!-- ENDIF -->/> {L_NO}</label>
-					</dd>
-				</dl>
-				<dl onmouseover="this.style.background='#ecf3f7';" onmouseout="this.style.background='#e1ebf2';">
-					<dt><label>{L_OCB_DEL_POSTS}:</label></dt>
-					<dd>
-						<label><input type="radio" class="radio" name="del_posts" value="1" <!-- IF OCB_DEL_POSTS -->checked="checked"<!-- ENDIF -->/> {L_YES}</label> &nbsp;
-						<label><input type="radio" class="radio" name="del_posts" value="0" <!-- IF not OCB_DEL_POSTS -->checked="checked"<!-- ENDIF -->/> {L_NO}</label>
-					</dd>
-				</dl>
-				<dl onmouseover="this.style.background='#ecf3f7';" onmouseout="this.style.background='#e1ebf2';">
-					<dt><label>{L_OCB_DEL_AVATAR}:</label></dt>
-					<dd>
-						<label><input type="radio" class="radio" name="del_avatar" value="1" <!-- IF OCB_DEL_AVATAR -->checked="checked"<!-- ENDIF -->/> {L_YES}</label> &nbsp;
-						<label><input type="radio" class="radio" name="del_avatar" value="0" <!-- IF not OCB_DEL_AVATAR -->checked="checked"<!-- ENDIF -->/> {L_NO}</label>
-					</dd>
-				</dl>
-				<dl onmouseover="this.style.background='#ecf3f7';" onmouseout="this.style.background='#e1ebf2';">
-					<dt><label>{L_OCB_DEL_SIGNATURE}:</label></dt>
-					<dd>
-						<label><input type="radio" class="radio" name="del_signature" value="1" <!-- IF OCB_DEL_SIGNATURE -->checked="checked"<!-- ENDIF -->/> {L_YES}</label> &nbsp;
-						<label><input type="radio" class="radio" name="del_signature" value="0" <!-- IF not OCB_DEL_SIGNATURE -->checked="checked"<!-- ENDIF -->/> {L_NO}</label>
-					</dd>
-				</dl>
-				<dl onmouseover="this.style.background='#ecf3f7';" onmouseout="this.style.background='#e1ebf2';">
-					<dt><label>{L_OCB_DEL_PROFILE}:</label></dt>
-					<dd>
-						<label><input type="radio" class="radio" name="del_profile" value="1" <!-- IF OCB_DEL_PROFILE -->checked="checked"<!-- ENDIF -->/> {L_YES}</label> &nbsp;
-						<label><input type="radio" class="radio" name="del_profile" value="0" <!-- IF not OCB_DEL_PROFILE -->checked="checked"<!-- ENDIF -->/> {L_NO}</label>
-					</dd>
-				</dl>
-				<!-- IF L_OCB_MOVE_GROUP -->
-				<dl onmouseover="this.style.background='#ecf3f7';" onmouseout="this.style.background='#e1ebf2';">
-					<dt><label>{L_OCB_MOVE_GROUP}:</label></dt>
-					<dd>
-						<label><input type="radio" class="radio" name="move_group" value="1" checked="checked" /> {L_YES}</label> &nbsp;
-						<label><input type="radio" class="radio" name="move_group" value="0" /> {L_NO}</label>
-					</dd>
-				</dl>
-				<!-- ENDIF -->
-				<!-- IF S_OCB_SFS -->
-				<dl onmouseover="this.style.background='#ecf3f7';" onmouseout="this.style.background='#e1ebf2';">
-					<dt><label>{L_SFS_REPORT}:</label></dt>
-					<dd>
-						<label><input type="radio" class="radio" name="sfs_report" value="1" checked="checked" /> {L_YES}</label> &nbsp;
-						<label><input type="radio" class="radio" name="sfs_report" value="0" /> {L_NO}</label>
-					</dd>
-				</dl>
-				<!-- ENDIF -->
-				<dl onmouseover="this.style.background='#ecf3f7';" onmouseout="this.style.background='#e1ebf2';">
-					<dt><label for="ocb_reason">{L_OCB_BAN_REASON}:</label></dt>
-					<dd><input type="text" class="input medium" name="ocb_reason" id="ocb_reason" maxlength="255" value="" /></dd>
-				</dl>
-				<dl onmouseover="this.style.background='#ecf3f7';" onmouseout="this.style.background='#e1ebf2';">
-					<dt><label for="ocb_reason_user">{L_OCB_BAN_GIVE_REASON}:</label></dt>
-					<dd><input type="text" class="input medium" name="ocb_reason_user" id="ocb_reason_user" maxlength="255" value="" /></dd>
-				</dl>
-
-				<dl style="margin-top: 5px;">
-					<dt></dt>
-					<dd>
-						<input class="button1" type="submit" id="submit" name="submit" value="{L_SUBMIT}" />&nbsp;
-						<input class="button2" type="reset" id="reset" name="reset" value="{L_RESET}" />
-					</dd>
-				</dl>
-			</fieldset>
-		</form>
+	<div class="inner ocb">
+		<div class="ocb-click">{L_OCB_THIS_USER}</div>
+	</div>
+</div>
+<div id="ocb-options" style="display: none;">
+	<div class="panel bg2">
+		<div class="inner">
+			<form id="ocb-form" method="post" action="{U_OCBAN}">
+				<fieldset>
+					<dl class="bg2 ocb_hover">
+						<dt><label>{L_OCB_BAN_EMAIL}:</label></dt>
+						<dd>
+							<label><input type="radio" class="radio" name="ban_email" value="1" <!-- IF OCB_BAN_EMAIL -->checked="checked"<!-- ENDIF -->/> {L_YES}</label> &nbsp;
+							<label><input type="radio" class="radio" name="ban_email" value="0" <!-- IF not OCB_BAN_EMAIL -->checked="checked"<!-- ENDIF -->/> {L_NO}</label>
+						</dd>
+					</dl>
+					<dl class="bg2 ocb_hover">
+						<dt><label>{L_OCB_BAN_IP}:</label><br /><span>{L_OCB_BAN_IP_EXPLAIN}</span></dt>
+						<dd>
+							<label><input type="radio" class="radio" name="ban_ip" value="1" <!-- IF OCB_BAN_IP -->checked="checked"<!-- ENDIF -->/> {L_YES}</label> &nbsp;
+							<label><input type="radio" class="radio" name="ban_ip" value="0" <!-- IF not OCB_BAN_IP -->checked="checked"<!-- ENDIF -->/> {L_NO}</label>
+						</dd>
+					</dl>
+					<dl class="bg2 ocb_hover">
+						<dt><label>{L_OCB_DEL_POSTS}:</label></dt>
+						<dd>
+							<label><input type="radio" class="radio" name="del_posts" value="1" <!-- IF OCB_DEL_POSTS -->checked="checked"<!-- ENDIF -->/> {L_YES}</label> &nbsp;
+							<label><input type="radio" class="radio" name="del_posts" value="0" <!-- IF not OCB_DEL_POSTS -->checked="checked"<!-- ENDIF -->/> {L_NO}</label>
+						</dd>
+					</dl>
+					<dl class="bg2 ocb_hover">
+						<dt><label>{L_OCB_DEL_AVATAR}:</label></dt>
+						<dd>
+							<label><input type="radio" class="radio" name="del_avatar" value="1" <!-- IF OCB_DEL_AVATAR -->checked="checked"<!-- ENDIF -->/> {L_YES}</label> &nbsp;
+							<label><input type="radio" class="radio" name="del_avatar" value="0" <!-- IF not OCB_DEL_AVATAR -->checked="checked"<!-- ENDIF -->/> {L_NO}</label>
+						</dd>
+					</dl>
+					<dl class="bg2 ocb_hover">
+						<dt><label>{L_OCB_DEL_SIGNATURE}:</label></dt>
+						<dd>
+							<label><input type="radio" class="radio" name="del_signature" value="1" <!-- IF OCB_DEL_SIGNATURE -->checked="checked"<!-- ENDIF -->/> {L_YES}</label> &nbsp;
+							<label><input type="radio" class="radio" name="del_signature" value="0" <!-- IF not OCB_DEL_SIGNATURE -->checked="checked"<!-- ENDIF -->/> {L_NO}</label>
+						</dd>
+					</dl>
+					<dl class="bg2 ocb_hover">
+						<dt><label>{L_OCB_DEL_PROFILE}:</label></dt>
+						<dd>
+							<label><input type="radio" class="radio" name="del_profile" value="1" <!-- IF OCB_DEL_PROFILE -->checked="checked"<!-- ENDIF -->/> {L_YES}</label> &nbsp;
+							<label><input type="radio" class="radio" name="del_profile" value="0" <!-- IF not OCB_DEL_PROFILE -->checked="checked"<!-- ENDIF -->/> {L_NO}</label>
+						</dd>
+					</dl>
+					<!-- IF L_OCB_MOVE_GROUP -->
+					<dl class="bg2 ocb_hover">
+						<dt><label>{L_OCB_MOVE_GROUP}:</label></dt>
+						<dd>
+							<label><input type="radio" class="radio" name="move_group" value="1" checked="checked" /> {L_YES}</label> &nbsp;
+							<label><input type="radio" class="radio" name="move_group" value="0" /> {L_NO}</label>
+						</dd>
+					</dl>
+					<!-- ENDIF -->
+					<!-- IF S_OCB_SFS -->
+					<dl class="bg2 ocb_hover">
+						<dt><label>{L_SFS_REPORT}:</label></dt>
+						<dd>
+							<label><input type="radio" class="radio" name="sfs_report" value="1" checked="checked" /> {L_YES}</label> &nbsp;
+							<label><input type="radio" class="radio" name="sfs_report" value="0" /> {L_NO}</label>
+						</dd>
+					</dl>
+					<!-- ENDIF -->
+				</fieldset>
+				<fieldset class="submit-buttons">
+					<input class="button1" type="submit" id="submit" name="submit" value="{L_SUBMIT}" />&nbsp;
+					<input class="button2" type="reset" id="reset" name="reset" value="{L_RESET}" />
+				</fieldset>
+			</form>
+		</div>
 	</div>
 </div>
 <!-- ENDIF -->

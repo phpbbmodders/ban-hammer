@@ -1,0 +1,16 @@
+.ocb {
+	padding: 0 0; 
+	font-size: 1.2em;
+	text-align:center;
+}
+
+.ocb-click {
+	color: #105289;
+}
+
+.ocb-click:hover {
+	text-decoration: underline;
+	color: #d31141;
+	cursor: pointer;
+}
+	
