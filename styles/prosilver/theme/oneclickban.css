@@ -14,3 +14,11 @@
 	cursor: pointer;
 }
 	
+.success {
+	color: white;
+}
+
+.ocb h3 {
+	text-align: center;
+	border-bottom: none;
+}

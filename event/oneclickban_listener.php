@@ -99,16 +99,15 @@ class oneclickban_listener implements EventSubscriberInterface
 				}
 
 				$this->template->assign_vars(array(
-					'OCB_STYLE'		=> ' style="background-color: ' . (($ocb_result == 'success') ? 'green' : '#ba1b1b') . '; color: white;"',
+					'OCB_STYLE'		=> ($ocb_result == 'success') ? 'green' : 'red',
 					'OCB_MESSAGE'	=> $ocb_message,
 				));
 			}
 			else
 			{
 				// It's enough to ban them once.
-				$this->template->assign_var('OCB_MESSAGE', $this->user->lang['OCB_BANNED']);
+				$this->template->assign_var('S_IS_BANNED', true);
 			}
-
 			return;
 		}
 
@@ -179,16 +178,16 @@ class oneclickban_listener implements EventSubscriberInterface
 			);
 
 			$message = sprintf($this->user->lang['SURE_BAN'], $this->data['username']) . '<br /><br />';
-			$message .= $this->user->lang['THIS_WILL'] . ':<br />' . $this->user->lang['OCB_BAN_USER'] . ':<br />';
-			$message .= ($hidden_fields['ban_email'])		? $this->user->lang['OCB_BAN_EMAIL'] . '<br />' : '';
-			$message .= ($hidden_fields['ban_ip'])			? $this->user->lang['OCB_BAN_IP'] . '<br />' : '';
-			$message .= ($hidden_fields['del_posts'])		? $this->user->lang['OCB_DEL_POSTS'] . '<br />' : '';
-			$message .= ($hidden_fields['del_avatar'])		? $this->user->lang['OCB_DEL_AVATAR'] . '<br />' : '';
-			$message .= ($hidden_fields['del_signature'])	? $this->user->lang['OCB_DEL_SIGNATURE'] . '<br />' : '';
-			$message .= ($hidden_fields['del_profile'])		? $this->user->lang['OCB_DEL_PROFILE'] . '<br />' : '';
-			$message .= (!empty($group_name) && $hidden_fields['move_group'])	? sprintf($this->user->lang['OCB_MOVE_GROUP'], $group_name) . '<br />' : '';
-			$message .= ($hidden_fields['sfs_report'] && $curl_exists)			? $this->user->lang['OCB_SUBMIT_SFS'] . '<br />' : '';
-			$message .= ($hidden_fields['ocb_reason'])		? sprintf($this->user->lang['OCB_REASON'], $hidden_fields['ocb_reason']) . '<br />' : '';
+			$message .= $this->user->lang['THIS_WILL'] . ':<br />' . $this->user->lang['OCB_BAN_USER'] . '<br />';
+			$message .= ($hidden_fields['ban_email']) ? $this->user->lang['OCB_BAN_EMAIL'] . '<br />' : '';
+			$message .= ($hidden_fields['ban_ip']) ? $this->user->lang['OCB_BAN_IP'] . '<br />' : '';
+			$message .= ($hidden_fields['del_posts']) ? $this->user->lang['OCB_DEL_POSTS'] . '<br />' : '';
+			$message .= ($hidden_fields['del_avatar']) ? $this->user->lang['OCB_DEL_AVATAR'] . '<br />' : '';
+			$message .= ($hidden_fields['del_signature']) ? $this->user->lang['OCB_DEL_SIGNATURE'] . '<br />' : '';
+			$message .= ($hidden_fields['del_profile']) ? $this->user->lang['OCB_DEL_PROFILE'] . '<br />' : '';
+			$message .= (!empty($group_name) && $hidden_fields['move_group']) ? sprintf($this->user->lang['OCB_MOVE_GROUP'], $group_name) . '<br />' : '';
+			$message .= ($hidden_fields['sfs_report'] && $curl_exists) ? $this->user->lang['OCB_SUBMIT_SFS'] . '<br />' : '';
+			$message .= ($hidden_fields['ocb_reason']) ? sprintf($this->user->lang['OCB_REASON'], $hidden_fields['ocb_reason']) . '<br />' : '';
 			$message .= ($hidden_fields['ocb_reason_user'])	? sprintf($this->user->lang['OCB_REASON_USER'], $hidden_fields['ocb_reason_user']) . '<br />' : '';
 
 			confirm_box(false, $message, build_hidden_fields($hidden_fields));
