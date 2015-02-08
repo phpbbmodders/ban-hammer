@@ -66,6 +66,7 @@ class oneclickban_listener implements EventSubscriberInterface
 			return;
 		}
 
+		$this->user->add_lang('acp/ban');
 		$this->user->add_lang_ext('phpbbmodders/oneclickban', 'common');
 
 		// Check if this user already is banned.
@@ -229,7 +230,7 @@ class oneclickban_listener implements EventSubscriberInterface
 
 			if (!$success)
 			{
-				$error[] = 'ERROR_BAN_EMAIL';
+				$error[] = 'ERROR_BAN_IP';
 			}
 		}
 

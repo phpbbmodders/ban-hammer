@@ -27,6 +27,7 @@ $lang = array_merge($lang, array(
 
 	'ERROR_BAN_EMAIL'	=> 'Banning email failed.',
 	'ERROR_BAN_USER'	=> 'Banning user failed.',
+	'ERROR_BAN_IP'		=> 'Banning IP failed.',
 	'ERROR_DEL_POSTS'	=> 'Delete users posts failed.',
 	'ERROR_MOVE_GROUP'	=> 'Move user to the selected group failed.',
 	'ERROR_SFS'			=> 'Stop Forum Spam',

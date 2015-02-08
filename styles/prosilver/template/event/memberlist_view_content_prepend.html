@@ -24,42 +24,42 @@
 			<form id="ocb-form" method="post" action="{U_OCBAN}">
 				<fieldset>
 					<dl class="bg2 ocb_hover">
-						<dt><label>{L_OCB_BAN_EMAIL}:</label></dt>
+						<dt><label>{L_OCB_BAN_EMAIL}{L_COLON}</label></dt>
 						<dd>
 							<label><input type="radio" class="radio" name="ban_email" value="1" <!-- IF OCB_BAN_EMAIL -->checked="checked"<!-- ENDIF -->/> {L_YES}</label> &nbsp;
 							<label><input type="radio" class="radio" name="ban_email" value="0" <!-- IF not OCB_BAN_EMAIL -->checked="checked"<!-- ENDIF -->/> {L_NO}</label>
 						</dd>
 					</dl>
 					<dl class="bg2 ocb_hover">
-						<dt><label>{L_OCB_BAN_IP}:</label><br /><span>{L_OCB_BAN_IP_EXPLAIN}</span></dt>
+						<dt><label>{L_OCB_BAN_IP}{L_COLON}</label><br /><span>{L_OCB_BAN_IP_EXPLAIN}</span></dt>
 						<dd>
 							<label><input type="radio" class="radio" name="ban_ip" value="1" <!-- IF OCB_BAN_IP -->checked="checked"<!-- ENDIF -->/> {L_YES}</label> &nbsp;
 							<label><input type="radio" class="radio" name="ban_ip" value="0" <!-- IF not OCB_BAN_IP -->checked="checked"<!-- ENDIF -->/> {L_NO}</label>
 						</dd>
 					</dl>
 					<dl class="bg2 ocb_hover">
-						<dt><label>{L_OCB_DEL_POSTS}:</label></dt>
+						<dt><label>{L_OCB_DEL_POSTS}{L_COLON}</label></dt>
 						<dd>
 							<label><input type="radio" class="radio" name="del_posts" value="1" <!-- IF OCB_DEL_POSTS -->checked="checked"<!-- ENDIF -->/> {L_YES}</label> &nbsp;
 							<label><input type="radio" class="radio" name="del_posts" value="0" <!-- IF not OCB_DEL_POSTS -->checked="checked"<!-- ENDIF -->/> {L_NO}</label>
 						</dd>
 					</dl>
 					<dl class="bg2 ocb_hover">
-						<dt><label>{L_OCB_DEL_AVATAR}:</label></dt>
+						<dt><label>{L_OCB_DEL_AVATAR}{L_COLON}</label></dt>
 						<dd>
 							<label><input type="radio" class="radio" name="del_avatar" value="1" <!-- IF OCB_DEL_AVATAR -->checked="checked"<!-- ENDIF -->/> {L_YES}</label> &nbsp;
 							<label><input type="radio" class="radio" name="del_avatar" value="0" <!-- IF not OCB_DEL_AVATAR -->checked="checked"<!-- ENDIF -->/> {L_NO}</label>
 						</dd>
 					</dl>
 					<dl class="bg2 ocb_hover">
-						<dt><label>{L_OCB_DEL_SIGNATURE}:</label></dt>
+						<dt><label>{L_OCB_DEL_SIGNATURE}{L_COLON}</label></dt>
 						<dd>
 							<label><input type="radio" class="radio" name="del_signature" value="1" <!-- IF OCB_DEL_SIGNATURE -->checked="checked"<!-- ENDIF -->/> {L_YES}</label> &nbsp;
 							<label><input type="radio" class="radio" name="del_signature" value="0" <!-- IF not OCB_DEL_SIGNATURE -->checked="checked"<!-- ENDIF -->/> {L_NO}</label>
 						</dd>
 					</dl>
 					<dl class="bg2 ocb_hover">
-						<dt><label>{L_OCB_DEL_PROFILE}:</label></dt>
+						<dt><label>{L_OCB_DEL_PROFILE}{L_COLON}</label></dt>
 						<dd>
 							<label><input type="radio" class="radio" name="del_profile" value="1" <!-- IF OCB_DEL_PROFILE -->checked="checked"<!-- ENDIF -->/> {L_YES}</label> &nbsp;
 							<label><input type="radio" class="radio" name="del_profile" value="0" <!-- IF not OCB_DEL_PROFILE -->checked="checked"<!-- ENDIF -->/> {L_NO}</label>
@@ -67,7 +67,7 @@
 					</dl>
 					<!-- IF L_OCB_MOVE_GROUP -->
 					<dl class="bg2 ocb_hover">
-						<dt><label>{L_OCB_MOVE_GROUP}:</label></dt>
+						<dt><label>{L_OCB_MOVE_GROUP}{L_COLON}</label></dt>
 						<dd>
 							<label><input type="radio" class="radio" name="move_group" value="1" checked="checked" /> {L_YES}</label> &nbsp;
 							<label><input type="radio" class="radio" name="move_group" value="0" /> {L_NO}</label>
@@ -76,13 +76,21 @@
 					<!-- ENDIF -->
 					<!-- IF S_OCB_SFS -->
 					<dl class="bg2 ocb_hover">
-						<dt><label>{L_SFS_REPORT}:</label></dt>
+						<dt><label>{L_SFS_REPORT}{L_COLON}</label></dt>
 						<dd>
 							<label><input type="radio" class="radio" name="sfs_report" value="1" checked="checked" /> {L_YES}</label> &nbsp;
 							<label><input type="radio" class="radio" name="sfs_report" value="0" /> {L_NO}</label>
 						</dd>
 					</dl>
 					<!-- ENDIF -->
+					<dl>
+						<dt><label>{L_BAN_REASON}{L_COLON}</label></dt>
+						<dd><input name="ocb_reason" type="text" class="text medium" maxlength="255" /></dd>
+					</dl>
+					<dl>
+						<dt><label>{L_BAN_GIVE_REASON}{L_COLON}</label></dt>
+						<dd><input name="ocb_reason_user" type="text" class="text medium" maxlength="255" /></dd>
+					</dl>
 				</fieldset>
 				<fieldset class="submit-buttons">
 					<input class="button1" type="submit" id="submit" name="submit" value="{L_SUBMIT}" />&nbsp;
