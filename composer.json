@@ -19,7 +19,7 @@
 			"homepage": "https://phpbbmodders.net",
 			"email": "rmcgirr83@phpbbmodders.net",
 			"role": "Developer"
-		}		
+		}
 	],
 	"require": {
 		"php": ">=5.3.3"
