@@ -8,9 +8,9 @@
 *
 */
 
-namespace phpbbmodders\oneclickban\acp;
+namespace phpbbmodders\banhammer\acp;
 
-class oneclickban_module
+class banhammer_module
 {
 	public	$u_action;
 
@@ -21,13 +21,13 @@ class oneclickban_module
 		$user->add_lang('acp/groups');
 
 		$this->page_title = $user->lang['ACP_OCB_TITLE'];
-		$this->tpl_name = 'oneclickban_body';
+		$this->tpl_name = 'banhammer_body';
 
-		add_form_key('oneclickban');
+		add_form_key('banhammer');
 
 		// Get saved settings.
 		$sql = 'SELECT * FROM ' . CONFIG_TEXT_TABLE . "
-				WHERE config_name = 'oneclickban_settings'";
+				WHERE config_name = 'banhammer_settings'";
 		$result = $db->sql_query($sql);
 		$settings = $db->sql_fetchfield('config_value');
 		$db->sql_freeresult($result);
@@ -54,7 +54,7 @@ class oneclickban_module
 		if ($request->is_set_post('submit'))
 		{
 			// Test if form key is valid
-			if (!check_form_key('oneclickban'))
+			if (!check_form_key('banhammer'))
 			{
 				trigger_error($user->lang['FORM_INVALID'] . adm_back_link($this->u_action), E_USER_WARNING);
 			}
@@ -76,7 +76,7 @@ class oneclickban_module
 
 			$sql = 'UPDATE ' . CONFIG_TEXT_TABLE . "
 					SET config_value = '$sql_settings'
-					WHERE config_name = 'oneclickban_settings'";
+					WHERE config_name = 'banhammer_settings'";
 			$success = $db->sql_query($sql);
 
 			if ($success === false)

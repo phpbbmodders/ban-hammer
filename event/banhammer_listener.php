@@ -1,14 +1,14 @@
 <?php
 /**
 *
-* @package One Click Ban
+* @package Ban Hammer
 * @copyright (c) 2015 phpBB Modders <https://phpbbmodders.net/>
 * @author Jari Kanerva <tumba25@phpbbmodders.net>
 * @license http://opensource.org/licenses/gpl-2.0.php GNU General Public License v2
 *
 */
 
-namespace phpbbmodders\oneclickban\event;
+namespace phpbbmodders\banhammer\event;
 
 /**
 * @ignore
@@ -18,7 +18,7 @@ use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 /**
 * Event listener
 */
-class oneclickban_listener implements EventSubscriberInterface
+class banhammer_listener implements EventSubscriberInterface
 {
 	/**
 	 * Member data
@@ -67,7 +67,7 @@ class oneclickban_listener implements EventSubscriberInterface
 		}
 
 		$this->user->add_lang('acp/ban');
-		$this->user->add_lang_ext('phpbbmodders/oneclickban', 'common');
+		$this->user->add_lang_ext('phpbbmodders/banhammer', 'common');
 
 		// Check if this user already is banned.
 		if (!function_exists('phpbb_get_banned_user_ids'))
@@ -114,7 +114,7 @@ class oneclickban_listener implements EventSubscriberInterface
 
 		// Get OCB settings
 		$sql = 'SELECT * FROM ' . CONFIG_TEXT_TABLE . "
-				WHERE config_name = 'oneclickban_settings'";
+				WHERE config_name = 'banhammer_settings'";
 		$result = $this->db->sql_query($sql);
 		$settings = $this->db->sql_fetchfield('config_value');
 		$this->db->sql_freeresult($result);

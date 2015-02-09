@@ -1,7 +1,7 @@
 <?php
 /**
 *
-* @package One Click Ban
+* @package Ban Hammer
 * @copyright (c) 2015 phpBB Modders <https://phpbbmodders.net/>
 * @author Jari Kanerva <tumba25@phpbbmodders.net>
 * @license http://opensource.org/licenses/gpl-2.0.php GNU General Public License v2
@@ -52,7 +52,7 @@ $lang = array_merge($lang, array(
 
 	'OCB_SUBMIT_SFS'	=> 'Submit to stop forum spam',
 
-	'OCB_THIS_USER'	=> 'One Click Ban this user',
+	'OCB_THIS_USER'	=> 'Ban Hammer this user',
 
 	'SFS_REPORT'	=> 'Report this user to Stop Forum Spam',
 	'SURE_BAN'		=> 'Are you sure you want to ban <strong>%s</strong>?', // %s will be a username.

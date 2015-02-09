@@ -1,20 +1,20 @@
 <?php
 /**
 *
-* @package One Click Ban
+* @package Ban Hammer
 * @copyright (c) 2015 phpBB Modders <https://phpbbmodders.net/>
 * @author Jari Kanerva <tumba25@phpbbmodders.net>
 * @license http://opensource.org/licenses/gpl-2.0.php GNU General Public License v2
 *
 */
 
-namespace phpbbmodders\oneclickban\migrations;
+namespace phpbbmodders\banhammer\migrations;
 
-class install_oneclickban extends \phpbb\db\migration\migration
+class install_banhammer extends \phpbb\db\migration\migration
 {
 	public function effectively_installed()
 	{
-		return(isset($this->config['oneclickban_version']) && version_compare($this->config['oneclickban_version'], '1.0.0-RC2', '>='));
+		return(isset($this->config['banhammer_version']) && version_compare($this->config['banhammer_version'], '1.0.0-RC2', '>='));
 	}
 
 	static public function depends_on()
@@ -38,8 +38,8 @@ class install_oneclickban extends \phpbb\db\migration\migration
 		$settings = serialize($settings_ary);
 
 		return(array(
-			array('config.add', array('oneclickban_version', '1.0.0-RC2')),
-			array('config_text.add', array('oneclickban_settings', $settings)),
+			array('config.add', array('banhammer_version', '1.0.0-RC2')),
+			array('config_text.add', array('banhammer_settings', $settings)),
 
 			array('module.add', array(
 				'acp',
@@ -51,7 +51,7 @@ class install_oneclickban extends \phpbb\db\migration\migration
 				'acp',
 				'ACP_OCB_TITLE',
 				array(
-					'module_basename'	=> '\phpbbmodders\oneclickban\acp\oneclickban_module',
+					'module_basename'	=> '\phpbbmodders\banhammer\acp\banhammer_module',
 					'modes'				=> array('settings'),
 				),
 			)),
@@ -61,14 +61,14 @@ class install_oneclickban extends \phpbb\db\migration\migration
 	public function revert_data()
 	{
 		return(array(
-			array('config.remove', array('oneclickban_version')),
-			array('config_text.remove', array('oneclickban_settings')),
+			array('config.remove', array('banhammer_version')),
+			array('config_text.remove', array('banhammer_settings')),
 
 			array('module.remove', array(
 				'acp',
 				'ACP_OCB_TITLE',
 				array(
-					'module_basename'	=> '\phpbbmodders\oneclickban\acp\oneclickban_module',
+					'module_basename'	=> '\phpbbmodders\banhammer\acp\banhammer_module',
 				),
 			)),
 		));

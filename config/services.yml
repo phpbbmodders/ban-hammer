@@ -1,6 +1,6 @@
 services:
-    phpbbmodders.oneclickban.listener:
-        class: phpbbmodders\oneclickban\event\oneclickban_listener
+    phpbbmodders.banhammer.listener:
+        class: phpbbmodders\banhammer\event\banhammer_listener
         arguments:
             - @template
             - @user
