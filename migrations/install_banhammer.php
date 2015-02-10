@@ -14,7 +14,7 @@ class install_banhammer extends \phpbb\db\migration\migration
 {
 	public function effectively_installed()
 	{
-		return(isset($this->config['banhammer_version']) && version_compare($this->config['banhammer_version'], '1.0.0-RC2', '>='));
+		return(isset($this->config['banhammer_version']) && version_compare($this->config['banhammer_version'], '1.0.0', '>='));
 	}
 
 	static public function depends_on()
@@ -28,28 +28,29 @@ class install_banhammer extends \phpbb\db\migration\migration
 		$settings_ary = array(
 			'ban_email'		=> 1,
 			'ban_ip'		=> 0,
-			'del_posts'		=> 0,
 			'del_avatar'	=> 0,
-			'del_signature'	=> 0,
+			'del_pms'		=> 0,
+			'del_posts'		=> 0,
 			'del_profile'	=> 0,
+			'del_signature'	=> 0,
 			'group_id'		=> 0,
 			'sfs_api_key'	=> '',
 		);
 		$settings = serialize($settings_ary);
 
 		return(array(
-			array('config.add', array('banhammer_version', '1.0.0-RC2')),
+			array('config.add', array('banhammer_version', '1.0.0')),
 			array('config_text.add', array('banhammer_settings', $settings)),
 
 			array('module.add', array(
 				'acp',
 				'ACP_CAT_DOT_MODS',
-				'ACP_OCB_TITLE'
+				'ACP_BH_TITLE'
 			)),
 
 			array('module.add', array(
 				'acp',
-				'ACP_OCB_TITLE',
+				'ACP_BH_TITLE',
 				array(
 					'module_basename'	=> '\phpbbmodders\banhammer\acp\banhammer_module',
 					'modes'				=> array('settings'),
@@ -66,7 +67,7 @@ class install_banhammer extends \phpbb\db\migration\migration
 
 			array('module.remove', array(
 				'acp',
-				'ACP_OCB_TITLE',
+				'ACP_BH_TITLE',
 				array(
 					'module_basename'	=> '\phpbbmodders\banhammer\acp\banhammer_module',
 				),

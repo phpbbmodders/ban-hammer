@@ -10,16 +10,16 @@
 
 namespace phpbbmodders\banhammer\acp;
 
-class oneclickban_info
+class banhammer_info
 {
 	function module()
 	{
 		return array(
 			'filename'	=> '\phpbbmodders\banhammer\acp\banhammer_module',
-			'title'	=> 'ACP_OCB_TITLE',
+			'title'	=> 'ACP_BH_TITLE',
 			'version'	=> '1.0.0',
 			'modes'	=> array(
-				'settings'	=> array('title' => 'ACP_OCB_SETTINGS', 'auth' => 'ext_phpbbmodders/banhammer && acl_a_user', 'cat' => array('ACP_OCB_TITLE')),
+				'settings'	=> array('title' => 'ACP_BH_SETTINGS', 'auth' => 'ext_phpbbmodders/banhammer && acl_a_user', 'cat' => array('ACP_BH_TITLE')),
 			),
 		);
 	}

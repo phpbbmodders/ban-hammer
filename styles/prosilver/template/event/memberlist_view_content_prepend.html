@@ -1,103 +1,97 @@
-<!-- IF OCB_MESSAGE -->
-<div class="panel bg2" style="background-color: {OCB_STYLE};">
-	<div class="inner ocb success">
-		{OCB_MESSAGE}
+<!-- IF BH_MESSAGE -->
+<div class="panel bg2" style="background-color: {BH_STYLE};">
+	<div class="inner bh">
+		<span>{BH_MESSAGE}</span>
 	</div>
 </div>
 
-<!-- ELSEIF S_IS_BANNED -->
+<!-- ELSEIF S_SHOW_BH -->
 <div class="panel bg2">
-	<div class="inner ocb">
-		<h3>{L_OCB_BANNED}</h3>
-	</div>
-</div>
-
-<!-- ELSEIF S_SHOW_OCB -->
-<div class="panel bg2">
-	<div class="inner ocb">
-		<div class="ocb-click">{L_OCB_THIS_USER}</div>
-	</div>
-</div>
-<div id="ocb-options" style="display: none;">
-	<div class="panel bg2">
-		<div class="inner">
-			<form id="ocb-form" method="post" action="{U_OCBAN}">
-				<fieldset>
-					<dl class="bg2 ocb_hover">
-						<dt><label>{L_OCB_BAN_EMAIL}{L_COLON}</label></dt>
-						<dd>
-							<label><input type="radio" class="radio" name="ban_email" value="1" <!-- IF OCB_BAN_EMAIL -->checked="checked"<!-- ENDIF -->/> {L_YES}</label> &nbsp;
-							<label><input type="radio" class="radio" name="ban_email" value="0" <!-- IF not OCB_BAN_EMAIL -->checked="checked"<!-- ENDIF -->/> {L_NO}</label>
-						</dd>
-					</dl>
-					<dl class="bg2 ocb_hover">
-						<dt><label>{L_OCB_BAN_IP}{L_COLON}</label><br /><span>{L_OCB_BAN_IP_EXPLAIN}</span></dt>
-						<dd>
-							<label><input type="radio" class="radio" name="ban_ip" value="1" <!-- IF OCB_BAN_IP -->checked="checked"<!-- ENDIF -->/> {L_YES}</label> &nbsp;
-							<label><input type="radio" class="radio" name="ban_ip" value="0" <!-- IF not OCB_BAN_IP -->checked="checked"<!-- ENDIF -->/> {L_NO}</label>
-						</dd>
-					</dl>
-					<dl class="bg2 ocb_hover">
-						<dt><label>{L_OCB_DEL_POSTS}{L_COLON}</label></dt>
-						<dd>
-							<label><input type="radio" class="radio" name="del_posts" value="1" <!-- IF OCB_DEL_POSTS -->checked="checked"<!-- ENDIF -->/> {L_YES}</label> &nbsp;
-							<label><input type="radio" class="radio" name="del_posts" value="0" <!-- IF not OCB_DEL_POSTS -->checked="checked"<!-- ENDIF -->/> {L_NO}</label>
-						</dd>
-					</dl>
-					<dl class="bg2 ocb_hover">
-						<dt><label>{L_OCB_DEL_AVATAR}{L_COLON}</label></dt>
-						<dd>
-							<label><input type="radio" class="radio" name="del_avatar" value="1" <!-- IF OCB_DEL_AVATAR -->checked="checked"<!-- ENDIF -->/> {L_YES}</label> &nbsp;
-							<label><input type="radio" class="radio" name="del_avatar" value="0" <!-- IF not OCB_DEL_AVATAR -->checked="checked"<!-- ENDIF -->/> {L_NO}</label>
-						</dd>
-					</dl>
-					<dl class="bg2 ocb_hover">
-						<dt><label>{L_OCB_DEL_SIGNATURE}{L_COLON}</label></dt>
-						<dd>
-							<label><input type="radio" class="radio" name="del_signature" value="1" <!-- IF OCB_DEL_SIGNATURE -->checked="checked"<!-- ENDIF -->/> {L_YES}</label> &nbsp;
-							<label><input type="radio" class="radio" name="del_signature" value="0" <!-- IF not OCB_DEL_SIGNATURE -->checked="checked"<!-- ENDIF -->/> {L_NO}</label>
-						</dd>
-					</dl>
-					<dl class="bg2 ocb_hover">
-						<dt><label>{L_OCB_DEL_PROFILE}{L_COLON}</label></dt>
-						<dd>
-							<label><input type="radio" class="radio" name="del_profile" value="1" <!-- IF OCB_DEL_PROFILE -->checked="checked"<!-- ENDIF -->/> {L_YES}</label> &nbsp;
-							<label><input type="radio" class="radio" name="del_profile" value="0" <!-- IF not OCB_DEL_PROFILE -->checked="checked"<!-- ENDIF -->/> {L_NO}</label>
-						</dd>
-					</dl>
-					<!-- IF L_OCB_MOVE_GROUP -->
-					<dl class="bg2 ocb_hover">
-						<dt><label>{L_OCB_MOVE_GROUP}{L_COLON}</label></dt>
-						<dd>
-							<label><input type="radio" class="radio" name="move_group" value="1" checked="checked" /> {L_YES}</label> &nbsp;
-							<label><input type="radio" class="radio" name="move_group" value="0" /> {L_NO}</label>
-						</dd>
-					</dl>
-					<!-- ENDIF -->
-					<!-- IF S_OCB_SFS -->
-					<dl class="bg2 ocb_hover">
-						<dt><label>{L_SFS_REPORT}{L_COLON}</label></dt>
-						<dd>
-							<label><input type="radio" class="radio" name="sfs_report" value="1" checked="checked" /> {L_YES}</label> &nbsp;
-							<label><input type="radio" class="radio" name="sfs_report" value="0" /> {L_NO}</label>
-						</dd>
-					</dl>
-					<!-- ENDIF -->
-					<dl>
-						<dt><label>{L_BAN_REASON}{L_COLON}</label></dt>
-						<dd><input name="ocb_reason" type="text" class="text medium" maxlength="255" /></dd>
-					</dl>
-					<dl>
-						<dt><label>{L_BAN_GIVE_REASON}{L_COLON}</label></dt>
-						<dd><input name="ocb_reason_user" type="text" class="text medium" maxlength="255" /></dd>
-					</dl>
-				</fieldset>
-				<fieldset class="submit-buttons">
-					<input class="button1" type="submit" id="submit" name="submit" value="{L_SUBMIT}" />&nbsp;
-					<input class="button2" type="reset" id="reset" name="reset" value="{L_RESET}" />
-				</fieldset>
-			</form>
-		</div>
+	<p class="bh bh-click">{L_BH_THIS_USER}</p>
+	<div class="inner" id="bh-options" style="display: none;">
+		<form id="bh-form" method="post" action="{U_HAMMERBAN}">
+			<fieldset>
+				<dl class="bg2 bh_hover">
+					<dt><label>{L_BH_BAN_EMAIL}{L_COLON}</label></dt>
+					<dd>
+						<label><input type="radio" class="radio" name="ban_email" value="1" <!-- IF BH_BAN_EMAIL -->checked="checked"<!-- ENDIF -->/> {L_YES}</label> &nbsp;
+						<label><input type="radio" class="radio" name="ban_email" value="0" <!-- IF not BH_BAN_EMAIL -->checked="checked"<!-- ENDIF -->/> {L_NO}</label>
+					</dd>
+				</dl>
+				<dl class="bg2 bh_hover">
+					<dt><label>{L_BH_BAN_IP}{L_COLON}</label><br /><span>{L_BH_BAN_IP_EXPLAIN}</span></dt>
+					<dd>
+						<label><input type="radio" class="radio" name="ban_ip" value="1" <!-- IF BH_BAN_IP -->checked="checked"<!-- ENDIF -->/> {L_YES}</label> &nbsp;
+						<label><input type="radio" class="radio" name="ban_ip" value="0" <!-- IF not BH_BAN_IP -->checked="checked"<!-- ENDIF -->/> {L_NO}</label>
+					</dd>
+				</dl>
+				<dl class="bg2 bh_hover">
+					<dt><label>{L_BH_DEL_POSTS}{L_COLON}</label></dt>
+					<dd>
+						<label><input type="radio" class="radio" name="del_posts" value="1" <!-- IF BH_DEL_POSTS -->checked="checked"<!-- ENDIF -->/> {L_YES}</label> &nbsp;
+						<label><input type="radio" class="radio" name="del_posts" value="0" <!-- IF not BH_DEL_POSTS -->checked="checked"<!-- ENDIF -->/> {L_NO}</label>
+					</dd>
+				</dl>
+				<dl class="bg2 bh_hover">
+					<dt><label>{L_BH_DEL_PMS}{L_COLON}</label></dt>
+					<dd>
+						<label><input type="radio" class="radio" name="del_pms" value="1" <!-- IF BH_DEL_PMS -->checked="checked"<!-- ENDIF -->/> {L_YES}</label> &nbsp;
+						<label><input type="radio" class="radio" name="del_pms" value="0" <!-- IF not BH_DEL_PMS -->checked="checked"<!-- ENDIF -->/> {L_NO}</label>
+					</dd>
+				</dl>
+				<dl class="bg2 bh_hover">
+					<dt><label>{L_BH_DEL_AVATAR}{L_COLON}</label></dt>
+					<dd>
+						<label><input type="radio" class="radio" name="del_avatar" value="1" <!-- IF BH_DEL_AVATAR -->checked="checked"<!-- ENDIF -->/> {L_YES}</label> &nbsp;
+						<label><input type="radio" class="radio" name="del_avatar" value="0" <!-- IF not BH_DEL_AVATAR -->checked="checked"<!-- ENDIF -->/> {L_NO}</label>
+					</dd>
+				</dl>
+				<dl class="bg2 bh_hover">
+					<dt><label>{L_BH_DEL_SIGNATURE}{L_COLON}</label></dt>
+					<dd>
+						<label><input type="radio" class="radio" name="del_signature" value="1" <!-- IF BH_DEL_SIGNATURE -->checked="checked"<!-- ENDIF -->/> {L_YES}</label> &nbsp;
+						<label><input type="radio" class="radio" name="del_signature" value="0" <!-- IF not BH_DEL_SIGNATURE -->checked="checked"<!-- ENDIF -->/> {L_NO}</label>
+					</dd>
+				</dl>
+				<dl class="bg2 bh_hover">
+					<dt><label>{L_BH_DEL_PROFILE}{L_COLON}</label></dt>
+					<dd>
+						<label><input type="radio" class="radio" name="del_profile" value="1" <!-- IF BH_DEL_PROFILE -->checked="checked"<!-- ENDIF -->/> {L_YES}</label> &nbsp;
+						<label><input type="radio" class="radio" name="del_profile" value="0" <!-- IF not BH_DEL_PROFILE -->checked="checked"<!-- ENDIF -->/> {L_NO}</label>
+					</dd>
+				</dl>
+				<!-- IF L_BH_MOVE_GROUP -->
+				<dl class="bg2 bh_hover">
+					<dt><label>{L_BH_MOVE_GROUP}{L_COLON}</label></dt>
+					<dd>
+						<label><input type="radio" class="radio" name="move_group" value="1" checked="checked" /> {L_YES}</label> &nbsp;
+						<label><input type="radio" class="radio" name="move_group" value="0" /> {L_NO}</label>
+					</dd>
+				</dl>
+				<!-- ENDIF -->
+				<!-- IF S_BH_SFS -->
+				<dl class="bg2 bh_hover">
+					<dt><label>{L_SFS_REPORT}{L_COLON}</label></dt>
+					<dd>
+						<label><input type="radio" class="radio" name="sfs_report" value="1" checked="checked" /> {L_YES}</label> &nbsp;
+						<label><input type="radio" class="radio" name="sfs_report" value="0" /> {L_NO}</label>
+					</dd>
+				</dl>
+				<!-- ENDIF -->
+				<dl>
+					<dt><label>{L_BH_BAN_REASON}{L_COLON}</label></dt>
+					<dd><input name="bh_reason" type="text" class="text medium" maxlength="255" /></dd>
+				</dl>
+				<dl>
+					<dt><label>{L_BH_BAN_GIVE_REASON}{L_COLON}</label></dt>
+					<dd><input name="bh_reason_user" type="text" class="text medium" maxlength="255" /></dd>
+				</dl>
+			</fieldset>
+			<fieldset class="submit-buttons">
+				<input class="button1" type="submit" id="submit" name="submit" value="{L_SUBMIT}" />&nbsp;
+				<input class="button2" type="reset" id="reset" name="reset" value="{L_RESET}" />
+			</fieldset>
+		</form>
 	</div>
 </div>
 <!-- ENDIF -->

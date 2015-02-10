@@ -41,6 +41,7 @@ $lang = array_merge($lang, array(
 	'ACP_BAN_IP_EXPLAIN'	=> '<strong>Be careful with this.</strong> Most home users have dynamic IP addresses and only need to reboot their router/modem to get a new IP address. The next day that IP address might be assigned to a user you want on your site. Spammers also use internet anonymity proxies or the Tor network making an IP ban pointless.',
 
 	'ACP_DEL_AVATAR'	=> 'Delete users avatar',
+	'ACP_DEL_PMS'		=> 'Delete users private messages',
 	'ACP_DEL_POSTS'		=> 'Delete users posts',
 	'ACP_DEL_PROFILE'	=> 'Delete users profile fields',
 	'ACP_DEL_SIGNATURE'	=> 'Delete users signature',
@@ -50,8 +51,8 @@ $lang = array_merge($lang, array(
 	'ACP_MOVE_GROUP'			=> 'Move to group',
 	'ACP_MOVE_GROUP_EXPLAIN'	=> 'Name of the group to which banned users should be moved. This will also be their default group.<br /><strong>If nothing but <em>“No group specified.”</em> is in the drop down then you have not set up any groups.</strong>',
 
-	'ACP_OCB_TITLE'		=> 'Ban Hammer',
-	'ACP_OCB_SETTINGS'	=> 'Settings',
+	'ACP_BH_TITLE'		=> 'Ban Hammer',
+	'ACP_BH_SETTINGS'	=> 'Ban Hammer Settings',
 
 	'SETTINGS_ERROR'		=> 'There was an error saving your settings. Please submit the back trace with your error report.',
 	'SETTINGS_SUCCESS'		=> 'The settings were successfully saved',

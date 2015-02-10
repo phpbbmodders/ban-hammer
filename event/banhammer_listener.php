@@ -21,19 +21,19 @@ use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 class banhammer_listener implements EventSubscriberInterface
 {
 	/**
-	 * Member data
+	 * Target user data
 	 */
 	private $data = array();
 
 	/**
-	 * Member userid
+	 * Target user id
 	 */
 	private $user_id = 0;
 
 	static public function getSubscribedEvents()
 	{
 		return(array(
-			'core.memberlist_view_profile'	=> 'do_ocb_stuff',
+			'core.memberlist_view_profile'	=> 'do_ban_hammer_stuff',
 		));
 	}
 
@@ -49,7 +49,7 @@ class banhammer_listener implements EventSubscriberInterface
 		$this->php_ext		= $phpExt;
 	}
 
-	public function do_ocb_stuff($event)
+	public function do_ban_hammer_stuff($event)
 	{
 		$this->data		= $event['member'];
 		$this->user_id	= (int) $this->data['user_id'];
@@ -66,8 +66,7 @@ class banhammer_listener implements EventSubscriberInterface
 			return;
 		}
 
-		$this->user->add_lang('acp/ban');
-		$this->user->add_lang_ext('phpbbmodders/banhammer', 'common');
+		$this->user->add_lang_ext('phpbbmodders/banhammer', 'banhammer_lang');
 
 		// Check if this user already is banned.
 		if (!function_exists('phpbb_get_banned_user_ids'))
@@ -79,40 +78,41 @@ class banhammer_listener implements EventSubscriberInterface
 
 		if (!empty($banned))
 		{
-			$ocb_result = $this->request->variable('ocb_res', '');
+			$bh_result = $this->request->variable('bh_res', '');
 
-			if (!empty($ocb_result))
+			if (!empty($bh_result))
 			{
-				if ($ocb_result == 'success')
+				if ($bh_result == 'success')
 				{
-					$ocb_message = $this->user->lang['BANNED_SUCCESS'];
+					$bh_message = $this->user->lang['BANNED_SUCCESS'];
 				}
 				else
 				{
 					// One or more actions failed.
-					$message_ary = explode('+', urldecode($ocb_result));
-					$ocb_message = $this->user->lang['BANNED_ERROR'];
+					$message_ary = explode('+', urldecode($bh_result));
+					$bh_message = $this->user->lang['BANNED_ERROR'];
 
 					foreach ($message_ary as $error)
 					{
-						$ocb_message .= '<br />' . $this->user->lang[$error];
+						$bh_message .= '<br />' . $this->user->lang[$error];
 					}
 				}
 
 				$this->template->assign_vars(array(
-					'OCB_STYLE'		=> ($ocb_result == 'success') ? 'green' : 'red',
-					'OCB_MESSAGE'	=> $ocb_message,
+					'BH_STYLE'		=> (($bh_result == 'success') ? 'green' : '#a92c2c') . '; color: white;"',
+					'BH_MESSAGE'	=> $bh_message,
 				));
 			}
 			else
 			{
 				// It's enough to ban them once.
-				$this->template->assign_var('S_IS_BANNED', true);
+				$this->template->assign_var('BH_MESSAGE', $this->user->lang['BH_BANNED']);
 			}
+
 			return;
 		}
 
-		// Get OCB settings
+		// Get Ban Hammer settings
 		$sql = 'SELECT * FROM ' . CONFIG_TEXT_TABLE . "
 				WHERE config_name = 'banhammer_settings'";
 		$result = $this->db->sql_query($sql);
@@ -135,28 +135,29 @@ class banhammer_listener implements EventSubscriberInterface
 			}
 		}
 
-		if (!$this->request->is_set('ocb') || ($this->request->is_set('ocb') && $this->request->is_set('confirm_key') && !confirm_box(true)))
+		if (!$this->request->is_set('bh') || ($this->request->is_set('bh') && $this->request->is_set('confirm_key') && !confirm_box(true)))
 		{
 			$params = array(
 				'mode'	=> 'viewprofile',
 				'u'		=> $this->user_id,
-				'ocb'	=> 1,
+				'bh'	=> 1,
 			);
 
 			$this->template->assign_vars(array(
-				'OCB_BAN_EMAIL'		=> $settings['ban_email'],
-				'OCB_BAN_IP'		=> $settings['ban_ip'],
-				'OCB_DEL_POSTS'		=> $settings['del_posts'],
-				'OCB_DEL_AVATAR'	=> $settings['del_avatar'],
-				'OCB_DEL_SIGNATURE'	=> $settings['del_signature'],
-				'OCB_DEL_PROFILE'	=> $settings['del_profile'],
+				'BH_BAN_EMAIL'		=> $settings['ban_email'],
+				'BH_BAN_IP'			=> $settings['ban_ip'],
+				'BH_DEL_AVATAR'		=> $settings['del_avatar'],
+				'BH_DEL_PMS'		=> $settings['del_pms'],
+				'BH_DEL_POSTS'		=> $settings['del_posts'],
+				'BH_DEL_PROFILE'	=> $settings['del_profile'],
+				'BH_DEL_SIGNATURE'	=> $settings['del_signature'],
 
-				'L_OCB_MOVE_GROUP'	=> (!empty($group_name)) ? sprintf($this->user->lang['OCB_MOVE_GROUP'], $group_name) : '',
+				'L_BH_MOVE_GROUP'	=> (!empty($group_name)) ? sprintf($this->user->lang['BH_MOVE_GROUP'], $group_name) : '',
 
-				'S_SHOW_OCB'	=> true,
-				'S_OCB_SFS'		=> (!empty($settings['sfs_api_key']) && $curl_exists) ? true : false,
+				'S_BH_SFS'	=> (!empty($settings['sfs_api_key']) && $curl_exists) ? true : false,
+				'S_SHOW_BH'	=> true,
 
-				'U_OCBAN'	=> append_sid($this->root_path . 'memberlist.' . $this->php_ext, $params),
+				'U_HAMMERBAN'	=> append_sid($this->root_path . 'memberlist.' . $this->php_ext, $params),
 			));
 			return;
 		}
@@ -167,47 +168,44 @@ class banhammer_listener implements EventSubscriberInterface
 			$hidden_fields = array(
 				'ban_email'			=> $this->request->variable('ban_email', 0),
 				'ban_ip'			=> $this->request->variable('ban_ip', 0),
-				'del_posts'			=> $this->request->variable('del_posts', 0),
+				'bh_reason'			=> $this->request->variable('bh_reason', ''),
+				'bh_reason_user'	=> $this->request->variable('bh_reason_user', ''),
 				'del_avatar'		=> $this->request->variable('del_avatar', 0),
-				'del_signature'		=> $this->request->variable('del_signature', 0),
+				'del_pms'			=> $this->request->variable('del_pms', 0),
+				'del_posts'			=> $this->request->variable('del_posts', 0),
 				'del_profile'		=> $this->request->variable('del_profile', 0),
+				'del_signature'		=> $this->request->variable('del_signature', 0),
+				'mode'				=> 'viewprofile',
 				'move_group'		=> $this->request->variable('move_group', 0),
 				'sfs_report'		=> $this->request->variable('sfs_report', 0),
-				'ocb_reason'		=> $this->request->variable('ocb_reason', ''),
-				'ocb_reason_user'	=> $this->request->variable('ocb_reason_user', ''),
-				'mode'				=> 'viewprofile',
 			);
 
 			$message = sprintf($this->user->lang['SURE_BAN'], $this->data['username']) . '<br /><br />';
-			$message .= $this->user->lang['THIS_WILL'] . ':<br />' . $this->user->lang['OCB_BAN_USER'] . '<br />';
-			$message .= ($hidden_fields['ban_email']) ? $this->user->lang['OCB_BAN_EMAIL'] . '<br />' : '';
-			$message .= ($hidden_fields['ban_ip']) ? $this->user->lang['OCB_BAN_IP'] . '<br />' : '';
-			$message .= ($hidden_fields['del_posts']) ? $this->user->lang['OCB_DEL_POSTS'] . '<br />' : '';
-			$message .= ($hidden_fields['del_avatar']) ? $this->user->lang['OCB_DEL_AVATAR'] . '<br />' : '';
-			$message .= ($hidden_fields['del_signature']) ? $this->user->lang['OCB_DEL_SIGNATURE'] . '<br />' : '';
-			$message .= ($hidden_fields['del_profile']) ? $this->user->lang['OCB_DEL_PROFILE'] . '<br />' : '';
-			$message .= (!empty($group_name) && $hidden_fields['move_group']) ? sprintf($this->user->lang['OCB_MOVE_GROUP'], $group_name) . '<br />' : '';
-			$message .= ($hidden_fields['sfs_report'] && $curl_exists) ? $this->user->lang['OCB_SUBMIT_SFS'] . '<br />' : '';
-			$message .= ($hidden_fields['ocb_reason']) ? sprintf($this->user->lang['OCB_REASON'], $hidden_fields['ocb_reason']) . '<br />' : '';
-			$message .= ($hidden_fields['ocb_reason_user'])	? sprintf($this->user->lang['OCB_REASON_USER'], $hidden_fields['ocb_reason_user']) . '<br />' : '';
+			$message .= $this->user->lang['THIS_WILL'] . ':<br />' . $this->user->lang['BH_BAN_USER'] . ':<br />';
+			$message .= ($hidden_fields['ban_email'])		? $this->user->lang['BH_BAN_EMAIL'] . '<br />' : '';
+			$message .= ($hidden_fields['ban_ip'])			? $this->user->lang['BH_BAN_IP'] . '<br />' : '';
+			$message .= ($hidden_fields['bh_reason'])		? sprintf($this->user->lang['BH_REASON'], $hidden_fields['bh_reason']) . '<br />' : '';
+			$message .= ($hidden_fields['bh_reason_user'])	? sprintf($this->user->lang['BH_REASON_USER'], $hidden_fields['bh_reason_user']) . '<br />' : '';
+			$message .= ($hidden_fields['del_avatar'])		? $this->user->lang['BH_DEL_AVATAR'] . '<br />' : '';
+			$message .= ($hidden_fields['del_pms'])			? $this->user->lang['BH_DEL_PMS'] . '<br />' : '';
+			$message .= ($hidden_fields['del_posts'])		? $this->user->lang['BH_DEL_POSTS'] . '<br />' : '';
+			$message .= ($hidden_fields['del_profile'])		? $this->user->lang['BH_DEL_PROFILE'] . '<br />' : '';
+			$message .= ($hidden_fields['del_signature'])	? $this->user->lang['BH_DEL_SIGNATURE'] . '<br />' : '';
+			$message .= (!empty($group_name) && $hidden_fields['move_group'])	? sprintf($this->user->lang['BH_MOVE_GROUP'], $group_name) . '<br />' : '';
+			$message .= ($hidden_fields['sfs_report'] && $curl_exists)			? $this->user->lang['BH_SUBMIT_SFS'] . '<br />' : '';
 
 			confirm_box(false, $message, build_hidden_fields($hidden_fields));
 		}
 
 		// We have a user to ban.
-		if (!function_exists('user_ban'))
-		{
-			include($this->root_path . 'includes/functions_user.' . $this->php_ext);
-		}
-
 		$error = array();
 
 		// Any reason for this ban?
-		$ocb_reason			= $this->request->variable('ocb_reason', '');
-		$ocb_reason_user	= $this->request->variable('ocb_reason_user', '');
+		$bh_reason		= $this->request->variable('bh_reason', '');
+		$bh_reason_user	= $this->request->variable('bh_reason_user', '');
 
 		// The username is the user so it's always banned.
-		$success = user_ban('user', $this->data['username'], 0, '', false, $ocb_reason, $ocb_reason_user);
+		$success = user_ban('user', $this->data['username'], 0, '', false, $bh_reason, $bh_reason_user);
 
 		if (!$success)
 		{
@@ -216,7 +214,7 @@ class banhammer_listener implements EventSubscriberInterface
 
 		if ($this->request->variable('ban_email', 0))
 		{
-			$success = user_ban('email', $this->data['user_email'], 0, '', false, $ocb_reason, $ocb_reason_user);
+			$success = user_ban('email', $this->data['user_email'], 0, '', false, $bh_reason, $bh_reason_user);
 
 			if (!$success)
 			{
@@ -226,7 +224,7 @@ class banhammer_listener implements EventSubscriberInterface
 
 		if ($this->request->variable('ban_ip', 0) && !empty($this->data['user_ip']))
 		{
-			$success = user_ban('ip', $this->data['user_ip'], 0, '', false, $ocb_reason, $ocb_reason_user);
+			$success = user_ban('ip', $this->data['user_ip'], 0, '', false, $bh_reason, $bh_reason_user);
 
 			if (!$success)
 			{
@@ -236,7 +234,12 @@ class banhammer_listener implements EventSubscriberInterface
 
 		if ($this->request->variable('del_posts', 0))
 		{
-			$this->ocb_del_posts();
+			$this->bh_del_posts();
+		}
+
+		if ($this->request->variable('del_pms', 0))
+		{
+			$this->bh_del_pms();
 		}
 
 		if ($this->request->variable('del_avatar', 0))
@@ -247,7 +250,7 @@ class banhammer_listener implements EventSubscriberInterface
 		if ($this->request->variable('del_signature', 0))
 		{
 			$sql = 'UPDATE ' . USERS_TABLE . "
-					SET user_sig ='',
+					SET user_sig = '',
 						user_sig_bbcode_uid = '',
 						user_sig_bbcode_bitfield = ''
 					WHERE user_id = " . $this->user_id;
@@ -291,16 +294,49 @@ class banhammer_listener implements EventSubscriberInterface
 		// Need to purge the cache.
 		$this->cache->purge();
 
-		// The page needs to be reloaded.
+		// The page needs to be reloaded to show the new banned status.
+		$args = array(
+			'mode'		=> 'viewprofile',
+			'u'			=> $this->user_id,
+			'bh_res'	=> (empty($error)) ? 'success' : urlencode(implode('+', $error)),
+		);
+
 		$url	= generate_board_url();
 		$url	.= ((substr($url, -1) == '/') ? '' : '/') . 'memberlist.' . $this->php_ext;
-		$args	= "mode=viewprofile&amp;u={$this->user_id}";
-		$args	.= (empty($error)) ? '&amp;ocb_res=success' : '&amp;ocb_res=' . urlencode(implode('+', $error));
 		$url	= append_sid($url, $args);
+
 		redirect($url);
 	}
 
-	private function ocb_del_posts()
+	private function bh_del_pms()
+	{
+		$user_id = $this->user_id;
+
+		// Get PMs
+		$sql = 'SELECT msg_id, author_id FROM ' . PRIVMSGS_TABLE . "
+				WHERE author_id = $user_id";
+		$result = $this->db->sql_query($sql);
+
+		$pms_ary = array();
+		while ($row = $this->db->sql_fetchrow($result))
+		{
+			$pms_ary[] = $row['msg_id'];
+		}
+		$this->db->sql_freeresult($result);
+
+		// And now close eventual reports.
+		$sql = 'UPDATE ' . REPORTS_TABLE . '
+				SET report_closed = 1
+				WHERE ' . $this->db->sql_in_set('pm_id', $pms_ary);
+		$this->db->sql_query($sql);
+
+		$this->db->sql_query('DELETE FROM ' . PRIVMSGS_TABLE .			" WHERE author_id = $user_id");
+		$this->db->sql_query('DELETE FROM ' . PRIVMSGS_FOLDER_TABLE .	" WHERE user_id = $user_id");
+		$this->db->sql_query('DELETE FROM ' . PRIVMSGS_RULES_TABLE .	" WHERE user_id = $user_id");
+		$this->db->sql_query('DELETE FROM ' . PRIVMSGS_TO_TABLE .		" WHERE user_id = $user_id OR author_id = $user_id");
+	}
+
+	private function bh_del_posts()
 	{
 		$user_id = $this->user_id;
 
@@ -312,8 +348,9 @@ class banhammer_listener implements EventSubscriberInterface
 					AND t.topic_id = p.topic_id
 				ORDER BY t.topic_id ASC, p.post_id ASC";
 		$result	= $this->db->sql_query($sql);
-
 		$posts = $topics = array();
+
+		// Step through the topics and count reported posts in each topic where this user is reported.
 		while ($row = $this->db->sql_fetchrow($result))
 		{
 			$posts[$row['post_id']] = $row;
@@ -325,31 +362,20 @@ class banhammer_listener implements EventSubscriberInterface
 		}
 		$this->db->sql_freeresult($result);
 
-		// Get PMs
-		$sql = 'SELECT msg_id, author_id FROM ' . PRIVMSGS_TABLE . "
-				WHERE author_id = $user_id";
-		$result = $this->db->sql_query($sql);
-
-		$pms = array();
-		while ($row = $this->db->sql_fetchrow($result))
-		{
-			$pms[] = $row['msg_id'];
-		}
-		$this->db->sql_freeresult($result);
-
 		// And now handle the reports.
-		$sql = 'SELECT report_id, post_id, report_closed, pm_id
+		$sql = 'SELECT report_id, post_id, report_closed
 				FROM ' . REPORTS_TABLE . '
-				WHERE report_closed = 0';
+				WHERE report_closed = 0
+					AND post_id <> 0';
 		$result = $this->db->sql_query($sql);
-
 		$close_reports = $unreport_topics = array();
+
 		while ($row = $this->db->sql_fetchrow($result))
 		{
 			if (!empty($row['post_id']) && !empty($posts[$row['post_id']]))
 			{
 				// A reported post.
-				$reports[] = (int) $row['report_id'];
+				$close_reports[] = (int) $row['report_id'];
 
 				// Check if the topic has more reported posts
 				if (isset($topics[$posts[$row['post_id']]['topic_id']]) && --$topics[$posts[$row['post_id']]['topic_id']] <= 0)
@@ -357,15 +383,10 @@ class banhammer_listener implements EventSubscriberInterface
 					$unreport_topics[] = (int) $posts[$row['post_id']]['topic_id'];
 				}
 			}
-			else if (!empty($row['pm_id']) && !empty($pms[$row['pm_id']]))
-			{
-				// It's a reported PM. Only close the report, the PM will be deleted.
-				$reports[] = (int) $row['report_id'];
-			}
 		}
 		$this->db->sql_freeresult($result);
 
-		// Close reports. Posts and PMs will be deleted so there is no need to unmark them as reported.
+		// Close reports. Posts will be deleted so there is no need to unmark them as reported.
 		if (!empty($close_reports))
 		{
 			$sql = 'UPDATE ' . REPORTS_TABLE . '
@@ -391,6 +412,7 @@ class banhammer_listener implements EventSubscriberInterface
 
 		delete_posts('post_id', array_keys($posts));
 
+		// Delete from other tables.
 		$this->db->sql_query('DELETE FROM ' . BOOKMARKS_TABLE .			" WHERE user_id = $user_id");
 		$this->db->sql_query('DELETE FROM ' . DRAFTS_TABLE .			" WHERE user_id = $user_id");
 		$this->db->sql_query('DELETE FROM ' . FORUMS_TRACK_TABLE .		" WHERE user_id = $user_id");
@@ -398,9 +420,6 @@ class banhammer_listener implements EventSubscriberInterface
 		$this->db->sql_query('DELETE FROM ' . MODERATOR_CACHE_TABLE .	" WHERE user_id = $user_id");
 		$this->db->sql_query('DELETE FROM ' . NOTIFICATIONS_TABLE .		" WHERE user_id = $user_id");
 		$this->db->sql_query('DELETE FROM ' . POLL_VOTES_TABLE .		" WHERE vote_user_id = $user_id");
-		$this->db->sql_query('DELETE FROM ' . PRIVMSGS_TABLE .			" WHERE author_id = $user_id");
-		$this->db->sql_query('DELETE FROM ' . PRIVMSGS_FOLDER_TABLE .	" WHERE user_id = $user_id");
-		$this->db->sql_query('DELETE FROM ' . PRIVMSGS_RULES_TABLE .	" WHERE user_id = $user_id");
 		$this->db->sql_query('DELETE FROM ' . TOPICS_POSTED_TABLE .		" WHERE user_id = $user_id");
 		$this->db->sql_query('DELETE FROM ' . TOPICS_TRACK_TABLE .		" WHERE user_id = $user_id");
 		$this->db->sql_query('DELETE FROM ' . TOPICS_WATCH_TABLE .		" WHERE user_id = $user_id");
@@ -424,6 +443,7 @@ class banhammer_listener implements EventSubscriberInterface
 		{
 			return false;
 		}
+
 		return(true);
 	}
 }

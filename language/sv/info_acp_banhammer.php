@@ -1,7 +1,7 @@
 <?php
 /**
 *
-* @package One Click Ban
+* @package Ban Hammer
 * @copyright (c) 2015 phpBB Modders <https://phpbbmodders.net/>
 * @author Jari Kanerva <tumba25@phpbbmodders.net>
 * Swedish translation by Holger (http://www.maskinisten.net)
@@ -37,8 +37,8 @@ if (empty($lang) || !is_array($lang))
 // equally where a string contains only two placeholders which are used to wrap text
 // in a url you again do not need to specify an order e.g., 'Click %sHERE%s' is fine
 $lang = array_merge($lang, array(
-	'ACP_BAN_EMAIL'		=> 'Banna användarens e-postadress',
-	'ACP_BAN_IP'		=> 'Banna användarens IP-adress',
+	'ACP_BAN_EMAIL'			=> 'Banna användarens e-postadress',
+	'ACP_BAN_IP'			=> 'Banna användarens IP-adress',
 	'ACP_BAN_IP_EXPLAIN'	=> '<strong>Var försiktig med detta.</strong> De flesta användare har dynamiska IP-adresser hemma och behöver endast boota om routern/modemet för att få en ny IP-adress. Någon dag senare kan en annan användare ha just denna IP-adress. Spammare använder även anonymiseringstjänster eller Tor-nätverket vilket gör IP-banning meningslöst.',
 
 	'ACP_DEL_AVATAR'	=> 'Radera denna användares avatar',
@@ -51,12 +51,12 @@ $lang = array_merge($lang, array(
 	'ACP_MOVE_GROUP'			=> 'Flytta till grupp',
 	'ACP_MOVE_GROUP_EXPLAIN'	=> 'Namnet på gruppen som bannade användre skall flyttas till. Gruppen kommer även att bli deras standardgrupp.<br /><strong>Detta är skiftlägeskänsligt.</strong>',
 
-	'ACP_OCB_TITLE'		=> 'One-Click-banning',
-	'ACP_OCB_SETTINGS'	=> 'Inställningar',
+	'ACP_BH_TITLE'		=> 'Ban Hammer',
+	'ACP_BH_SETTINGS'	=> 'Ban Hammer inställningar',
 
-	'SETTINGS_ERROR'		=> 'Ett fel uppstod när inställningarna skulle sparas. Överför även backtrace-informationen med din felrapport.',
-	'SETTINGS_SUCCESS'		=> 'Inställningarna har sparats',
-	'SFS_API_KEY'			=> 'SFS API-nyckel',
+	'SETTINGS_ERROR'	=> 'Ett fel uppstod när inställningarna skulle sparas. Överför även backtrace-informationen med din felrapport.',
+	'SETTINGS_SUCCESS'	=> 'Inställningarna har sparats',
+	'SFS_API_KEY'		=> 'SFS API-nyckel',
 	'SFS_API_KEY_EXPLAIN'	=> 'Om du vill rapportera spammare till Stop Forum Spam automatiskt så behöver du en API-nyckel, <a href="http://www.stopforumspam.com/signup">http://www.stopforumspam.com/signup</a>.',
-	'SFS_NEEDS_CURL'		=> '<span style="color:red;">Din server måste ha cURL installerat för att kunna använda Stop Forum Spam.</span>',
+	'SFS_NEEDS_CURL'	=> '<span style="color:red;">Din server måste ha cURL installerat för att kunna använda Stop Forum Spam.</span>',
 ));

@@ -1,7 +1,7 @@
 <?php
 /**
 *
-* @package One Click Ban
+* @package Ban Hammer
 * @copyright (c) 2015 phpBB Modders <https://phpbbmodders.net/>
 * @author Jari Kanerva <tumba25@phpbbmodders.net>
 * @license http://opensource.org/licenses/gpl-2.0.php GNU General Public License v2
@@ -20,7 +20,7 @@ class banhammer_module
 
 		$user->add_lang('acp/groups');
 
-		$this->page_title = $user->lang['ACP_OCB_TITLE'];
+		$this->page_title = $user->lang['ACP_BH_TITLE'];
 		$this->tpl_name = 'banhammer_body';
 
 		add_form_key('banhammer');
@@ -42,10 +42,11 @@ class banhammer_module
 			$settings = array(
 				'ban_email'		=> 1,
 				'ban_ip'		=> 0,
-				'del_posts'		=> 0,
 				'del_avatar'	=> 0,
-				'del_signature'	=> 0,
+				'del_pms'		=> 0,
+				'del_posts'		=> 0,
 				'del_profile'	=> 0,
+				'del_signature'	=> 0,
 				'group_id'		=> 0,
 				'sfs_api_key'	=> '',
 			);
@@ -63,10 +64,11 @@ class banhammer_module
 			$settings = array(
 				'ban_email'		=> $request->variable('ban_email', 0),
 				'ban_ip'		=> $request->variable('ban_ip', 0),
-				'del_posts'		=> $request->variable('del_posts', 0),
 				'del_avatar'	=> $request->variable('del_avatar', 0),
-				'del_signature'	=> $request->variable('del_signature', 0),
+				'del_pms'		=> $request->variable('del_pms', 0),
+				'del_posts'		=> $request->variable('del_posts', 0),
 				'del_profile'	=> $request->variable('del_profile', 0),
+				'del_signature'	=> $request->variable('del_signature', 0),
 				'group_id'		=> (!empty($group_id)) ? $group_id : 0,
 				'sfs_api_key'	=> $request->variable('sfs_api_key', ''),
 			);
@@ -96,10 +98,11 @@ class banhammer_module
 		$template->assign_vars(array(
 			'BAN_EMAIL'		=> $settings['ban_email'],
 			'BAN_IP'		=> $settings['ban_ip'],
-			'DEL_POSTS'		=> $settings['del_posts'],
 			'DEL_AVATAR'	=> $settings['del_avatar'],
-			'DEL_SIGNATURE'	=> $settings['del_signature'],
+			'DEL_PMS'		=> $settings['del_pms'],
+			'DEL_POSTS'		=> $settings['del_posts'],
 			'DEL_PROFILE'	=> $settings['del_profile'],
+			'DEL_SIGNATURE'	=> $settings['del_signature'],
 			'MOVE_GROUP'	=> $s_group_options,
 			'SFS_API_KEY'	=> $settings['sfs_api_key'],
 			'SFS_CURL'		=> (function_exists('curl_init')) ? true : false,
