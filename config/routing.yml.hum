@@ -1,3 +1,0 @@
-phpbbmodders_oneclickban_controller:
-    path: /oneclickban/{name}
-    defaults: { _controller: phpbbmodders.oneclickban.controller:handle }
