@@ -41,7 +41,7 @@ $lang = array_merge($lang, array(
 	'BH_BANNED'				=> 'This user is banned',
 
 	'BH_DEL_AVATAR'		=> 'Delete this users avatar',
-	'BH_DEL_PMS'		=> 'Delete this users private messages',
+	'BH_DEL_PRIVMSGS'	=> 'Delete this users private messages',
 	'BH_DEL_POSTS'		=> 'Delete this users posts',
 	'BH_DEL_PROFILE'	=> 'Delete this users profile fields',
 	'BH_DEL_SIGNATURE'	=> 'Delete this users signature',

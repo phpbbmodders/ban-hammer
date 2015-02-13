@@ -29,7 +29,7 @@ class install_banhammer extends \phpbb\db\migration\migration
 			'ban_email'		=> 1,
 			'ban_ip'		=> 0,
 			'del_avatar'	=> 0,
-			'del_pms'		=> 0,
+			'del_privmsgs'	=> 0,
 			'del_posts'		=> 0,
 			'del_profile'	=> 0,
 			'del_signature'	=> 0,

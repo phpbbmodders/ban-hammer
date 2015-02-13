@@ -41,7 +41,7 @@ $lang = array_merge($lang, array(
 	'ACP_BAN_IP_EXPLAIN'	=> '<strong>Be careful with this.</strong> Most home users have dynamic IP addresses and only need to reboot their router/modem to get a new IP address. The next day that IP address might be assigned to a user you want on your site. Spammers also use internet anonymity proxies or the Tor network making an IP ban pointless.',
 
 	'ACP_DEL_AVATAR'	=> 'Delete users avatar',
-	'ACP_DEL_PMS'		=> 'Delete users private messages',
+	'ACP_DEL_PRIVMSGS'	=> 'Delete users private messages',
 	'ACP_DEL_POSTS'		=> 'Delete users posts',
 	'ACP_DEL_PROFILE'	=> 'Delete users profile fields',
 	'ACP_DEL_SIGNATURE'	=> 'Delete users signature',

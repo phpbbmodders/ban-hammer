@@ -147,7 +147,7 @@ class banhammer_listener implements EventSubscriberInterface
 				'BH_BAN_EMAIL'		=> $settings['ban_email'],
 				'BH_BAN_IP'			=> $settings['ban_ip'],
 				'BH_DEL_AVATAR'		=> $settings['del_avatar'],
-				'BH_DEL_PMS'		=> $settings['del_pms'],
+				'BH_DEL_PRIVMSGS'	=> $settings['del_privmsgs'],
 				'BH_DEL_POSTS'		=> $settings['del_posts'],
 				'BH_DEL_PROFILE'	=> $settings['del_profile'],
 				'BH_DEL_SIGNATURE'	=> $settings['del_signature'],
@@ -171,7 +171,7 @@ class banhammer_listener implements EventSubscriberInterface
 				'bh_reason'			=> $this->request->variable('bh_reason', ''),
 				'bh_reason_user'	=> $this->request->variable('bh_reason_user', ''),
 				'del_avatar'		=> $this->request->variable('del_avatar', 0),
-				'del_pms'			=> $this->request->variable('del_pms', 0),
+				'del_privmsgs'			=> $this->request->variable('del_privmsgs', 0),
 				'del_posts'			=> $this->request->variable('del_posts', 0),
 				'del_profile'		=> $this->request->variable('del_profile', 0),
 				'del_signature'		=> $this->request->variable('del_signature', 0),
@@ -187,7 +187,7 @@ class banhammer_listener implements EventSubscriberInterface
 			$message .= ($hidden_fields['bh_reason'])		? sprintf($this->user->lang['BH_REASON'], $hidden_fields['bh_reason']) . '<br />' : '';
 			$message .= ($hidden_fields['bh_reason_user'])	? sprintf($this->user->lang['BH_REASON_USER'], $hidden_fields['bh_reason_user']) . '<br />' : '';
 			$message .= ($hidden_fields['del_avatar'])		? $this->user->lang['BH_DEL_AVATAR'] . '<br />' : '';
-			$message .= ($hidden_fields['del_pms'])			? $this->user->lang['BH_DEL_PMS'] . '<br />' : '';
+			$message .= ($hidden_fields['del_privmsgs'])			? $this->user->lang['BH_DEL_PRIVMSGS'] . '<br />' : '';
 			$message .= ($hidden_fields['del_posts'])		? $this->user->lang['BH_DEL_POSTS'] . '<br />' : '';
 			$message .= ($hidden_fields['del_profile'])		? $this->user->lang['BH_DEL_PROFILE'] . '<br />' : '';
 			$message .= ($hidden_fields['del_signature'])	? $this->user->lang['BH_DEL_SIGNATURE'] . '<br />' : '';
@@ -237,9 +237,9 @@ class banhammer_listener implements EventSubscriberInterface
 			$this->bh_del_posts();
 		}
 
-		if ($this->request->variable('del_pms', 0))
+		if ($this->request->variable('del_privmsgs', 0))
 		{
-			$this->bh_del_pms();
+			$this->bh_del_privmsgs();
 		}
 
 		if ($this->request->variable('del_avatar', 0))
@@ -308,27 +308,30 @@ class banhammer_listener implements EventSubscriberInterface
 		redirect($url);
 	}
 
-	private function bh_del_pms()
+	private function bh_del_privmsgs()
 	{
 		$user_id = $this->user_id;
 
-		// Get PMs
+		// Get private messages
 		$sql = 'SELECT msg_id, author_id FROM ' . PRIVMSGS_TABLE . "
 				WHERE author_id = $user_id";
 		$result = $this->db->sql_query($sql);
 
-		$pms_ary = array();
+		$privmsgs_ary = array();
 		while ($row = $this->db->sql_fetchrow($result))
 		{
-			$pms_ary[] = $row['msg_id'];
+			$privmsgs_ary[] = $row['msg_id'];
 		}
 		$this->db->sql_freeresult($result);
 
-		// And now close eventual reports.
-		$sql = 'UPDATE ' . REPORTS_TABLE . '
-				SET report_closed = 1
-				WHERE ' . $this->db->sql_in_set('pm_id', $pms_ary);
-		$this->db->sql_query($sql);
+		if (!empty($privmsgs_ary))
+		{
+			// And now close eventual reports.
+			$sql = 'UPDATE ' . REPORTS_TABLE . '
+					SET report_closed = 1
+					WHERE ' . $this->db->sql_in_set('pm_id', $privmsgs_ary);
+			$this->db->sql_query($sql);
+		}
 
 		$this->db->sql_query('DELETE FROM ' . PRIVMSGS_TABLE .			" WHERE author_id = $user_id");
 		$this->db->sql_query('DELETE FROM ' . PRIVMSGS_FOLDER_TABLE .	" WHERE user_id = $user_id");
