@@ -3,8 +3,7 @@
 *
 * @package Ban Hammer
 * @copyright (c) 2015 phpBB Modders <https://phpbbmodders.net/>
-* @author Jari Kanerva <tumba25@phpbbmodders.net>
-* Swedish translation by Holger (http://www.maskinisten.net)
+* @author Swedish translation by Holger (http://www.maskinisten.net)
 * @license http://opensource.org/licenses/gpl-2.0.php GNU General Public License v2
 *
 */

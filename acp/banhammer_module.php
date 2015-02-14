@@ -3,7 +3,7 @@
 *
 * @package Ban Hammer
 * @copyright (c) 2015 phpBB Modders <https://phpbbmodders.net/>
-* @author Jari Kanerva <tumba25@phpbbmodders.net>
+* @author Jari Kanerva <jari@tumba25.net>
 * @license http://opensource.org/licenses/gpl-2.0.php GNU General Public License v2
 *
 */
@@ -59,6 +59,7 @@ class banhammer_module
 			{
 				trigger_error($user->lang['FORM_INVALID'] . adm_back_link($this->u_action), E_USER_WARNING);
 			}
+
 			$group_id = $request->variable('move_group', 0);
 
 			$settings = array(
@@ -91,25 +92,23 @@ class banhammer_module
 			}
 		}
 
-		// Get the groups, so that the user can be added to them
-		// don't rely on user input, well just because
-		$s_group_options = $this->get_groups($settings['group_id']);
-
 		$template->assign_vars(array(
-			'BAN_EMAIL'		=> $settings['ban_email'],
-			'BAN_IP'		=> $settings['ban_ip'],
-			'DEL_AVATAR'	=> $settings['del_avatar'],
-			'DEL_PRIVMSGS'	=> $settings['del_privmsgs'],
-			'DEL_POSTS'		=> $settings['del_posts'],
-			'DEL_PROFILE'	=> $settings['del_profile'],
-			'DEL_SIGNATURE'	=> $settings['del_signature'],
-			'MOVE_GROUP'	=> $s_group_options,
-			'SFS_API_KEY'	=> $settings['sfs_api_key'],
+			'BAN_EMAIL'		=> (!empty($settings['ban_email'])) ? true : false,
+			'BAN_IP'		=> (!empty($settings['ban_ip'])) ? true : false,
+			'DEL_AVATAR'	=> (!empty($settings['del_avatar'])) ? true : false,
+			'DEL_PRIVMSGS'	=> (!empty($settings['del_privmsgs'])) ? true : false,
+			'DEL_POSTS'		=> (!empty($settings['del_posts'])) ? true : false,
+			'DEL_PROFILE'	=> (!empty($settings['del_profile'])) ? true : false,
+			'DEL_SIGNATURE'	=> (!empty($settings['del_signature'])) ? true : false,
+			'MOVE_GROUP'	=> (!empty($settings['group_id'])) ? $this->get_groups($settings['group_id']) : $this->get_groups(0),
+			'SFS_API_KEY'	=> (!empty($settings['sfs_api_key'])) ? $settings['sfs_api_key'] : '',
 			'SFS_CURL'		=> (function_exists('curl_init')) ? true : false,
 		));
 	}
 
-	//function to return groups that are allowed
+	/**
+	 * function to return groups that are allowed
+	 */
 	private function get_groups($group_selected)
 	{
 		global $db, $user;
@@ -124,11 +123,13 @@ class banhammer_module
 			ORDER BY group_name ASC';
 		$result = $db->sql_query($sql);
 
-		$s_group_options = '<option value="0">' . $user->lang['NO_GROUP'] . '</option>';
+		$selected = ($group_selected == 0) ? ' selected="selected"' : '';
+		$s_group_options = "<option value='0'$selected>&nbsp;{$user->lang['NO_GROUP']}&nbsp;</option>";
 		while ($row = $db->sql_fetchrow($result))
 		{
-			$selected = $row['group_id'] == $group_selected ? ' selected="selected"' : '';
-			$s_group_options .= '<option value="' . $row['group_id'] . '"' . $selected . '>' . (($row['group_type'] == GROUP_SPECIAL) ? $user->lang['G_' . $row['group_name']] : $row['group_name']) . '</option>';
+			$selected = ($row['group_id'] == $group_selected) ? ' selected="selected"' : '';
+			$group_name = ($row['group_type'] == GROUP_SPECIAL) ? $user->lang['G_' . $row['group_name']] : $row['group_name'];
+			$s_group_options .= "<option value='{$row['group_id']}'$selected>$group_name</option>";
 		}
 		$db->sql_freeresult($result);
 

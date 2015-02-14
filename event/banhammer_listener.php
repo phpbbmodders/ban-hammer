@@ -3,7 +3,7 @@
 *
 * @package Ban Hammer
 * @copyright (c) 2015 phpBB Modders <https://phpbbmodders.net/>
-* @author Jari Kanerva <tumba25@phpbbmodders.net>
+* @author Jari Kanerva <jari@tumba25.net>
 * @license http://opensource.org/licenses/gpl-2.0.php GNU General Public License v2
 *
 */
@@ -37,7 +37,15 @@ class banhammer_listener implements EventSubscriberInterface
 		));
 	}
 
-	public function __construct(\phpbb\template\template $template, \phpbb\user $user, \phpbb\db\driver\driver_interface $db, \phpbb\auth\auth $auth, \phpbb\request\request $request, \phpbb\cache\driver\driver_interface $cache, $phpbb_root_path, $phpExt)
+	public function __construct(
+		\phpbb\template\template $template,
+		\phpbb\user $user,
+		\phpbb\db\driver\driver_interface $db,
+		\phpbb\auth\auth $auth,
+		\phpbb\request\request $request,
+		\phpbb\cache\driver\driver_interface $cache,
+		$phpbb_root_path,
+		$phpExt)
 	{
 		$this->template		= $template;
 		$this->user			= $user;
