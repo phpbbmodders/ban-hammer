@@ -6,7 +6,7 @@
 	"version": "1.0.0",
 	"time": "2015-02-09",
 	"keywords": ["phpbb", "extension", "ban", "hammer", "banhammer", "moderator", "tool"],
-	"license": "Gnu GPL v2",
+	"license": "GPL-2.0",
 	"authors": [
 		{
 			"name": "Jari Kanerva",
