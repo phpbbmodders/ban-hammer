@@ -56,7 +56,7 @@ $lang = array_merge($lang, array(
 	'ACP_BH_SETTINGS'	=> 'Paramètres du bannissement massif',
 
 	'SETTINGS_ERROR'		=> 'Il y a eu une erreur lors de l’enregistrement de vos paramètres. Veuillez nous soumettre votre rapport d’erreur.',
-	'SETTINGS_SUCCESS'		=> 'Les parmètres ont été sauvegardés avec succès',
+	'SETTINGS_SUCCESS'		=> 'Les paramètres ont été sauvegardés avec succès',
 	'SFS_API_KEY'			=> 'Clé de l’API SFS ',
 	'SFS_API_KEY_EXPLAIN'	=> 'Si vous voulez signaler automatiquement les spammeurs à StopForumSpam vous aurez besoin d’une clé de l’API, <a href="http://www.stopforumspam.com/signup">http://www.stopforumspam.com/signup</a>.',
 	'SFS_NEEDS_CURL'		=> '<span style="color:red;">Votre serveur a besoin que cURL soit installé pour utiliser le service contre le spam sur le forum.</span>',
