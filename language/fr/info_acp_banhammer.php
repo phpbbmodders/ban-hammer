@@ -38,7 +38,7 @@ if (empty($lang) || !is_array($lang))
 // in a url you again do not need to specify an order e.g., 'Click %sHERE%s' is fine
 $lang = array_merge($lang, array(
 	'ACP_BAN_EMAIL'		=> 'Bannir l’adresse e-mail des utilisateurs ',
-	'ACP_BAN_IP'		=> 'Bannir l’IP des utilisateurs',
+	'ACP_BAN_IP'		=> 'Bannir l’IP des utilisateurs ',
 	'ACP_BAN_IP_EXPLAIN'	=> '<strong>Nous attirons votre attention</strong> sur le fait que la plupart des utilisateurs qui ont une adresse IP dynamique ont seulement besoin de redémarrer leur routeur / modem pour en obtenir une nouvelle. Un jour un utilisateur que vous souhaitez voir sur votre forum pourrait se voir attribué cette adresse IP. Les spammeurs utilisent également des serveurs proxys ou TOR pour protéger leur anonymat rendant le bannissement d’IP inutile.',
 
 	'ACP_DEL_AVATAR'	=> 'Supprimer l’avatar des utilisateurs ',
