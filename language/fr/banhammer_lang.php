@@ -38,7 +38,7 @@ $lang = array_merge($lang, array(
 	'BH_BAN_IP'				=> 'Bannir l’IP de cet utilisateur',
 	'BH_BAN_IP_EXPLAIN'		=> '<strong>Nous attirons votre attention</strong> sur le fait que la plupart des utilisateurs qui ont une adresse IP dynamique ont seulement besoin de redémarrer leur routeur / modem pour en obtenir une nouvelle. Un jour un utilisateur que vous souhaitez voir sur votre forum pourrait se voir attribué cette adresse IP. Les spammeurs utilisent également des serveurs proxys ou TOR pour protéger leur anonymat rendant le bannissement d’IP inutile.',
 	'BH_BAN_REASON'			=> 'Raison interne pour ce bannissement',
-	'BH_BAN_USER'			=> 'Bannir cet utilisateur',
+	'BH_BAN_USER'			=> 'Bannir cet utilisateur ',
 	'BH_BANNED'				=> 'Cet utilisateur est banni',
 
 	'BH_DEL_AVATAR'		=> 'Supprimer l’avatar de cet utilisateur',
@@ -59,5 +59,5 @@ $lang = array_merge($lang, array(
 	'SFS_REPORT'	=> 'Signaler cet utilisateur pour arrêter le spam sur le forum',
 	'SURE_BAN'		=> 'Êtes-vous sûr de vouloir bannir <strong>%s</strong> ?', // %s will be a username.
 
-	'THIS_WILL'	=> 'Ce sera',
+	'THIS_WILL'	=> 'Cela aura pour conséquence de ',
 ));
