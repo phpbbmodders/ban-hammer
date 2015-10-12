@@ -176,8 +176,8 @@ class banhammer_listener implements EventSubscriberInterface
 			$hidden_fields = array(
 				'ban_email'			=> $this->request->variable('ban_email', 0),
 				'ban_ip'			=> $this->request->variable('ban_ip', 0),
-				'bh_reason'			=> $this->request->variable('bh_reason', ''),
-				'bh_reason_user'	=> $this->request->variable('bh_reason_user', ''),
+				'bh_reason'			=> $this->request->variable('bh_reason', '', true),
+				'bh_reason_user'	=> $this->request->variable('bh_reason_user', '', true),
 				'del_avatar'		=> $this->request->variable('del_avatar', 0),
 				'del_privmsgs'			=> $this->request->variable('del_privmsgs', 0),
 				'del_posts'			=> $this->request->variable('del_posts', 0),
@@ -209,8 +209,8 @@ class banhammer_listener implements EventSubscriberInterface
 		$error = array();
 
 		// Any reason for this ban?
-		$bh_reason		= $this->request->variable('bh_reason', '');
-		$bh_reason_user	= $this->request->variable('bh_reason_user', '');
+		$bh_reason		= $this->request->variable('bh_reason', '', true);
+		$bh_reason_user	= $this->request->variable('bh_reason_user', '', true);
 
 		// The username is the user so it's always banned.
 		$success = user_ban('user', $this->data['username'], 0, '', false, $bh_reason, $bh_reason_user);
