@@ -450,7 +450,7 @@ class banhammer_listener implements EventSubscriberInterface
 		curl_close($ch);
 
 		// if nothing is returned (SFS is down)
-		if($httpcode != 200)
+		if ($httpcode != 200)
 		{
 			return false;
 		}
