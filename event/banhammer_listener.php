@@ -63,10 +63,12 @@ class banhammer_listener implements EventSubscriberInterface
 		$this->user_id	= (int) $this->data['user_id'];
 		$curl_exists	= (function_exists('curl_init')) ? true : false;
 
+		$admin_mod_array = $this->admin_mod_array();
+
 		/**
 		 * Split these up and give error messages? Later maybe.
 		 */
-		if (!$this->auth->acl_get('m_ban') || ($this->data['user_type'] == USER_FOUNDER && $this->user->data['user_type'] != USER_FOUNDER) || $this->user_id == $this->user->data['user_id'])
+		if (!$this->auth->acl_get('m_ban') || ($this->data['user_type'] == USER_FOUNDER && $this->user->data['user_type'] != USER_FOUNDER) || $this->user_id == $this->user->data['user_id'] || in_array($this->data['user_id'], $admin_mod_array))
 		{
 			// Nothing to see here, move on.
 			// Only let founders be banned by other founders.
@@ -457,4 +459,20 @@ class banhammer_listener implements EventSubscriberInterface
 
 		return(true);
 	}
+
+	// Check for admins and mods
+	public function admin_mod_array()
+	{
+		// grab all admins
+		$admin_ary = $this->auth->acl_get_list(false, 'a_', false);
+		$admin_ary = (!empty($admin_ary[0]['a_'])) ? $admin_ary[0]['a_'] : array();
+
+		//grab all mods
+		$mod_ary = $this->auth->acl_get_list(false,'m_', false);
+		$mod_ary = (!empty($mod_ary[0]['m_'])) ? $mod_ary[0]['m_'] : array();
+		$admin_mod_array = array_unique(array_merge($admin_ary, $mod_ary));
+
+		return $admin_mod_array;
+	}
+		
 }
