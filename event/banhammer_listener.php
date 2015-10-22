@@ -474,5 +474,4 @@ class banhammer_listener implements EventSubscriberInterface
 
 		return $admin_mod_array;
 	}
-		
 }
