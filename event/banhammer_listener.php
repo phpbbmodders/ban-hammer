@@ -191,7 +191,7 @@ class banhammer_listener implements EventSubscriberInterface
 			);
 
 			$message = sprintf($this->user->lang['SURE_BAN'], $this->data['username']) . '<br /><br />';
-			$message .= $this->user->lang['THIS_WILL'] . ':<br />' . $this->user->lang['BH_BAN_USER'] . '<br />';
+			$message .= $this->user->lang['THIS_WILL'] . '' . $this->user->lang['COLON'] . '<br />' . $this->user->lang['BH_BAN_USER'] . '<br />';
 			$message .= ($hidden_fields['ban_email'])		? $this->user->lang['BH_BAN_EMAIL'] . '<br />' : '';
 			$message .= ($hidden_fields['ban_ip'])			? $this->user->lang['BH_BAN_IP'] . '<br />' : '';
 			$message .= ($hidden_fields['bh_reason'])		? sprintf($this->user->lang['BH_REASON'], $hidden_fields['bh_reason']) . '<br />' : '';
