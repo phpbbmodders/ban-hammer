@@ -55,7 +55,7 @@ $lang = array_merge($lang, array(
 
 	'SETTINGS_ERROR'	=> 'Ett fel uppstod när inställningarna skulle sparas. Överför även backtrace-informationen med din felrapport.',
 	'SETTINGS_SUCCESS'	=> 'Inställningarna har sparats',
-	'ACP_BH_SFS_API_KEY'		=> 'SFS API-nyckel',
-	'ACP_BH_SFS_API_KEY_EXPLAIN'	=> 'Om du vill rapportera spammare till Stop Forum Spam automatiskt så behöver du en API-nyckel, <a href="http://www.stopforumspam.com/signup">http://www.stopforumspam.com/signup</a>.',
+	'SFS_API_KEY'		=> 'SFS API-nyckel',
+	'SFS_API_KEY_EXPLAIN'	=> 'Om du vill rapportera spammare till Stop Forum Spam automatiskt så behöver du en API-nyckel, <a href="http://www.stopforumspam.com/signup">http://www.stopforumspam.com/signup</a>.',
 	'SFS_NEEDS_CURL'	=> '<span style="color:red;">Din server måste ha cURL installerat för att kunna använda Stop Forum Spam.</span>',
 ));

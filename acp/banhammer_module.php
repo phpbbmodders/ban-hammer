@@ -16,7 +16,7 @@ class banhammer_module
 
 	function main($id, $mode)
 	{
-		global $db, $request, $template, $user;
+		global $request, $template, $user, $config;
 
 		$user->add_lang('acp/groups');
 
@@ -24,33 +24,6 @@ class banhammer_module
 		$this->tpl_name = 'banhammer_body';
 
 		add_form_key('banhammer');
-
-		// Get saved settings.
-		$sql = 'SELECT * FROM ' . CONFIG_TEXT_TABLE . "
-				WHERE config_name = 'banhammer_settings'";
-		$result = $db->sql_query($sql);
-		$settings = $db->sql_fetchfield('config_value');
-		$db->sql_freeresult($result);
-
-		if (!empty($settings))
-		{
-			$settings = unserialize($settings);
-		}
-		else
-		{
-			// Default settings in case something went wrong with the install.
-			$settings = array(
-				'ban_email'		=> 1,
-				'ban_ip'		=> 0,
-				'del_avatar'	=> 0,
-				'del_privmsgs'	=> 0,
-				'del_posts'		=> 0,
-				'del_profile'	=> 0,
-				'del_signature'	=> 0,
-				'group_id'		=> 0,
-				'sfs_api_key'	=> '',
-			);
-		}
 
 		if ($request->is_set_post('submit'))
 		{
@@ -60,52 +33,45 @@ class banhammer_module
 				trigger_error($user->lang['FORM_INVALID'] . adm_back_link($this->u_action), E_USER_WARNING);
 			}
 
-			$group_id = $request->variable('move_group', 0);
-
-			$settings = array(
-				'ban_email'		=> $request->variable('ban_email', 0),
-				'ban_ip'		=> $request->variable('ban_ip', 0),
-				'del_avatar'	=> $request->variable('del_avatar', 0),
-				'del_privmsgs'	=> $request->variable('del_privmsgs', 0),
-				'del_posts'		=> $request->variable('del_posts', 0),
-				'del_profile'	=> $request->variable('del_profile', 0),
-				'del_signature'	=> $request->variable('del_signature', 0),
-				'group_id'		=> (!empty($group_id)) ? $group_id : 0,
-				'sfs_api_key'	=> $request->variable('sfs_api_key', ''),
-			);
-
-			$sql_settings	= serialize($settings);
-			$sql_settings	= $db->sql_escape($sql_settings);
-
-			$sql = 'UPDATE ' . CONFIG_TEXT_TABLE . "
-					SET config_value = '$sql_settings'
-					WHERE config_name = 'banhammer_settings'";
-			$success = $db->sql_query($sql);
-
-			if ($success === false)
-			{
-				trigger_error($user->lang['SETTINGS_ERROR'] . adm_back_link($this->u_action), E_USER_ERROR);
-			}
-			else
-			{
-				trigger_error($user->lang['SETTINGS_SUCCESS'] . adm_back_link($this->u_action));
-			}
+			$this->set_options();
+			trigger_error($user->lang['SETTINGS_SUCCESS'] . adm_back_link($this->u_action));
 		}
 
 		$template->assign_vars(array(
-			'BAN_EMAIL'		=> (!empty($settings['ban_email'])) ? true : false,
-			'BAN_IP'		=> (!empty($settings['ban_ip'])) ? true : false,
-			'DEL_AVATAR'	=> (!empty($settings['del_avatar'])) ? true : false,
-			'DEL_PRIVMSGS'	=> (!empty($settings['del_privmsgs'])) ? true : false,
-			'DEL_POSTS'		=> (!empty($settings['del_posts'])) ? true : false,
-			'DEL_PROFILE'	=> (!empty($settings['del_profile'])) ? true : false,
-			'DEL_SIGNATURE'	=> (!empty($settings['del_signature'])) ? true : false,
-			'MOVE_GROUP'	=> (!empty($settings['group_id'])) ? $this->get_groups($settings['group_id']) : $this->get_groups(0),
-			'SFS_API_KEY'	=> (!empty($settings['sfs_api_key'])) ? $settings['sfs_api_key'] : '',
+			'BAN_EMAIL'		=> (!empty($config['bh_ban_email'])) ? true : false,
+			'BAN_IP'		=> (!empty($config['bh_ban_ip'])) ? true : false,
+			'DEL_AVATAR'	=> (!empty($config['bh_del_avatar'])) ? true : false,
+			'DEL_PRIVMSGS'	=> (!empty($config['bh_del_privmsgs'])) ? true : false,
+			'DEL_POSTS'		=> (!empty($config['bh_del_posts'])) ? true : false,
+			'DEL_PROFILE'	=> (!empty($config['bh_del_profile'])) ? true : false,
+			'DEL_SIGNATURE'	=> (!empty($config['bh_del_signature'])) ? true : false,
+			'MOVE_GROUP'	=> $this->get_groups($request->variable('move_group', $config['bh_group_id'])),
+			'SFS_API_KEY'	=> (!empty($config['bh_sfs_api_key'])) ? $config['bh_sfs_api_key'] : '',
 			'SFS_CURL'		=> (function_exists('curl_init')) ? true : false,
 		));
 	}
 
+	/**
+	 * Set the options a user can configure
+	 *
+	 * @return null
+	 * @access protected
+	 */
+	protected function set_options()
+	{
+		global $config, $request;
+
+		$config->set('bh_ban_email', $request->variable('ban_email', 0));
+		$config->set('bh_ban_ip', $request->variable('ban_ip', 0));
+		$config->set('bh_del_avatar', $request->variable('del_avatar', 0));
+		$config->set('bh_del_privmsgs', $request->variable('del_privmsgs', 0));
+		$config->set('bh_del_posts', $request->variable('del_posts', 0));
+		$config->set('bh_del_profile', $request->variable('del_profile', 0));
+		$config->set('bh_del_signature', $request->variable('del_signature', 0));
+		$config->set('bh_group_id', $request->variable('move_group', 0));
+		$config->set('bh_sfs_api_key', $request->variable('sfs_api_key', '', true));
+	}
+	
 	/**
 	 * function to return groups that are allowed
 	 */
