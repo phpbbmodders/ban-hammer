@@ -71,7 +71,7 @@ class banhammer_module
 		$config->set('bh_group_id', $request->variable('move_group', 0));
 		$config->set('bh_sfs_api_key', $request->variable('sfs_api_key', '', true));
 	}
-	
+
 	/**
 	 * function to return groups that are allowed
 	 */
