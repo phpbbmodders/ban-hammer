@@ -59,7 +59,7 @@ $lang = array_merge($lang, array(
 
 	'SETTINGS_ERROR'		=> 'Il y a eu une erreur lors de l’enregistrement des paramètres. Merci de soumettre le rapport d’erreur.',
 	'SETTINGS_SUCCESS'		=> 'Les paramètres ont été sauvegardés avec succès.',
-	'ACP_BH_SFS_API_KEY'			=> 'Clé de l’API du service « Stop Forum Spam »',
-	'ACP_BH_SFS_API_KEY_EXPLAIN'	=> 'Permet de signaler automatiquement les spammeurs au service « Stop Forum Spam ». Pour cela une clé de l’API est nécessaire : <a href="http://www.stopforumspam.com/signup">http://www.stopforumspam.com/signup</a>.',
+	'SFS_API_KEY'			=> 'Clé de l’API du service « Stop Forum Spam »',
+	'SFS_API_KEY_EXPLAIN'	=> 'Permet de signaler automatiquement les spammeurs au service « Stop Forum Spam ». Pour cela une clé de l’API est nécessaire : <a href="http://www.stopforumspam.com/signup">http://www.stopforumspam.com/signup</a>.',
 	'SFS_NEEDS_CURL'		=> '<span style="color:red;">Votre serveur a besoin que cURL soit installé pour utiliser le service contre le spam sur le forum.</span>',
 ));
