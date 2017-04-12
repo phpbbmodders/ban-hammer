@@ -4,6 +4,7 @@
 * @package Ban Hammer
 * @copyright (c) 2015 phpBB Modders <https://phpbbmodders.net/>
 * @author Jari Kanerva <jari@tumba25.net>
+* @author Rich McGirr
 * @license http://opensource.org/licenses/gpl-2.0.php GNU General Public License v2
 *
 */
@@ -268,7 +269,7 @@ class banhammer_listener implements EventSubscriberInterface
 
 		if ($this->request->variable('move_group', 0) && !empty($group_name))
 		{
-			$return = group_user_add($settings['group_id'], array($this->user_id), array($this->data['username']), $group_name, true);
+			$return = group_user_add($this->config['bh_group_id'], array($this->user_id), array($this->data['username']), $group_name, true);
 
 			if ($return != false)
 			{
@@ -276,14 +277,14 @@ class banhammer_listener implements EventSubscriberInterface
 			}
 		}
 
-		if ($this->request->variable('sfs_report', 0) && !empty($settings['sfs_api_key']) && $curl_exists)
+		if ($this->request->variable('sfs_report', 0) && !empty($this->config['bh_sfs_api_key']) && $curl_exists)
 		{
 			// add the spammer to the SFS database
 			$http_request = 'http://www.stopforumspam.com/add.php';
 			$http_request .= '?username=' . $this->data['username'];
 			$http_request .= '&ip_addr=' . $this->data['user_ip'];
 			$http_request .= '&email=' . $this->data['user_email'];
-			$http_request .= '&api_key=' . $settings['sfs_api_key'];
+			$http_request .= '&api_key=' . $this->config['bh_sfs_api_key'];
 
 			$response = $this->get_file($http_request);
 
@@ -294,7 +295,7 @@ class banhammer_listener implements EventSubscriberInterface
 		}
 
 		// Need to purge the cache.
-		$this->cache->purge();
+		$this->cache->destroy('sql', BANLIST_TABLE);
 
 		// The page needs to be reloaded to show the new banned status.
 		$args = array(
