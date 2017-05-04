@@ -26,7 +26,7 @@ class v101_data extends \phpbb\db\migration\container_aware_migration
 	{
 		$config_text = $this->container->get('config_text');
 
-		$this->settings = unserialize($config_text->get('banhammer_settings'));
+		$this->settings = @unserialize($config_text->get('banhammer_settings'));
 
 		return array(
 			array('config.add', array('bh_ban_email', $this->get('ban_email', 1))),
