@@ -204,8 +204,8 @@ class banhammer_listener implements EventSubscriberInterface
 		$error = array();
 
 		// Any reason for this ban?
-		$bh_reason		= $this->request->variable('bh_reason', '');
-		$bh_reason_user	= $this->request->variable('bh_reason_user', '');
+		$bh_reason		= $this->request->variable('bh_reason', '', true);
+		$bh_reason_user	= $this->request->variable('bh_reason_user', '', true);
 
 		// The username is the user so it's always banned.
 		$success = user_ban('user', $this->data['username'], 0, '', false, $bh_reason, $bh_reason_user);
