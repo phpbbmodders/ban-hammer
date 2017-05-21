@@ -31,33 +31,62 @@ class banhammer_listener implements EventSubscriberInterface
 	 */
 	private $user_id = 0;
 
+	/** @var \phpbb\auth\auth */
+	protected $auth;
+
+	/** @var \phpbb\cache\driver\driver_interface */
+	protected $cache;
+
+	/** @var \phpbb\config\config */
+	protected $config;
+
+	/** @var \phpbb\db\driver\driver */
+	protected $db;
+
+	/** @var \phpbb\request\request */
+	protected $request;
+
+	/** @var \phpbb\template\template */
+	protected $template;
+
+	/** @var \phpbb\user */
+	protected $user;
+
+	/** @var string phpBB root path */
+	protected $root_path;
+
+	/** @var string phpEx */
+	protected $php_ext;
+
+	public function __construct(
+		\phpbb\auth\auth $auth,
+		\phpbb\cache\driver\driver_interface $cache,
+		\phpbb\config\config $config,
+		\phpbb\db\driver\driver_interface $db,
+		\phpbb\request\request $request,
+		\phpbb\template\template $template,
+		\phpbb\user $user,
+		$root_path,
+		$phpExt
+	)
+	{
+		$this->auth			= $auth;
+		$this->cache		= $cache;
+		$this->config 		= $config;
+		$this->db			= $db;
+		$this->request		= $request;
+		$this->template		= $template;
+		$this->user			= $user;
+		$this->root_path	= $root_path;
+		$this->php_ext		= $phpExt;
+
+	}
+
 	static public function getSubscribedEvents()
 	{
 		return(array(
 			'core.memberlist_view_profile'	=> 'do_ban_hammer_stuff',
 		));
-	}
-
-	public function __construct(
-		\phpbb\template\template $template,
-		\phpbb\user $user,
-		\phpbb\db\driver\driver_interface $db,
-		\phpbb\auth\auth $auth,
-		\phpbb\request\request $request,
-		\phpbb\cache\driver\driver_interface $cache,
-		$phpbb_root_path,
-		$phpExt,
-		\phpbb\config\config $config)
-	{
-		$this->template		= $template;
-		$this->user			= $user;
-		$this->db			= $db;
-		$this->auth			= $auth;
-		$this->request		= $request;
-		$this->cache		= $cache;
-		$this->root_path	= $phpbb_root_path;
-		$this->php_ext		= $phpExt;
-		$this->config 		= $config;
 	}
 
 	public function do_ban_hammer_stuff($event)
@@ -72,8 +101,7 @@ class banhammer_listener implements EventSubscriberInterface
 		if (!$this->auth->acl_get('m_ban') || $this->data['user_type'] == USER_FOUNDER || $this->user_id == $this->user->data['user_id'])
 		{
 			// Nothing to see here, move on.
-			// Only let founders be banned by other founders.
-			// And don't allow them to ban them selves
+			// And don't allow users to ban them selves
 			return;
 		}
 

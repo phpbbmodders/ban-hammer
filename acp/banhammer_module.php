@@ -48,6 +48,8 @@ class banhammer_module
 			'MOVE_GROUP'	=> $this->get_groups($request->variable('move_group', $config['bh_group_id'])),
 			'SFS_API_KEY'	=> (!empty($config['bh_sfs_api_key'])) ? $config['bh_sfs_api_key'] : '',
 			'SFS_CURL'		=> (function_exists('curl_init')) ? true : false,
+
+			'U_ACTION'		=> $this->u_action,
 		));
 	}
 

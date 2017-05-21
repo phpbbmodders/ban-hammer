@@ -2,14 +2,15 @@ services:
     phpbbmodders.banhammer.listener:
         class: phpbbmodders\banhammer\event\banhammer_listener
         arguments:
+            - '@auth'
+            - '@cache.driver'
+            - '@config'
+            - '@dbal.conn'
+            - '@request'
             - '@template'
             - '@user'
-            - '@dbal.conn'
-            - '@auth'
-            - '@request'
-            - '@cache.driver'
             - '%core.root_path%'
             - '%core.php_ext%'
-            - '@config'            
+
         tags:
             - { name: event.listener }
