@@ -18,14 +18,14 @@ class banhammer_module
 	{
 		global $phpbb_container, $user;
 
-		$user->add_lang_ext('phpbbmodders/banhammer', 'banhammer_acp');		
+		$user->add_lang_ext('phpbbmodders/banhammer', 'banhammer_acp');
 
 		// Get an instance of the admin controller
 		$admin_controller = $phpbb_container->get('phpbbmodders.banhammer.admin.controller');
 
 		// Make the $u_action url available in the admin controller
 		$admin_controller->set_page_url($this->u_action);
-		
+
 		// Load the "settings" or "manage" module modes
 		switch ($mode)
 		{

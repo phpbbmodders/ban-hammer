@@ -19,7 +19,7 @@ class admin_controller
 	protected $config;
 
 	/** @var \phpbb\db\driver\driver_interface */
-	protected $db;	
+	protected $db;
 
 	/** @var \phpbb\controller\helper */
 	protected $helper;
@@ -37,7 +37,7 @@ class admin_controller
 	protected $log;
 
 	/* @var \phpbbmodders\banhammer\core\bantime */
-	protected $bantime;	
+	protected $bantime;
 
 	/** @var string Custom form action */
 	protected $u_action;
@@ -149,7 +149,7 @@ class admin_controller
 	private function get_groups($group_selected)
 	{
 		$this->user->add_lang('acp/groups');
-	
+
 		// Don't display any of the default groups
 		// highly doubt an admin would want to ban someone into a default group
 		$ignore_groups = array('BOTS', 'GUESTS', 'REGISTERED', 'REGISTERED_COPPA', 'NEWLY_REGISTERED', 'ADMINISTRATORS', 'GLOBAL_MODERATORS');
