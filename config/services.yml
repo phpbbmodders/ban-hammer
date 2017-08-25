@@ -9,8 +9,25 @@ services:
             - '@request'
             - '@template'
             - '@user'
+            - '@phpbbmodders.banhammer.core.bantime'
             - '%core.root_path%'
-            - '%core.php_ext%'
-
+            - '%core.php_ext%'            
         tags:
             - { name: event.listener }
+    phpbbmodders.banhammer.admin.controller:
+        class: phpbbmodders\banhammer\controller\admin_controller
+        arguments:
+            - '@config'
+            - '@dbal.conn'
+            - '@controller.helper'
+            - '@request'
+            - '@template'
+            - '@user'
+            - '@log'
+            - '@phpbbmodders.banhammer.core.bantime'
+    phpbbmodders.banhammer.core.bantime:
+        class:  phpbbmodders\banhammer\core\bantime
+        arguments:
+            - '@dbal.conn'
+            - '@user'
+            - '@template'
