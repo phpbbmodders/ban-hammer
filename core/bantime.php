@@ -41,7 +41,7 @@ class bantime
 
 		return $ban_options;
 	}
-	
+
 	/*
 	 * ban_length_options
 	 * access public
@@ -50,17 +50,17 @@ class bantime
 	public function ban_length_options()
 	{
 		$ban_text = array(
-			0 => $this->user->lang['PERMANENT'], 
-			30 => $this->user->lang['30_MINS'], 
-			60 => $this->user->lang['1_HOUR'], 
-			360 => $this->user->lang['6_HOURS'], 
-			1440 => $this->user->lang['1_DAY'], 
-			10080 => $this->user->lang['7_DAYS'], 
-			20160 => $this->user->lang['2_WEEKS'], 
-			40320 => $this->user->lang['1_MONTH'], 
+			0 => $this->user->lang['PERMANENT'],
+			30 => $this->user->lang['30_MINS'],
+			60 => $this->user->lang['1_HOUR'],
+			360 => $this->user->lang['6_HOURS'],
+			1440 => $this->user->lang['1_DAY'],
+			10080 => $this->user->lang['7_DAYS'],
+			20160 => $this->user->lang['2_WEEKS'],
+			40320 => $this->user->lang['1_MONTH'],
 			524160 => $this->user->lang['1_YEAR']
 		);
-		
+
 		return $ban_text;
 	}
 }
