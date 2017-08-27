@@ -21,9 +21,6 @@ class admin_controller
 	/** @var \phpbb\db\driver\driver_interface */
 	protected $db;
 
-	/** @var \phpbb\controller\helper */
-	protected $helper;
-
 	/** @var \phpbb\request\request */
 	protected $request;
 
@@ -47,7 +44,6 @@ class admin_controller
 	*
 	* @param \phpbb\config\config					$config				Config object
 	* @param \phpbb\db\driver\driver_interface		$db					Database object
-	* @param \phpbb\controller\helper           	$helper     	    Controller helper object
 	* @param \phpbb\request\request					$request			Request object
 	* @param \phpbb\template\template				$template			Template object
 	* @param \phpbb\user							$user				User object
@@ -59,7 +55,6 @@ class admin_controller
 	public function __construct(
 			\phpbb\config\config $config,
 			\phpbb\db\driver\driver_interface $db,
-			\phpbb\controller\helper $helper,
 			\phpbb\request\request $request,
 			\phpbb\template\template $template,
 			\phpbb\user $user,
@@ -68,7 +63,6 @@ class admin_controller
 	{
 		$this->config = $config;
 		$this->db = $db;
-		$this->helper = $helper;
 		$this->request = $request;
 		$this->template = $template;
 		$this->user = $user;

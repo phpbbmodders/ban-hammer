@@ -19,7 +19,6 @@ services:
         arguments:
             - '@config'
             - '@dbal.conn'
-            - '@controller.helper'
             - '@request'
             - '@template'
             - '@user'
@@ -28,6 +27,4 @@ services:
     phpbbmodders.banhammer.core.bantime:
         class:  phpbbmodders\banhammer\core\bantime
         arguments:
-            - '@dbal.conn'
             - '@user'
-            - '@template'

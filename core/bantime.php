@@ -12,24 +12,16 @@ namespace phpbbmodders\banhammer\core;
 
 class bantime
 {
-	/** @var \phpbb\db\driver\driver */
-	protected $db;
-
 	/** @var \phpbb\user */
 	protected $user;
 
-	/** @var \phpbb\template\template */
-	protected $template;
-
-	public function __construct(\phpbb\db\driver\driver_interface $db, \phpbb\user $user, \phpbb\template\template $template)
+	public function __construct(\phpbb\user $user)
 	{
-		$this->db = $db;
 		$this->user = $user;
-		$this->template = $template;
 	}
 
 	/*
-	 * sfsapi
+	 * display_ban_time
 	 * @param 	$ban_time		the time as initially set in the acp
 	 * @return 	string			an array of options for setting the ban time
 	*/
@@ -38,7 +30,7 @@ class bantime
 		$this->user->add_lang('acp/ban');
 
 		// Ban length options
-		$ban_text = array(0 => $this->user->lang['PERMANENT'], 30 => $this->user->lang['30_MINS'], 60 => $this->user->lang['1_HOUR'], 360 => $this->user->lang['6_HOURS'], 1440 => $this->user->lang['1_DAY'], 10080 => $this->user->lang['7_DAYS'], 20160 => $this->user->lang['2_WEEKS'], 40320 => $this->user->lang['1_MONTH'], 524160 => $this->user->lang['1_YEAR']);
+		$ban_text = $this->ban_length_options();
 
 		$ban_options = '';
 		foreach ($ban_text as $length => $text)
@@ -48,5 +40,27 @@ class bantime
 		}
 
 		return $ban_options;
+	}
+	
+	/*
+	 * ban_length_options
+	 * access public
+	 * return an array of lang strings
+	*/
+	public function ban_length_options()
+	{
+		$ban_text = array(
+			0 => $this->user->lang['PERMANENT'], 
+			30 => $this->user->lang['30_MINS'], 
+			60 => $this->user->lang['1_HOUR'], 
+			360 => $this->user->lang['6_HOURS'], 
+			1440 => $this->user->lang['1_DAY'], 
+			10080 => $this->user->lang['7_DAYS'], 
+			20160 => $this->user->lang['2_WEEKS'], 
+			40320 => $this->user->lang['1_MONTH'], 
+			524160 => $this->user->lang['1_YEAR']
+		);
+		
+		return $ban_text;
 	}
 }
