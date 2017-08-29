@@ -93,11 +93,11 @@ class admin_controller
 			$this->set_options();
 
 			// Add option settings change action to the admin log
-			$this->log->add('admin', $this->user->data['user_id'], $this->user->ip, 'FLAG_CONFIG_SAVED');
+			$this->log->add('admin', $this->user->data['user_id'], $this->user->ip, 'BH_SETTINGS_SUCCESS');
 
 			// Option settings have been updated and logged
 			// Confirm this to the user and provide link back to previous page
-			trigger_error($this->user->lang['SETTINGS_SUCCESS'] . adm_back_link($this->u_action));
+			trigger_error($this->user->lang['BH_SETTINGS_SUCCESS'] . adm_back_link($this->u_action));
 		}
 
 		$this->template->assign_vars(array(

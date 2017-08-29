@@ -38,4 +38,5 @@ if (empty($lang) || !is_array($lang))
 $lang = array_merge($lang, array(
 	'ACP_BH_TITLE'		=> 'Ban Hammer',
 	'ACP_BH_SETTINGS'	=> 'Ban Hammer Settings',
+	'BH_SETTINGS_SUCCESS'		=> 'Ban Hammer settings were successfully updated',
 ));
