@@ -336,7 +336,7 @@ class banhammer_listener implements EventSubscriberInterface
 			$http_request = 'http://www.stopforumspam.com/add.php';
 			$http_request .= '?username=' . $this->data['username'];
 			$http_request .= '&ip_addr=' . $this->data['user_ip'];
-			$http_request .= '&email=' . url_encode($this->data['user_email']);
+			$http_request .= '&email=' . urlencode(($this->data['user_email']);
 			$http_request .= '&api_key=' . $this->config['bh_sfs_api_key'];
 
 			$response = $this->get_file($http_request);

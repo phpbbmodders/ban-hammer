@@ -24,6 +24,8 @@ class v104_data extends \phpbb\db\migration\container_aware_migration
 
 	public function update_data()
 	{
-			array('config.add', array('bh_ban_time', 0));
+		return array(
+			array('config.add', array('bh_ban_time', 0)),
+		);
 	}
 }

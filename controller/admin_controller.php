@@ -49,7 +49,6 @@ class admin_controller
 	* @param \phpbb\user							$user				User object
 	* @param \phpbb\log								$log				Log object
 	* @param \phpbbmodders\banhammer\core\bantime	$bantime			methods for the extension
-	* @return phpbbmodders\banhammer\controller\admin_controller
 	* @access public
 	*/
 	public function __construct(
