@@ -91,7 +91,7 @@ class banhammer_listener implements EventSubscriberInterface
 	{
 		return(array(
 			'core.memberlist_view_profile'	=> 'do_ban_hammer_stuff',
-			'core.session_set_custom_ban'	=> 'undo_ban',
+			'core.session_set_custom_ban'	=> 'undo_bh_group',
 		));
 	}
 
@@ -366,16 +366,27 @@ class banhammer_listener implements EventSubscriberInterface
 	}
 
 	// Once a ban is cleared try and remove the user from the banned group set in the ACP of the extension
-	public function undo_ban($event)
+	public function undo_bh_group($event)
 	{
-		if (!empty($this->config['bh_group_id']) && !$event['banned'])
+		if (!empty($this->config['bh_group_id']) && !$event['banned'] && $this->user->data['user_type'] != USER_IGNORE)
 		{
-			// Remove the user from the banned group set in the ACP
-			if (!function_exists('group_user_del'))
+			// determine if the user is in the ban hammer group set in the ACP
+			$sql = 'SELECT group_id FROM ' . USER_GROUP_TABLE . '
+					WHERE group_id = ' . (int) $this->config['bh_group_id'] . '
+						AND user_id = ' . (int) $this->user->data['user_id'];
+			$result = $this->db->sql_query($sql);
+			$group_id = $this->db->sql_fetchfield('group_id');
+			$this->db->sql_freeresult($result);
+
+			if ($group_id)
 			{
-				include($this->root_path . 'includes/functions_user.' . $this->php_ext);
+				// Remove the user from the banned group set in the ACP
+				if (!function_exists('group_user_del'))
+				{
+					include($this->root_path . 'includes/functions_user.' . $this->php_ext);
+				}
+				group_user_del($this->config['bh_group_id'], array($this->user->data['user_id']));
 			}
-			group_user_del($this->config['bh_group_id'], array($this->user->data['user_id']));
 		}
 	}
 
