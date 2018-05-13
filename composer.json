@@ -3,8 +3,8 @@
     "type": "phpbb-extension",
     "description": "Allows banning directly from a users profile. Option to ban email and/or IP, and delete avatar, posts, topics, private messages, signature, profile fields. Also option to add banned users to a selected user group and/or report them to Stop Forum Spam. Previously known as One Click Ban.",
     "homepage": "https://phpbbmodders.net",
-    "version": "1.0.5",
-    "time": "2017-08-27",
+    "version": "1.0.6",
+    "time": "2018-0513",
     "keywords": [
         "phpbb",
         "extension",
@@ -24,7 +24,7 @@
             "name": "Jari Kanerva",
             "homepage": "https://phpbbmodders.net",
             "email": "jari@tumba25.net",
-            "role": "Developer"
+            "role": "Previous Developer"
         }
     ],
     "require": {
