@@ -104,7 +104,7 @@ class banhammer_listener implements EventSubscriberInterface
 		/**
 		 * Split these up and give error messages? Later maybe.
 		 */
-		if (!$this->auth->acl_get('m_ban') || !$this->auth->acl_get('a_user') || $this->data['user_type'] == USER_FOUNDER || $this->user_id == $this->user->data['user_id'])
+		if (!$this->auth->acl_get('m_ban') || $this->data['user_type'] == USER_FOUNDER || $this->user_id == $this->user->data['user_id'])
 		{
 			// Nothing to see here, move on.
 			return;
