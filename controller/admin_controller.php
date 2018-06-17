@@ -47,7 +47,7 @@ class admin_controller
 	* @param \phpbb\request\request					$request			Request object
 	* @param \phpbb\template\template				$template			Template object
 	* @param \phpbb\user							$user				User object
-	* @param \phpbb\log								$log				Log object
+	* @param \phpbb\log\log							$log				Log object
 	* @param \phpbbmodders\banhammer\core\bantime	$bantime			methods for the extension
 	* @access public
 	*/
