@@ -3,7 +3,7 @@
 *
 * @package Ban Hammer
 * @copyright (c) 2015 phpBB Modders <https://phpbbmodders.net/>
-* @author Jari Kanerva <jari@tumba25.net>
+* @author Jari Kanerva
 * @author Rich McGirr
 * @license http://opensource.org/licenses/gpl-2.0.php GNU General Public License v2
 *
@@ -139,7 +139,7 @@ class banhammer_listener implements EventSubscriberInterface
 
 					foreach ($message_ary as $error)
 					{
-						$bh_message .= '<br />' . $this->user->lang[$error];
+						$bh_message .= '<br />' . $error;
 					}
 				}
 
@@ -498,17 +498,17 @@ class banhammer_listener implements EventSubscriberInterface
 		delete_posts('post_id', array_keys($posts));
 
 		// Delete from other tables.
-		$this->db->sql_query('DELETE FROM ' . BOOKMARKS_TABLE .			" WHERE user_id = $user_id");
-		$this->db->sql_query('DELETE FROM ' . DRAFTS_TABLE .			" WHERE user_id = $user_id");
-		$this->db->sql_query('DELETE FROM ' . FORUMS_TRACK_TABLE .		" WHERE user_id = $user_id");
-		$this->db->sql_query('DELETE FROM ' . FORUMS_WATCH_TABLE .		" WHERE user_id = $user_id");
-		$this->db->sql_query('DELETE FROM ' . MODERATOR_CACHE_TABLE .	" WHERE user_id = $user_id");
-		$this->db->sql_query('DELETE FROM ' . NOTIFICATIONS_TABLE .		" WHERE user_id = $user_id");
-		$this->db->sql_query('DELETE FROM ' . POLL_VOTES_TABLE .		" WHERE vote_user_id = $user_id");
-		$this->db->sql_query('DELETE FROM ' . TOPICS_POSTED_TABLE .		" WHERE user_id = $user_id");
-		$this->db->sql_query('DELETE FROM ' . TOPICS_TRACK_TABLE .		" WHERE user_id = $user_id");
-		$this->db->sql_query('DELETE FROM ' . TOPICS_WATCH_TABLE .		" WHERE user_id = $user_id");
-		$this->db->sql_query('DELETE FROM ' . USER_NOTIFICATIONS_TABLE .	" WHERE user_id = $user_id");
+		$this->db->sql_query('DELETE FROM ' . BOOKMARKS_TABLE . " WHERE user_id = $user_id");
+		$this->db->sql_query('DELETE FROM ' . DRAFTS_TABLE . " WHERE user_id = $user_id");
+		$this->db->sql_query('DELETE FROM ' . FORUMS_TRACK_TABLE . " WHERE user_id = $user_id");
+		$this->db->sql_query('DELETE FROM ' . FORUMS_WATCH_TABLE . " WHERE user_id = $user_id");
+		$this->db->sql_query('DELETE FROM ' . MODERATOR_CACHE_TABLE . " WHERE user_id = $user_id");
+		$this->db->sql_query('DELETE FROM ' . NOTIFICATIONS_TABLE .	" WHERE user_id = $user_id");
+		$this->db->sql_query('DELETE FROM ' . POLL_VOTES_TABLE . " WHERE vote_user_id = $user_id");
+		$this->db->sql_query('DELETE FROM ' . TOPICS_POSTED_TABLE . " WHERE user_id = $user_id");
+		$this->db->sql_query('DELETE FROM ' . TOPICS_TRACK_TABLE . " WHERE user_id = $user_id");
+		$this->db->sql_query('DELETE FROM ' . TOPICS_WATCH_TABLE . " WHERE user_id = $user_id");
+		$this->db->sql_query('DELETE FROM ' . USER_NOTIFICATIONS_TABLE . " WHERE user_id = $user_id");
 	}
 
 	// use curl to get response from SFS

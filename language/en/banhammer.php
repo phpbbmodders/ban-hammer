@@ -3,7 +3,8 @@
 *
 * @package Ban Hammer
 * @copyright (c) 2015 phpBB Modders <https://phpbbmodders.net/>
-* @author Jari Kanerva <jari@tumba25.net>
+* @author Rich McGirr (RMcGirr83)
+* @author Jari Kanerva
 * @license http://opensource.org/licenses/gpl-2.0.php GNU General Public License v2
 *
 */
@@ -22,15 +23,15 @@ if (empty($lang) || !is_array($lang))
 }
 
 $lang = array_merge($lang, array(
-	'BANNED_ERROR'		=> 'There was an error banning this user',
-	'BANNED_SUCCESS'	=> 'This user was successfully banned.',
+	'BANNED_ERROR'		=> 'There was an error!',
+	'BANNED_SUCCESS'	=> 'All actions were performed correctly.',
 
-	'ERROR_BAN_EMAIL'	=> 'Banning email failed.',
-	'ERROR_BAN_IP'		=> 'Banning IP failed.',
-	'ERROR_BAN_USER'	=> 'Banning user failed.',
-	'ERROR_DEL_POSTS'	=> 'Delete users posts failed.',
-	'ERROR_MOVE_GROUP'	=> 'Move user to the selected group failed.',
-	'ERROR_SFS'			=> 'Stop Forum Spam',
+	'ERROR_BAN_EMAIL'	=> 'Banning the email failed.',
+	'ERROR_BAN_IP'		=> 'Banning the IP failed.',
+	'ERROR_BAN_USER'	=> 'Banning the users name failed.',
+	'ERROR_DEL_POSTS'	=> 'Deleting the users posts failed.',
+	'ERROR_MOVE_GROUP'	=> 'Moving user to the selected group failed.',
+	'ERROR_SFS'			=> 'Error with reporting to the Stop Forum Spam database',
 
 	'BH_BAN_EMAIL'			=> 'Ban this users email address',
 	'BH_BAN_GIVE_REASON'	=> 'The reason for this ban shown to the user',
