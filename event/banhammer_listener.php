@@ -299,7 +299,7 @@ class banhammer_listener implements EventSubscriberInterface
 			$this->bh_del_privmsgs();
 		}
 
-		if ($this->request->variable('del_avatar', 0))
+		if ($this->request->variable('del_avatar', 0) && !empty($this->data['user_avatar']))
 		{
 			avatar_delete('user', $this->data, true);
 		}
