@@ -14,6 +14,7 @@ namespace phpbbmodders\banhammer\event;
 /**
 * @ignore
 */
+use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
 /**
@@ -61,6 +62,9 @@ class banhammer_listener implements EventSubscriberInterface
 	/** @var string phpEx */
 	protected $php_ext;
 
+	/** @var ContainerInterface */
+	protected $container;
+
 	public function __construct(
 		\phpbb\auth\auth $auth,
 		\phpbb\cache\driver\driver_interface $cache,
@@ -71,7 +75,8 @@ class banhammer_listener implements EventSubscriberInterface
 		\phpbb\user $user,
 		\phpbbmodders\banhammer\core\bantime $bantime,
 		$root_path,
-		$phpExt
+		$phpExt,
+		ContainerInterface $container
 	)
 	{
 		$this->auth			= $auth;
@@ -84,7 +89,7 @@ class banhammer_listener implements EventSubscriberInterface
 		$this->bantime		= $bantime;
 		$this->root_path	= $root_path;
 		$this->php_ext		= $phpExt;
-
+		$this->container	= $container;
 	}
 
 	static public function getSubscribedEvents()
@@ -301,7 +306,8 @@ class banhammer_listener implements EventSubscriberInterface
 
 		if ($this->request->variable('del_avatar', 0))
 		{
-			avatar_delete('user', $this->data, true);
+			$phpbb_avatar_manager = $this->container->get('avatar.manager');
+			$phpbb_avatar_manager->handle_avatar_delete($this->db, $this->user, $phpbb_avatar_manager->clean_row($this->data, 'user'), USERS_TABLE, 'user_');
 		}
 
 		if ($this->request->variable('del_signature', 0))

@@ -11,7 +11,8 @@ services:
             - '@user'
             - '@phpbbmodders.banhammer.core.bantime'
             - '%core.root_path%'
-            - '%core.php_ext%'            
+            - '%core.php_ext%'
+            - '@service_container'
         tags:
             - { name: event.listener }
     phpbbmodders.banhammer.admin.controller:
