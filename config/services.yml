@@ -13,6 +13,7 @@ services:
             - '%core.root_path%'
             - '%core.php_ext%'
             - '@service_container'
+            - '%core.table_prefix%banhammer_restrict'
         tags:
             - { name: event.listener }
     phpbbmodders.banhammer.admin.controller:
@@ -36,3 +37,13 @@ services:
             - '@language'
             - '@request'
             - '@user'
+    phpbbmodders.banhammer.cron.restriction_expiry:
+        class: phpbbmodders\banhammer\cron\task\restriction_expiry
+        arguments:
+            - '@config'
+            - '@dbal.conn'
+            - '%core.table_prefix%banhammer_restrict'
+            - '%core.root_path%'
+            - '%core.php_ext%'
+        tags:
+            - { name: cron.task }

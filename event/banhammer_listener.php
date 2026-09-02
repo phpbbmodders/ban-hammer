@@ -64,6 +64,9 @@ class banhammer_listener implements EventSubscriberInterface
 	/** @var ContainerInterface */
 	protected $container;
 
+	/** @var string */
+	protected $restrict_table;
+
 	public function __construct(
 		\phpbb\auth\auth $auth,
 		\phpbb\cache\driver\driver_interface $cache,
@@ -75,7 +78,8 @@ class banhammer_listener implements EventSubscriberInterface
 		\phpbbmodders\banhammer\core\bantime $bantime,
 		$root_path,
 		$phpExt,
-		ContainerInterface $container
+		ContainerInterface $container,
+		$restrict_table
 	)
 	{
 		$this->auth			= $auth;
@@ -89,12 +93,16 @@ class banhammer_listener implements EventSubscriberInterface
 		$this->root_path	= $root_path;
 		$this->php_ext		= $phpExt;
 		$this->container	= $container;
+		$this->restrict_table	= $restrict_table;
 	}
 
 	static public function getSubscribedEvents()
 	{
 		return(array(
-			'core.memberlist_view_profile'				=> 'do_ban_hammer_stuff',
+			'core.memberlist_view_profile'	=> array(
+				array('do_ban_hammer_stuff'),
+				array('do_restrict_stuff'),
+			),
 			'core.session_set_custom_ban'				=> 'undo_bh_group',
 			'core.mcp_queue_approve_details_template'	=> 'add_mcp_queue_banhammer_link',
 		));
@@ -448,6 +456,123 @@ class banhammer_listener implements EventSubscriberInterface
 		$url	= append_sid($url, $args);
 
 		redirect($url);
+	}
+
+	/**
+	 * Move a user into a restricted group for a set time, instead of banning
+	 * them. They keep the ability to log in, just with whatever reduced
+	 * permissions the admin has given the restricted group.
+	 *
+	 * Answers CDB topic 240381 ("would it be possible to slightly change
+	 * this to avoid the ban... add the user from profile to a different
+	 * group, severely limited, for a given time").
+	 *
+	 * @param \phpbb\event\data $event The event object
+	 * @return void
+	 * @access public
+	 */
+	public function do_restrict_stuff($event)
+	{
+		$data = $event['member'];
+		$user_id = (int) $data['user_id'];
+		$restrict_group_id = (int) $this->config['bh_restrict_group_id'];
+
+		if (!$this->auth->acl_get('m_ban') || $data['user_type'] == USER_FOUNDER || $user_id == $this->user->data['user_id'] || !$restrict_group_id)
+		{
+			// Nothing to see here, move on. No group configured in the ACP
+			// means this feature is simply off.
+			return;
+		}
+
+		$this->user->add_lang_ext('phpbbmodders/banhammer', 'banhammer');
+		$this->user->add_lang('acp/ban');
+
+		if ($this->active_restriction($user_id) !== null)
+		{
+			$this->template->assign_var('RESTRICT_MESSAGE', $this->user->lang['BH_ALREADY_RESTRICTED']);
+
+			return;
+		}
+
+		if (!$this->request->is_set('restrict') || ($this->request->is_set('restrict') && $this->request->is_set('confirm_key') && !confirm_box(true)))
+		{
+			$params = array(
+				'mode'		=> 'viewprofile',
+				'u'			=> $user_id,
+				'restrict'	=> 1,
+			);
+
+			$this->template->assign_vars(array(
+				'RESTRICT_TIME'		=> $this->bantime->display_ban_time(0),
+				'S_SHOW_RESTRICT'	=> true,
+				'U_RESTRICT_USER'	=> append_sid($this->root_path . 'memberlist.' . $this->php_ext, $params),
+			));
+
+			return;
+		}
+
+		if (!confirm_box(true))
+		{
+			$hidden_fields = build_hidden_fields(array(
+				'restrict_time'	=> $this->request->variable('restrict_time', 0),
+				'mode'			=> 'viewprofile',
+			));
+
+			$ban_length_options = $this->bantime->ban_length_options();
+			$length = isset($ban_length_options[$this->request->variable('restrict_time', 0)]) ? $ban_length_options[$this->request->variable('restrict_time', 0)] : '';
+
+			$message = sprintf($this->user->lang['BH_SURE_RESTRICT'], $data['username']);
+			$message .= ($length) ? '<br><br>' . $this->user->lang('BH_RESTRICT_FOR', $length) : '<br><br>' . $this->user->lang['BH_RESTRICT_PERM'];
+
+			confirm_box(false, $message, $hidden_fields);
+		}
+
+		if (!function_exists('group_user_add'))
+		{
+			include($this->root_path . 'includes/functions_user.' . $this->php_ext);
+		}
+
+		$restrict_time = $this->request->variable('restrict_time', 0);
+		$restrict_until = ($restrict_time > 0) ? time() + ($restrict_time * 86400) : 0;
+		$original_group_id = (int) $data['group_id'];
+
+		$sql_ary = array(
+			'user_id'			=> $user_id,
+			'original_group_id'	=> $original_group_id,
+			'restrict_until'	=> $restrict_until,
+		);
+		$sql = 'INSERT INTO ' . $this->restrict_table . ' ' . $this->db->sql_build_array('INSERT', $sql_ary);
+		$this->db->sql_query($sql);
+
+		group_user_add($restrict_group_id, array($user_id), false, false, true);
+
+		$args = array(
+			'mode'	=> 'viewprofile',
+			'u'		=> $user_id,
+		);
+
+		$url = append_sid(generate_board_url() . '/memberlist.' . $this->php_ext, $args);
+
+		redirect($url);
+	}
+
+	/**
+	 * Whether a user currently has an active restriction.
+	 *
+	 * @param int $user_id
+	 * @return array|null The restriction row, or null when there is none.
+	 * @access protected
+	 */
+	protected function active_restriction($user_id)
+	{
+		$sql = 'SELECT restrict_id
+			FROM ' . $this->restrict_table . '
+			WHERE user_id = ' . (int) $user_id;
+		$result = $this->db->sql_query_limit($sql, 1);
+		$row = $this->db->sql_fetchrow($result);
+		$this->db->sql_freeresult($result);
+
+		return ($row) ?: null;
 	}
 
 	// Once a ban is cleared try and remove the user from the banned group set in the ACP of the extension

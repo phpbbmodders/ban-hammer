@@ -108,7 +108,8 @@ class admin_controller
 			'DEL_POSTS'		=> (!empty($this->config['bh_del_posts'])) ? true : false,
 			'DEL_PROFILE'	=> (!empty($this->config['bh_del_profile'])) ? true : false,
 			'DEL_SIGNATURE'	=> (!empty($this->config['bh_del_signature'])) ? true : false,
-			'MOVE_GROUP'	=> $this->get_groups($this->request->variable('move_group', $this->config['bh_group_id'])),
+			'MOVE_GROUP'		=> $this->get_groups($this->request->variable('move_group', $this->config['bh_group_id'])),
+			'RESTRICT_GROUP'	=> $this->get_groups($this->request->variable('restrict_group', $this->config['bh_restrict_group_id'])),
 			'SFS_ALLOW_HTTP'	=> (!empty($this->config['bh_sfs_allow_http'])) ? true : false,
 			'SFS_API_KEY'		=> (!empty($this->config['bh_sfs_api_key'])) ? $this->config['bh_sfs_api_key'] : '',
 			'SFS_CURL'			=> (function_exists('curl_init')) ? true : false,
@@ -133,6 +134,7 @@ class admin_controller
 		$this->config->set('bh_del_profile', $this->request->variable('del_profile', 0));
 		$this->config->set('bh_del_signature', $this->request->variable('del_signature', 0));
 		$this->config->set('bh_group_id', $this->request->variable('move_group', 0));
+		$this->config->set('bh_restrict_group_id', $this->request->variable('restrict_group', 0));
 		$this->config->set('bh_sfs_api_key', $this->request->variable('sfs_api_key', '', true));
 		$this->config->set('bh_sfs_allow_http', $this->request->variable('sfs_allow_http', 0));
 		$this->config->set('bh_ban_time', $this->request->variable('ban_time', 0));
