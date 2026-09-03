@@ -416,8 +416,10 @@ class banhammer_listener implements EventSubscriberInterface
 
 		if ($this->request->variable('sfs_report', 0) && !empty($this->config['bh_sfs_api_key']) && $curl_exists)
 		{
-			// add the spammer to the SFS database
-			$http_request = 'https://www.stopforumspam.com/add.php';
+			// add the spammer to the SFS database. HTTPS unless the admin
+			// has explicitly opted into HTTP for it in the ACP.
+			$sfs_scheme = (!empty($this->config['bh_sfs_allow_http'])) ? 'http://' : 'https://';
+			$http_request = $sfs_scheme . 'www.stopforumspam.com/add.php';
 			$http_request .= '?username=' . urlencode($this->data['username']);
 			$http_request .= '&ip_addr=' . urlencode($this->data['user_ip']);
 			$http_request .= '&email=' . urlencode($this->data['user_email']);
