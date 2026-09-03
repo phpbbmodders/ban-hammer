@@ -1,0 +1,13 @@
+(function($) { // Avoid conflicts with other libraries
+	'use strict';
+
+	$('.bh-click').click(function() {
+		$('#bh-options').toggle('slow');
+	});
+
+	$('.bh_hover').hover(function() {
+		$(this).css('background-color', '#ecf3f7');
+	}, function() {
+		$(this).css('background-color', '');
+	});
+})(jQuery);
