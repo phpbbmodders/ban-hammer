@@ -13,6 +13,8 @@ namespace phpbbmodders\banhammer\acp;
 class banhammer_module
 {
 	public	$u_action;
+	public	$tpl_name;
+	public	$page_title;
 
 	function main($id, $mode)
 	{

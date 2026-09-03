@@ -16,6 +16,9 @@ namespace phpbbmodders\banhammer\migrations;
 
 class v101_data extends \phpbb\db\migration\container_aware_migration
 {
+	/** @var array Unserialized legacy settings blob, keyed by setting name */
+	protected $settings;
+
 	static public function depends_on()
 	{
 		return array('\phpbbmodders\banhammer\migrations\install_banhammer');
@@ -36,7 +39,7 @@ class v101_data extends \phpbb\db\migration\container_aware_migration
 			array('config.add', array('bh_del_profile', $this->get('del_profile', 1))),
 			array('config.add', array('bh_del_signature', $this->get('del_signature', 1))),
 			array('config.add', array('bh_group_id', $this->get('group_id', 1))),
-			array('config.add', array('bh_sfs_api_key', $this->get('sfs_api_key', ''))),
+			array('config.add', array('bh_sfs_api_key', $this->get_string('sfs_api_key', ''))),
 			array('config.remove', array('banhammer_version')),
 			array('config_text.remove', array('banhammer_settings')),
 		);
@@ -45,5 +48,10 @@ class v101_data extends \phpbb\db\migration\container_aware_migration
 	protected function get($name, $default)
 	{
 		return isset($this->settings[$name]) ? (int) $this->settings[$name] : $default;
+	}
+
+	protected function get_string($name, $default)
+	{
+		return isset($this->settings[$name]) ? (string) $this->settings[$name] : $default;
 	}
 }
