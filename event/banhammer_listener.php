@@ -94,8 +94,42 @@ class banhammer_listener implements EventSubscriberInterface
 	static public function getSubscribedEvents()
 	{
 		return(array(
-			'core.memberlist_view_profile'	=> 'do_ban_hammer_stuff',
-			'core.session_set_custom_ban'	=> 'undo_bh_group',
+			'core.memberlist_view_profile'				=> 'do_ban_hammer_stuff',
+			'core.session_set_custom_ban'				=> 'undo_bh_group',
+			'core.mcp_queue_approve_details_template'	=> 'add_mcp_queue_banhammer_link',
+		));
+	}
+
+	/**
+	 * Add a Ban Hammer link to the MCP post-approval detail page (mcp_post.html),
+	 * so a moderator can ban the poster without leaving the approval workflow to
+	 * find their profile first.
+	 *
+	 * @param \phpbb\event\data $event The event object
+	 * @return void
+	 * @access public
+	 */
+	public function add_mcp_queue_banhammer_link($event)
+	{
+		$post_info = $event['post_info'];
+		$target_user_id = (int) $post_info['user_id'];
+
+		if (!$this->auth->acl_get('m_ban') || $post_info['user_type'] == USER_FOUNDER || $target_user_id == $this->user->data['user_id'] || $target_user_id <= 0)
+		{
+			return;
+		}
+
+		$this->user->add_lang_ext('phpbbmodders/banhammer', 'banhammer');
+
+		$params = array(
+			'mode'	=> 'viewprofile',
+			'u'		=> $target_user_id,
+			'bh'	=> 1,
+		);
+
+		$this->template->assign_vars(array(
+			'S_MCP_SHOW_BANHAMMER'	=> true,
+			'U_MCP_BANHAMMER'		=> append_sid($this->root_path . 'memberlist.' . $this->php_ext, $params),
 		));
 	}
 
