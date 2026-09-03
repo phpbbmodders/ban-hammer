@@ -484,6 +484,19 @@ class banhammer_listener implements EventSubscriberInterface
 			return;
 		}
 
+		// A banned user can't log in regardless of group, so restricting
+		// them on top of a ban is meaningless - same check do_ban_hammer_stuff
+		// already makes before showing its own options.
+		if (!function_exists('phpbb_get_banned_user_ids'))
+		{
+			include($this->root_path . 'includes/functions_user.' . $this->php_ext);
+		}
+
+		if (!empty(phpbb_get_banned_user_ids(array($user_id))))
+		{
+			return;
+		}
+
 		$this->user->add_lang_ext('phpbbmodders/banhammer', 'banhammer');
 		$this->user->add_lang('acp/ban');
 
@@ -533,7 +546,9 @@ class banhammer_listener implements EventSubscriberInterface
 		}
 
 		$restrict_time = $this->request->variable('restrict_time', 0);
-		$restrict_until = ($restrict_time > 0) ? time() + ($restrict_time * 86400) : 0;
+		// $restrict_time is minutes (ban_length_options()'s keys, same unit
+		// user_ban() expects), not days.
+		$restrict_until = ($restrict_time > 0) ? time() + ($restrict_time * 60) : 0;
 		$original_group_id = (int) $data['group_id'];
 
 		$sql_ary = array(
