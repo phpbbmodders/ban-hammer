@@ -1,13 +1,12 @@
 <?php
 /**
-*
-* @package Ban Hammer
-* @copyright (c) 2015 phpBB Modders <https://phpbbmodders.net/>
-* @author Rich McGirr (RMcGirr83)
-* @author Jari Kanerva
-* @license http://opensource.org/licenses/gpl-2.0.php GNU General Public License v2
-*
-*/
+ *
+ * Ban Hammer extension for the phpBB Forum Software package
+ *
+ * @copyright (c) 2026, phpBB Modders, https://www.phpbbmodders.com/
+ * @license GNU General Public License, version 2 (GPL-2.0)
+ *
+ */
 
 /**
 * DO NOT CHANGE
