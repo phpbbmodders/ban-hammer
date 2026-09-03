@@ -8,20 +8,14 @@
  *
  */
 
-/**
-* @ignore
-*/
 if (!defined('IN_PHPBB'))
 {
 	exit;
 }
 
-/**
-* DO NOT CHANGE
-*/
 if (empty($lang) || !is_array($lang))
 {
-	$lang = array();
+	$lang = [];
 }
 
 // DEVELOPERS PLEASE NOTE
@@ -35,8 +29,11 @@ if (empty($lang) || !is_array($lang))
 // You do not need this where single placeholders are used, e.g. 'Message %d' is fine
 // equally where a string contains only two placeholders which are used to wrap text
 // in a url you again do not need to specify an order e.g., 'Click %sHERE%s' is fine
-$lang = array_merge($lang, array(
-	'ACP_BH_TITLE'		=> 'Ban Hammer',
-	'ACP_BH_SETTINGS'	=> 'Ban Hammer Settings',
-	'BH_SETTINGS_SUCCESS'		=> 'Ban Hammer settings were successfully updated',
-));
+//
+// Some characters you may want to copy&paste:
+// ’ » “ ” …
+//
+
+$lang = array_merge($lang, [
+	'BANHAMMER_NOT_ENABLEABLE'	=> 'Ban Hammer could not be enabled. The minimum requirements of phpBB 3.3.17 and/or PHP 7.4.0 were not satisfied.',
+]);
