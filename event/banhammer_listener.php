@@ -94,9 +94,80 @@ class banhammer_listener implements EventSubscriberInterface
 	static public function getSubscribedEvents()
 	{
 		return(array(
-			'core.memberlist_view_profile'	=> 'do_ban_hammer_stuff',
-			'core.session_set_custom_ban'	=> 'undo_bh_group',
+			'core.memberlist_view_profile'				=> 'do_ban_hammer_stuff',
+			'core.session_set_custom_ban'				=> 'undo_bh_group',
+			'core.mcp_queue_approve_details_template'	=> 'add_mcp_queue_banhammer_link',
 		));
+	}
+
+	/**
+	 * Add a Ban Hammer link to the MCP post-approval detail page (mcp_post.html),
+	 * so a moderator can ban the poster without leaving the approval workflow to
+	 * find their profile first.
+	 *
+	 * @param \phpbb\event\data $event The event object
+	 * @return void
+	 * @access public
+	 */
+	public function add_mcp_queue_banhammer_link($event)
+	{
+		$post_info = $event['post_info'];
+		$target_user_id = (int) $post_info['user_id'];
+
+		if (!$this->auth->acl_get('m_ban'))
+		{
+			return;
+		}
+
+		$this->user->add_lang_ext('phpbbmodders/banhammer', 'banhammer');
+
+		$template_vars = array();
+
+		if ($post_info['user_type'] != USER_FOUNDER && $target_user_id != $this->user->data['user_id'] && $target_user_id > 0)
+		{
+			$params = array(
+				'mode'	=> 'viewprofile',
+				'u'		=> $target_user_id,
+				'bh'	=> 1,
+			);
+
+			$template_vars['S_MCP_SHOW_BANHAMMER'] = true;
+			$template_vars['U_MCP_BANHAMMER'] = append_sid($this->root_path . 'memberlist.' . $this->php_ext, $params);
+		}
+
+		$domain = $this->email_domain($post_info['user_email']);
+
+		if ($domain !== '')
+		{
+			$template_vars['S_MCP_SHOW_BAN_DOMAIN'] = true;
+			$template_vars['MCP_BAN_DOMAIN'] = htmlspecialchars($domain, ENT_QUOTES);
+			$template_vars['U_MCP_BAN_DOMAIN'] = append_sid(generate_board_url() . '/app.' . $this->php_ext . '/banhammer/ban_domain', 'domain=' . urlencode($domain));
+		}
+
+		if (!empty($template_vars))
+		{
+			$this->template->assign_vars($template_vars);
+		}
+	}
+
+	/**
+	 * Extract the domain part of an email address.
+	 *
+	 * @param string $email
+	 * @return string Lowercase domain, or an empty string when unusable.
+	 * @access protected
+	 */
+	protected function email_domain($email)
+	{
+		$email = trim((string) $email);
+		$at_pos = strrpos($email, '@');
+
+		if ($at_pos === false || $at_pos === strlen($email) - 1)
+		{
+			return '';
+		}
+
+		return strtolower(substr($email, $at_pos + 1));
 	}
 
 	public function do_ban_hammer_stuff($event)
