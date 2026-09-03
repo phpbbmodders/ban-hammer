@@ -64,6 +64,12 @@ $lang = array_merge($lang, array(
 
 	'BH_THIS_USER'	=> 'Ban Hammer this user',
 
+	'BH_ALREADY_RESTRICTED'	=> 'This user already has an active restriction',
+	'BH_RESTRICT_FOR'			=> 'Restrict this user for %s', // %s will be a duration
+	'BH_RESTRICT_PERM'			=> 'Restrict this user permanently',
+	'BH_RESTRICT_THIS_USER'	=> 'Restrict this user',
+	'BH_SURE_RESTRICT'			=> 'Are you sure you want to restrict <strong>%s</strong>?', // %s will be a username
+
 	'SFS_REPORT'	=> 'Report this user to Stop Forum Spam',
 	'SURE_BAN'		=> 'Are you sure you want to ban <strong>%s</strong>?', // %s will be a username.
 

@@ -101,3 +101,32 @@
 	</div>
 </div>
 <!-- ENDIF -->
+
+<!-- IF RESTRICT_MESSAGE -->
+<div class="panel bg2">
+	<div class="inner bh">
+		<span>{RESTRICT_MESSAGE}</span>
+	</div>
+</div>
+
+<!-- ELSEIF S_SHOW_RESTRICT -->
+<div class="panel bg2">
+	<p class="bh bh-click">{L_BH_RESTRICT_THIS_USER}</p>
+	<div class="inner" id="bh-restrict-options" style="display: none;">
+		<form id="bh-restrict-form" method="post" action="{U_RESTRICT_USER}">
+			<fieldset>
+				<dl class="bg2 bh_hover">
+					<dt><label>{L_BAN_LENGTH}{L_COLON}</label></dt>
+					<dd>
+						<select name="restrict_time" id="restrict_time">{RESTRICT_TIME}</select>
+					</dd>
+				</dl>
+			</fieldset>
+			<fieldset class="submit-buttons">
+				<input class="button1" type="submit" id="restrict-submit" name="submit" value="{L_SUBMIT}" />&nbsp;
+				<input class="button2" type="reset" id="restrict-reset" name="reset" value="{L_RESET}" />
+			</fieldset>
+		</form>
+	</div>
+</div>
+<!-- ENDIF -->

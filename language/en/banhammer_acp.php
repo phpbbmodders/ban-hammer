@@ -48,6 +48,8 @@ $lang = array_merge($lang, array(
 
 	'ACP_MOVE_GROUP'			=> 'Move to group',
 	'ACP_MOVE_GROUP_EXPLAIN'	=> 'Name of the group to which banned users should be moved. This will also be their default group.<br /><strong>If nothing but <em>“No group specified.”</em> is in the drop down then you have not set up any groups.</strong>',
+	'ACP_RESTRICT_GROUP'			=> 'Restrict to group',
+	'ACP_RESTRICT_GROUP_EXPLAIN'	=> 'Name of the group moderators can move a user into instead of banning them, for a set amount of time. This will also be their default group while restricted; their original group is restored automatically once the restriction expires.<br /><strong>If nothing but <em>“No group specified.”</em> is in the drop down then you have not set up any groups, and the restrict option will not appear on member profiles.</strong>',
 	'BAN_LENGTH_EXPLAIN'	=> 'If either of the ban options is set then the user will be banned for the amount of time as set here.  This is also able to be set when ban hammering the user.',
 	'SFS_ALLOW_HTTP'		=> 'Allow HTTP for Stop Forum Spam reports',
 	'SFS_ALLOW_HTTP_EXPLAIN'	=> 'Reports are sent over HTTPS by default. <strong>Only enable this if your server cannot make outbound HTTPS requests</strong> - your API key and the reported user\'s username, IP address, and email are sent in clear text over HTTP.',
