@@ -208,13 +208,20 @@ class banhammer_listener implements EventSubscriberInterface
 				}
 				else
 				{
-					// One or more actions failed.
-					$message_ary = explode('+', urldecode($bh_result));
+					// One or more actions failed. $bh_result only ever carries
+					// '+'-joined error-code identifiers from the allow-list
+					// below - never urldecode() this value or append raw
+					// pieces of it to a template variable.
+					$known_errors = array('ERROR_BAN_USER', 'ERROR_BAN_EMAIL', 'ERROR_BAN_IP', 'ERROR_SFS', 'ERROR_MOVE_GROUP');
+					$message_ary = explode('+', $bh_result);
 					$bh_message = $this->user->lang['BANNED_ERROR'];
 
 					foreach ($message_ary as $error)
 					{
-						$bh_message .= '<br />' . $error;
+						if (in_array($error, $known_errors, true))
+						{
+							$bh_message .= '<br />' . $this->user->lang[$error];
+						}
 					}
 				}
 
@@ -403,24 +410,24 @@ class banhammer_listener implements EventSubscriberInterface
 
 			if ($return != false)
 			{
-				$error[] = $this->user->lang['ERROR_MOVE_GROUP'];
+				$error[] = 'ERROR_MOVE_GROUP';
 			}
 		}
 
 		if ($this->request->variable('sfs_report', 0) && !empty($this->config['bh_sfs_api_key']) && $curl_exists)
 		{
 			// add the spammer to the SFS database
-			$http_request = 'http://www.stopforumspam.com/add.php';
-			$http_request .= '?username=' . $this->data['username'];
-			$http_request .= '&ip_addr=' . $this->data['user_ip'];
+			$http_request = 'https://www.stopforumspam.com/add.php';
+			$http_request .= '?username=' . urlencode($this->data['username']);
+			$http_request .= '&ip_addr=' . urlencode($this->data['user_ip']);
 			$http_request .= '&email=' . urlencode($this->data['user_email']);
-			$http_request .= '&api_key=' . $this->config['bh_sfs_api_key'];
+			$http_request .= '&api_key=' . urlencode($this->config['bh_sfs_api_key']);
 
 			$response = $this->get_file($http_request);
 
 			if (!$response)
 			{
-				$error[] = $this->user->lang['ERROR_SFS'];
+				$error[] = 'ERROR_SFS';
 			}
 		}
 
