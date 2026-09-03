@@ -1,0 +1,83 @@
+name: Tests
+
+# For most extensions, this workflow should not need changing;
+# simply commit it to your repository.
+#
+# See the README for full details and configuration instructions:
+#  - https://github.com/phpbb-extensions/test-framework
+#
+on:
+  push:
+    # Run tests when commits are pushed to these branches in your repo,
+    # or remove this branches section to run tests on all your branches
+    branches:
+      - master    # Legacy or alternative main branch
+
+  pull_request:
+    # Run tests when pull requests are made on these branches in your repo,
+    # or remove this branches section to run tests on all your branches
+    branches:
+      - master
+
+jobs:
+  call-tests:
+    name: Extension tests
+    uses: phpbb-extensions/test-framework/.github/workflows/tests.yml@3.3.x
+    with:
+      EXTNAME: phpbbmodders/banhammer   # Your extension vendor/package name (required)
+
+      # OPTIONAL CONFIGURATIONS BELOW
+      # The following arguments are optional and can be omitted if not needed.
+
+      # The phpBB repository's branch to use when running tests.
+      # Default is '3.3.x', which this framework is designed for.
+      # If using a different branch, ensure it's compatible with 3.3.x.
+      # To test with phpBB's master branch, refer to the phpBB Branches section of this README.
+      # Default: '3.3.x'
+      PHPBB_BRANCH: '3.3.x'
+
+      # Run phpBB's EPV (Extension Pre Validator)? 1 (yes) or 0 (no)
+      EPV: 1
+
+      # Check for files with executable permissions? 1 (yes) or 0 (no)
+      EXECUTABLE_FILES: 1
+
+      # Remove embedded ICC profiles from images? 1 (yes) or 0 (no)
+      IMAGE_ICC: 1
+
+      # Run CodeSniffer to detect PHP code style issues? 1 (yes) or 0 (no)
+      SNIFF: 1
+
+      # Run MySQL/MariaDB tests? 1 (yes) or 0 (no)
+      RUN_MYSQL_JOBS: 0
+
+      # Run PostgreSQL tests? 1 (yes) or 0 (no)
+      RUN_PGSQL_JOBS: 0
+
+      # Run MSSQL and SQLite3 tests? 1 (yes) or 0 (no)
+      RUN_MSSQL_JOBS: 0
+
+      # Run Windows IIS & PostgreSQL tests? 1 (yes) or 0 (no)
+      RUN_WINDOWS_JOBS: 0
+
+      # Run functional tests if you have them? 1 (yes) or 0 (no)
+      RUN_FUNCTIONAL_TESTS: 0
+
+      # Install npm dependencies (if your extension relies on them)? 1 (yes) or 0 (no)
+      RUN_NPM_INSTALL: 0
+
+      # Install Composer dependencies (if your extension relies on them)? 1 (yes) or 0 (no)
+      RUN_COMPOSER_INSTALL: 0
+
+      # CUSTOMISE PHP VERSIONS
+      # To override the default PHP versions tested (7.2 through 8.4):
+
+      # Preferred PHP version used for all test jobs.
+      PRIMARY_PHP_VERSION: '7.4'
+
+      # The MySQL and PostgreSQL jobs run tests across multiple PHP versions.
+      # List the PHP versions you want your extension tested with.
+      PHP_VERSION_MATRIX: '["7.4", "8.0", "8.1","8.2", "8.3", "8.4"]'
+
+      # Generate a code coverage report (see documentation below)? 1 (yes) or 0 (no)
+      CODECOV: 0
