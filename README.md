@@ -3,7 +3,11 @@ Ban Hammer for phpBB 3.3.x line (was One Click Ban)
 
 Gives possibility to ban users directly from their profile. Along with banning you can automatically move the user to a certain group, delete their posts, delete their private messages, delete their avatar, signature, and profile information.
 
-[![Build Status](https://travis-ci.org/phpbbmodders/ban-hammer.svg?branch=master)](https://travis-ci.org/phpbbmodders/ban-hammer)
+## Automated testing
+
+We use automated unit tests to prevent regressions. Check out our build below:
+
+[![Tests](https://github.com/phpbbmodders/ban-hammer/actions/workflows/tests.yml/badge.svg)](https://github.com/phpbbmodders/ban-hammer/actions/workflows/tests.yml)
 
 ## Acknowledgments
 
