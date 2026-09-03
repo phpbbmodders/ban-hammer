@@ -75,6 +75,7 @@
 				<!-- ENDIF -->
 			</dd>
 		</dl>
+		<!-- IF SFS_CURL -->
 		<dl>
 			<dt><label for="sfs_allow_http">{L_SFS_ALLOW_HTTP}{L_COLON}</label><br /><span>{L_SFS_ALLOW_HTTP_EXPLAIN}</span></dt>
 			<dd>
@@ -82,6 +83,7 @@
 				<label><input type="radio" class="radio" name="sfs_allow_http" value="0" <!-- IF not SFS_ALLOW_HTTP -->id="sfs_allow_http" checked="checked"<!-- ENDIF -->/> {L_NO}</label>
 			</dd>
 		</dl>
+		<!-- ENDIF -->
 
 		<p class="submit-buttons">
 			<input class="button1" type="submit" id="submit" name="submit" value="{L_SUBMIT}" />&nbsp;
