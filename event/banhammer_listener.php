@@ -141,7 +141,7 @@ class banhammer_listener implements EventSubscriberInterface
 		if ($domain !== '')
 		{
 			$template_vars['S_MCP_SHOW_BAN_DOMAIN'] = true;
-			$template_vars['MCP_BAN_DOMAIN'] = $domain;
+			$template_vars['MCP_BAN_DOMAIN'] = htmlspecialchars($domain, ENT_QUOTES);
 			$template_vars['U_MCP_BAN_DOMAIN'] = append_sid(generate_board_url() . '/app.' . $this->php_ext . '/banhammer/ban_domain', 'domain=' . urlencode($domain));
 		}
 
