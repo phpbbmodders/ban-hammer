@@ -114,23 +114,60 @@ class banhammer_listener implements EventSubscriberInterface
 		$post_info = $event['post_info'];
 		$target_user_id = (int) $post_info['user_id'];
 
-		if (!$this->auth->acl_get('m_ban') || $post_info['user_type'] == USER_FOUNDER || $target_user_id == $this->user->data['user_id'] || $target_user_id <= 0)
+		if (!$this->auth->acl_get('m_ban'))
 		{
 			return;
 		}
 
 		$this->user->add_lang_ext('phpbbmodders/banhammer', 'banhammer');
 
-		$params = array(
-			'mode'	=> 'viewprofile',
-			'u'		=> $target_user_id,
-			'bh'	=> 1,
-		);
+		$template_vars = array();
 
-		$this->template->assign_vars(array(
-			'S_MCP_SHOW_BANHAMMER'	=> true,
-			'U_MCP_BANHAMMER'		=> append_sid($this->root_path . 'memberlist.' . $this->php_ext, $params),
-		));
+		if ($post_info['user_type'] != USER_FOUNDER && $target_user_id != $this->user->data['user_id'] && $target_user_id > 0)
+		{
+			$params = array(
+				'mode'	=> 'viewprofile',
+				'u'		=> $target_user_id,
+				'bh'	=> 1,
+			);
+
+			$template_vars['S_MCP_SHOW_BANHAMMER'] = true;
+			$template_vars['U_MCP_BANHAMMER'] = append_sid($this->root_path . 'memberlist.' . $this->php_ext, $params);
+		}
+
+		$domain = $this->email_domain($post_info['user_email']);
+
+		if ($domain !== '')
+		{
+			$template_vars['S_MCP_SHOW_BAN_DOMAIN'] = true;
+			$template_vars['MCP_BAN_DOMAIN'] = htmlspecialchars($domain, ENT_QUOTES);
+			$template_vars['U_MCP_BAN_DOMAIN'] = append_sid(generate_board_url() . '/app.' . $this->php_ext . '/banhammer/ban_domain', 'domain=' . urlencode($domain));
+		}
+
+		if (!empty($template_vars))
+		{
+			$this->template->assign_vars($template_vars);
+		}
+	}
+
+	/**
+	 * Extract the domain part of an email address.
+	 *
+	 * @param string $email
+	 * @return string Lowercase domain, or an empty string when unusable.
+	 * @access protected
+	 */
+	protected function email_domain($email)
+	{
+		$email = trim((string) $email);
+		$at_pos = strrpos($email, '@');
+
+		if ($at_pos === false || $at_pos === strlen($email) - 1)
+		{
+			return '';
+		}
+
+		return strtolower(substr($email, $at_pos + 1));
 	}
 
 	public function do_ban_hammer_stuff($event)

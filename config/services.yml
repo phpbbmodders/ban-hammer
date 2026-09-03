@@ -29,3 +29,10 @@ services:
         class:  phpbbmodders\banhammer\core\bantime
         arguments:
             - '@user'
+    phpbbmodders.banhammer.controller.ban_domain:
+        class: phpbbmodders\banhammer\controller\ban_domain_controller
+        arguments:
+            - '@auth'
+            - '@language'
+            - '@request'
+            - '@user'

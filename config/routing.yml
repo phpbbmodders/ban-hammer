@@ -1,0 +1,3 @@
+phpbbmodders_banhammer_ban_domain:
+    path: /banhammer/ban_domain
+    defaults: { _controller: phpbbmodders.banhammer.controller.ban_domain:handle }

@@ -1,0 +1,84 @@
+TITLE
+=====
+[RFC] Let an extension override a core notification email .txt template
+
+BODY
+====
+This started from a CDB support request (topic 202586): "add the email
+address in the admin-approval-email and make it possible to ban the
+email domain directly from there." Actually adding a placeholder to
+the post_in_queue/topic_in_queue notification email turned out to be
+impossible for an extension today, traced all the way through core.
+
+An extension CAN override what \phpbb\notification\type\post_in_queue
+puts into an email (get_email_template_variables() is a normal PHP
+method, and the service can be swapped in the extension's own
+services.yml, same technique many extensions already use to customize
+a core notification type). Adding a brand new template VARIABLE this
+way is easy.
+
+What an extension CANNOT do is get that new variable to actually
+appear in the sent email, because the email BODY comes from a fixed
+.txt file phpBB itself owns:
+
+	language/en/email/post_in_queue.txt
+
+Traced the resolution path directly in includes/functions_messenger.php,
+the messenger::template() method:
+
+	$template_path = (!empty($user->lang_path)) ? $user->lang_path : $phpbb_root_path . 'language/';
+	$template_path .= $template_lang . '/email';
+
+	$template_paths = array(
+		$template_path . $template_dir_prefix,
+	);
+
+Every path built in this method is rooted at $phpbb_root_path . 'language/'
+(or the user's board-configured language path), with only board-default
+and 'en' fallbacks layered on top. There is no branch anywhere in this
+method that looks under an extension's own ext/<vendor>/<name>/language/
+tree. Confirmed by searching the whole file for any extension/ext_manager
+awareness, none exists.
+
+This is a real, structural gap: an extension can add new authors,
+new subjects, new URLs to a notification type's email variables, but
+has no way to make a core .txt template actually use them. The only
+current workaround is either patching core (against project convention)
+or shipping a whole new, separately-fired notification type with its
+own extension-owned email template, which does not help when the goal
+is enriching an EXISTING core notification.
+
+PROPOSED CHANGE
+----------------
+File: includes/functions_messenger.php, class messenger, method template()
+Location: where $template_paths / $ext_template_paths are assembled,
+before $this->set_template_paths() is called.
+
+Add an extension-language search path alongside the existing core one,
+following the same pattern phpBB's style/template system already uses
+for extension-provided style overrides (styles/<style>/template/ext/<vendor>/<name>/...).
+Something in the shape of:
+
+	if (!empty($phpbb_extension_manager))
+	{
+		foreach ($phpbb_extension_manager->all_enabled() as $ext_name => $ext_path)
+		{
+			$ext_template_paths[] = array(
+				'name'		=> $template_lang . '_email_ext_' . $ext_name,
+				'ext_path'	=> $ext_path . 'language/' . $template_lang . '/email' . $template_dir_prefix,
+			);
+		}
+	}
+
+placed so extension-provided files are searched before the core
+fallback, letting an extension ship its own language/en/email/post_in_queue.txt
+that phpBB's template engine picks up ahead of core's copy, the exact
+mechanism style templates already have via @vendor_ext/template.html.
+
+TESTING
+-------
+Verified against phpBB release-3.3.17: read includes/functions_messenger.php's
+messenger::template() method in full, confirmed every template path
+built there is rooted at core's own language/ directory or the board's
+configured language path, with no extension-relative branch anywhere
+in the method or elsewhere in the file.

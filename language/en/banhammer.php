@@ -55,6 +55,11 @@ $lang = array_merge($lang, array(
 	'BH_REASON'		=> 'Internal reason &quot;%s&quot;', // %s will be the reason
 	'BH_REASON_USER'	=> 'Reason to user &quot;%s&quot;', // %s will be the reason
 
+	'BH_BAN_DOMAIN'			=> 'Ban email domain',
+	'BH_CONFIRM_BAN_DOMAIN'	=> 'Are you sure you want to permanently ban every address matching <strong>%s</strong>?', // %s will be *@domain.tld
+	'BH_DOMAIN_BANNED'		=> 'The email domain &quot;%s&quot; has been banned.', // %s will be the domain
+	'BH_INVALID_DOMAIN'		=> 'That does not look like a valid email domain.',
+
 	'BH_SUBMIT_SFS'	=> 'Submit to stop forum spam',
 
 	'BH_THIS_USER'	=> 'Ban Hammer this user',
