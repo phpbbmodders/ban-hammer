@@ -37,6 +37,8 @@ services:
             - '@language'
             - '@request'
             - '@user'
+            - '%core.root_path%'
+            - '%core.php_ext%'
     phpbbmodders.banhammer.cron.restriction_expiry:
         class: phpbbmodders\banhammer\cron\task\restriction_expiry
         arguments:

@@ -35,6 +35,12 @@ class ban_domain_controller
 	/** @var \phpbb\user */
 	protected $user;
 
+	/** @var string phpBB root path */
+	protected $root_path;
+
+	/** @var string phpEx */
+	protected $php_ext;
+
 	/**
 	* Constructor
 	*
@@ -42,19 +48,25 @@ class ban_domain_controller
 	* @param \phpbb\language\language	$language	Language object
 	* @param \phpbb\request\request		$request	Request object
 	* @param \phpbb\user					$user		User object
+	* @param string							$root_path	phpBB root path
+	* @param string							$php_ext	PHP file extension
 	* @access public
 	*/
 	public function __construct(
 		\phpbb\auth\auth $auth,
 		\phpbb\language\language $language,
 		\phpbb\request\request $request,
-		\phpbb\user $user
+		\phpbb\user $user,
+		$root_path,
+		$php_ext
 	)
 	{
 		$this->auth		= $auth;
 		$this->language	= $language;
 		$this->request	= $request;
 		$this->user		= $user;
+		$this->root_path	= $root_path;
+		$this->php_ext		= $php_ext;
 	}
 
 	/**
@@ -92,6 +104,11 @@ class ban_domain_controller
 		if (confirm_box(true))
 		{
 			$reason = $this->request->variable('bh_reason', '', true);
+
+			if (!function_exists('user_ban'))
+			{
+				include($this->root_path . 'includes/functions_user.' . $this->php_ext);
+			}
 
 			$success = user_ban('email', $ban_pattern, 0, '', false, $reason);
 
