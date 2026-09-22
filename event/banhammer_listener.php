@@ -133,10 +133,14 @@ class banhammer_listener implements EventSubscriberInterface
 
 		if ($post_info['user_type'] != USER_FOUNDER && $target_user_id != $this->user->data['user_id'] && $target_user_id > 0)
 		{
+			// Deliberately not 'bh' => 1: that shortcut jumps straight to the
+			// confirmation step with none of the ban options set (permanent,
+			// no email/IP ban, no deletions, no group move, no SFS report),
+			// silently ignoring the ACP-configured defaults. Link to the
+			// profile page instead, which shows the real options form.
 			$params = array(
 				'mode'	=> 'viewprofile',
 				'u'		=> $target_user_id,
-				'bh'	=> 1,
 			);
 
 			$template_vars['S_MCP_SHOW_BANHAMMER'] = true;
