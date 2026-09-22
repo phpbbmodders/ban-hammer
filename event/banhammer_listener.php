@@ -780,12 +780,14 @@ class banhammer_listener implements EventSubscriberInterface
 		curl_setopt($ch, CURLOPT_URL, $url);
 		curl_setopt($ch, CURLOPT_TIMEOUT, 5);
 		curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 5);
-		curl_exec($ch);
+		$response = curl_exec($ch);
 		$httpcode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
 		curl_close($ch);
 
-		// if nothing is returned (SFS is down)
-		if ($httpcode != 200)
+		// curl_exec() returns false on a transport failure (e.g. the
+		// connection dropped after headers were already sent), which the
+		// HTTP code alone would not catch.
+		if ($response === false || $httpcode != 200)
 		{
 			return false;
 		}
