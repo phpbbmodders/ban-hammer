@@ -682,6 +682,24 @@ class banhammer_listener implements EventSubscriberInterface
 		}
 		$this->db->sql_freeresult($result);
 
+		// m_ban alone doesn't grant delete rights in every forum; only the
+		// extension's own explicit permission does. Without it, only touch
+		// posts in forums the acting moderator could delete in anyway.
+		if (!$this->auth->acl_get('m_banhammer_del_posts_all'))
+		{
+			foreach ($posts as $post_id => $post_row)
+			{
+				if (!$this->auth->acl_get('m_delete', (int) $post_row['forum_id']))
+				{
+					// Only gates $posts: the report-closing loop below only
+					// ever reads $topics through a $posts[$post_id] lookup,
+					// so leaving a stale count here for a topic we're no
+					// longer touching has no effect.
+					unset($posts[$post_id]);
+				}
+			}
+		}
+
 		// And now handle the reports.
 		$sql = 'SELECT report_id, post_id, report_closed
 				FROM ' . REPORTS_TABLE . '
