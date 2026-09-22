@@ -564,6 +564,7 @@ class banhammer_listener implements EventSubscriberInterface
 		$sql_ary = array(
 			'user_id'			=> $user_id,
 			'original_group_id'	=> $original_group_id,
+			'restrict_group_id'	=> $restrict_group_id,
 			'restrict_until'	=> $restrict_until,
 		);
 		$sql = 'INSERT INTO ' . $this->restrict_table . ' ' . $this->db->sql_build_array('INSERT', $sql_ary);
@@ -615,6 +616,15 @@ class banhammer_listener implements EventSubscriberInterface
 
 			if ($group_id)
 			{
+				// The ban and restrict groups can be configured to be the
+				// same group. A restricted (not banned) user deliberately
+				// sits in it, so leave their membership alone while the
+				// restriction is still active instead of undoing it here.
+				if ((int) $this->config['bh_restrict_group_id'] === (int) $this->config['bh_group_id'] && $this->active_restriction($this->user->data['user_id']) !== null)
+				{
+					return;
+				}
+
 				// Remove the user from the banned group set in the ACP
 				if (!function_exists('group_user_del'))
 				{
