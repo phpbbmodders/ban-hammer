@@ -126,6 +126,12 @@ class admin_controller
 	 */
 	protected function set_options()
 	{
+		$move_group = $this->request->variable('move_group', 0);
+		$restrict_group = $this->request->variable('restrict_group', 0);
+
+		$this->validate_group($move_group);
+		$this->validate_group($restrict_group);
+
 		$this->config->set('bh_ban_email', $this->request->variable('ban_email', 0));
 		$this->config->set('bh_ban_ip', $this->request->variable('ban_ip', 0));
 		$this->config->set('bh_del_avatar', $this->request->variable('del_avatar', 0));
@@ -133,11 +139,53 @@ class admin_controller
 		$this->config->set('bh_del_posts', $this->request->variable('del_posts', 0));
 		$this->config->set('bh_del_profile', $this->request->variable('del_profile', 0));
 		$this->config->set('bh_del_signature', $this->request->variable('del_signature', 0));
-		$this->config->set('bh_group_id', $this->request->variable('move_group', 0));
-		$this->config->set('bh_restrict_group_id', $this->request->variable('restrict_group', 0));
+		$this->config->set('bh_group_id', $move_group);
+		$this->config->set('bh_restrict_group_id', $restrict_group);
 		$this->config->set('bh_sfs_api_key', $this->request->variable('sfs_api_key', '', true));
 		$this->config->set('bh_sfs_allow_http', $this->request->variable('sfs_allow_http', 0));
 		$this->config->set('bh_ban_time', $this->request->variable('ban_time', 0));
+	}
+
+	/**
+	 * Reject a submitted group id that isn't a valid choice: one of the
+	 * special groups excluded from the dropdown (get_groups() only hides
+	 * them client-side, a crafted submission can still send their id), or a
+	 * founder-managed group the current admin isn't allowed to assign users
+	 * into (phpBB's own acp_users.php enforces the same rule).
+	 *
+	 * @param int $group_id
+	 * @return void
+	 * @access private
+	 */
+	private function validate_group($group_id)
+	{
+		if (!$group_id)
+		{
+			return;
+		}
+
+		$sql = 'SELECT group_name, group_founder_manage
+			FROM ' . GROUPS_TABLE . '
+			WHERE group_id = ' . (int) $group_id;
+		$result = $this->db->sql_query($sql);
+		$row = $this->db->sql_fetchrow($result);
+		$this->db->sql_freeresult($result);
+
+		if (!$row || in_array($row['group_name'], $this->ignored_groups(), true) || ($this->user->data['user_type'] != USER_FOUNDER && $row['group_founder_manage']))
+		{
+			trigger_error($this->user->lang['FORM_INVALID'] . adm_back_link($this->u_action), E_USER_WARNING);
+		}
+	}
+
+	/**
+	 * Special groups no admin should be moving/restricting users into.
+	 *
+	 * @return array
+	 * @access private
+	 */
+	private function ignored_groups()
+	{
+		return array('BOTS', 'GUESTS', 'REGISTERED', 'REGISTERED_COPPA', 'NEWLY_REGISTERED', 'ADMINISTRATORS', 'GLOBAL_MODERATORS');
 	}
 
 	/**
@@ -149,9 +197,9 @@ class admin_controller
 
 		// Don't display any of the default groups
 		// highly doubt an admin would want to ban someone into a default group
-		$ignore_groups = array('BOTS', 'GUESTS', 'REGISTERED', 'REGISTERED_COPPA', 'NEWLY_REGISTERED', 'ADMINISTRATORS', 'GLOBAL_MODERATORS');
+		$ignore_groups = $this->ignored_groups();
 
-		$sql = 'SELECT group_name, group_id, group_type
+		$sql = 'SELECT group_name, group_id, group_type, group_founder_manage
 			FROM ' . GROUPS_TABLE . '
 			WHERE ' . $this->db->sql_in_set('group_name', $ignore_groups, true) . '
 			ORDER BY group_name ASC';
@@ -161,6 +209,13 @@ class admin_controller
 		$s_group_options = "<option value='0'$selected>&nbsp;{$this->user->lang['NO_GROUP']}&nbsp;</option>";
 		while ($row = $this->db->sql_fetchrow($result))
 		{
+			// Same rule as phpBB's own acp_users.php: don't offer a group a
+			// non-founder isn't allowed to manage.
+			if ($this->user->data['user_type'] != USER_FOUNDER && $row['group_founder_manage'])
+			{
+				continue;
+			}
+
 			$selected = ($row['group_id'] == $group_selected) ? ' selected="selected"' : '';
 			$group_name = ($row['group_type'] == GROUP_SPECIAL) ? $this->user->lang['G_' . $row['group_name']] : $row['group_name'];
 			$s_group_options .= "<option value='{$row['group_id']}'$selected>$group_name</option>";
