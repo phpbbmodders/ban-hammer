@@ -616,7 +616,7 @@ class banhammer_listener implements EventSubscriberInterface
 	 */
 	protected function active_restriction($user_id)
 	{
-		$sql = 'SELECT restrict_id
+		$sql = 'SELECT restrict_id, restrict_group_id
 			FROM ' . $this->restrict_table . '
 			WHERE user_id = ' . (int) $user_id;
 		$result = $this->db->sql_query_limit($sql, 1);
@@ -673,11 +673,16 @@ class banhammer_listener implements EventSubscriberInterface
 
 			if ($group_id)
 			{
-				// The ban and restrict groups can be configured to be the
-				// same group. A restricted (not banned) user deliberately
-				// sits in it, so leave their membership alone while the
-				// restriction is still active instead of undoing it here.
-				if ((int) $this->config['bh_restrict_group_id'] === (int) $this->config['bh_group_id'] && $this->active_restriction($this->user->data['user_id']) !== null)
+				// A restricted (not banned) user deliberately sits in
+				// whatever group their own restriction actually used, so
+				// leave that membership alone rather than undoing it here -
+				// checked against the restriction's own recorded group, not
+				// the current ACP settings, which may have changed since
+				// (comparing current settings would stop protecting an
+				// already-active restriction the moment either is edited).
+				$restriction = $this->active_restriction($this->user->data['user_id']);
+
+				if ($restriction !== null && (int) $restriction['restrict_group_id'] === (int) $this->config['bh_group_id'])
 				{
 					return;
 				}
