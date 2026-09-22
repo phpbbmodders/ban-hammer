@@ -575,7 +575,7 @@ class banhammer_listener implements EventSubscriberInterface
 			return;
 		}
 
-		if (!function_exists('group_user_add'))
+		if (!function_exists('group_user_add') || !function_exists('group_user_attributes'))
 		{
 			include($this->root_path . 'includes/functions_user.' . $this->php_ext);
 		}
@@ -593,9 +593,45 @@ class banhammer_listener implements EventSubscriberInterface
 			'restrict_until'	=> $restrict_until,
 		);
 		$sql = 'INSERT INTO ' . $this->restrict_table . ' ' . $this->db->sql_build_array('INSERT', $sql_ary);
-		$this->db->sql_query($sql);
 
-		group_user_add($restrict_group_id, array($user_id), false, false, true);
+		// Two moderators confirming a restriction on the same user at
+		// nearly the same moment could both pass the active_restriction()
+		// check above before either commits. The unique index on user_id
+		// (see the restrict_unique_user migration) turns the loser's
+		// insert into a caught error here instead of a second, silently
+		// conflicting tracking row.
+		$this->db->sql_return_on_error(true);
+		$this->db->sql_query($sql);
+		$insert_failed = (bool) $this->db->get_sql_error_triggered();
+		$this->db->sql_return_on_error(false);
+
+		if ($insert_failed)
+		{
+			$this->template->assign_var('RESTRICT_MESSAGE', $this->user->lang['BH_ALREADY_RESTRICTED']);
+
+			return;
+		}
+
+		$result = group_user_add($restrict_group_id, array($user_id), false, false, true);
+
+		if ($result === 'GROUP_USERS_EXIST')
+		{
+			// Already a member for some unrelated reason: group_user_add()
+			// returns before setting the default group in that case (see
+			// the same fix in restriction_expiry's restore path), so set
+			// it directly instead.
+			group_user_attributes('default', $restrict_group_id, array($user_id));
+		}
+		else if ($result !== false)
+		{
+			// NO_USER / GROUP_USERS_INVALID: the group action never took
+			// effect (shouldn't happen - $user_id comes from the profile
+			// this event fired for). Don't leave a tracking row behind for
+			// a restriction that isn't actually in place.
+			$this->db->sql_query('DELETE FROM ' . $this->restrict_table . ' WHERE user_id = ' . $user_id);
+
+			return;
+		}
 
 		$args = array(
 			'mode'	=> 'viewprofile',
