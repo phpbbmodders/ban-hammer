@@ -639,31 +639,22 @@ class banhammer_listener implements EventSubscriberInterface
 	{
 		$user_id = $this->user_id;
 
-		// Get private messages
-		$sql = 'SELECT msg_id, author_id FROM ' . PRIVMSGS_TABLE . "
-				WHERE author_id = $user_id";
-		$result = $this->db->sql_query($sql);
-
-		$privmsgs_ary = array();
-		while ($row = $this->db->sql_fetchrow($result))
+		// phpBB's own bulk PM cleanup (used when deleting a user account
+		// entirely): correctly adjusts recipients' unread/new counts,
+		// removes attachments and notifications, and anonymizes already-
+		// delivered sent messages instead of deleting them out from under
+		// their recipients. A hand-rolled DELETE here previously left all
+		// of that bookkeeping inconsistent.
+		if (!function_exists('phpbb_delete_users_pms'))
 		{
-			$privmsgs_ary[] = $row['msg_id'];
+			include($this->root_path . 'includes/functions_privmsgs.' . $this->php_ext);
 		}
-		$this->db->sql_freeresult($result);
+		phpbb_delete_users_pms(array($user_id));
 
-		if (!empty($privmsgs_ary))
-		{
-			// And now close eventual reports.
-			$sql = 'UPDATE ' . REPORTS_TABLE . '
-					SET report_closed = 1
-					WHERE ' . $this->db->sql_in_set('pm_id', $privmsgs_ary);
-			$this->db->sql_query($sql);
-		}
-
-		$this->db->sql_query('DELETE FROM ' . PRIVMSGS_TABLE .			" WHERE author_id = $user_id");
+		// The account itself isn't deleted, only its own folder structure
+		// and rules, which don't affect any other user.
 		$this->db->sql_query('DELETE FROM ' . PRIVMSGS_FOLDER_TABLE .	" WHERE user_id = $user_id");
 		$this->db->sql_query('DELETE FROM ' . PRIVMSGS_RULES_TABLE .	" WHERE user_id = $user_id");
-		$this->db->sql_query('DELETE FROM ' . PRIVMSGS_TO_TABLE .		" WHERE user_id = $user_id OR author_id = $user_id");
 	}
 
 	private function bh_del_posts()
@@ -767,7 +758,10 @@ class banhammer_listener implements EventSubscriberInterface
 		$this->db->sql_query('DELETE FROM ' . FORUMS_WATCH_TABLE . " WHERE user_id = $user_id");
 		$this->db->sql_query('DELETE FROM ' . MODERATOR_CACHE_TABLE . " WHERE user_id = $user_id");
 		$this->db->sql_query('DELETE FROM ' . NOTIFICATIONS_TABLE .	" WHERE user_id = $user_id");
-		$this->db->sql_query('DELETE FROM ' . POLL_VOTES_TABLE . " WHERE vote_user_id = $user_id");
+		// Poll votes are deliberately left alone, same as phpBB's own
+		// user_delete() (which doesn't touch POLL_VOTES_TABLE either):
+		// removing them here without decrementing poll_option_total would
+		// corrupt the poll's totals and let the user vote again later.
 		$this->db->sql_query('DELETE FROM ' . TOPICS_POSTED_TABLE . " WHERE user_id = $user_id");
 		$this->db->sql_query('DELETE FROM ' . TOPICS_TRACK_TABLE . " WHERE user_id = $user_id");
 		$this->db->sql_query('DELETE FROM ' . TOPICS_WATCH_TABLE . " WHERE user_id = $user_id");
