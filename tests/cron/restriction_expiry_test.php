@@ -57,12 +57,28 @@ class restriction_expiry_test extends \phpbb_database_test_case
 		$auth->expects($this->any())
 			->method('acl_clear_prefetch');
 		$cache_driver = new \phpbb\cache\driver\dummy();
+		// group_user_del() (called without $log_action = false, its
+		// default) also asks the container for 'group_helper' via
+		// get_group_name() for its log message, and 'notification_manager'
+		// to clear group-request notifications; neither's return value
+		// affects this test's assertions, so plain mocks are enough.
+		$group_helper = $this->createMock('\phpbb\group\helper');
+		$notification_manager = $this->createMock('\phpbb\notification\manager');
 		$phpbb_container = $this->createMock('Symfony\Component\DependencyInjection\ContainerInterface');
 		$phpbb_container
-			->expects($this->any())
 			->method('get')
-			->with('cache.driver')
-			->willReturn($cache_driver);
+			->willReturnCallback(function ($id) use ($cache_driver, $group_helper, $notification_manager)
+			{
+				switch ($id)
+				{
+					case 'cache.driver':
+						return $cache_driver;
+					case 'notification_manager':
+						return $notification_manager;
+					default:
+						return $group_helper;
+				}
+			});
 		$phpbb_log = new \phpbb\log\log($db, $user, $auth, $phpbb_dispatcher, $phpbb_root_path, 'adm/', $phpEx, LOG_TABLE);
 
 		// Deliberately not the group either row actually used (8 or 9): a
