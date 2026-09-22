@@ -41,7 +41,7 @@ class restriction_expiry_test extends \phpbb_database_test_case
 
 	public function test_expiry_restores_expired_restriction_only()
 	{
-		global $phpbb_root_path, $phpEx, $phpbb_dispatcher, $cache, $phpbb_container, $phpbb_log, $user, $auth;
+		global $phpbb_root_path, $phpEx, $phpbb_dispatcher, $cache, $phpbb_container, $phpbb_log, $user, $auth, $db, $config;
 
 		$db = $this->new_dbal();
 

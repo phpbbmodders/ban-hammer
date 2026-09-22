@@ -30,9 +30,11 @@ class confirm_bypass_test extends \phpbb_functional_test_case
 	{
 		parent::setUp();
 
-		global $phpbb_root_path, $phpEx;
+		global $phpbb_root_path, $phpEx, $db, $cache, $phpbb_dispatcher;
 
 		$db = $this->get_db();
+		$cache = new \phpbb\cache\driver\dummy();
+		$phpbb_dispatcher = new \phpbb_mock_event_dispatcher();
 
 		if (!class_exists('auth_admin'))
 		{
@@ -48,6 +50,9 @@ class confirm_bypass_test extends \phpbb_functional_test_case
 
 		// m_ban isn't part of any default role granted to the test install's
 		// admin account, so grant it directly rather than assume it's there.
+		// auth_admin's constructor and acl_set(..., true)'s
+		// acl_clear_prefetch() both read $db/$cache/$phpbb_dispatcher as
+		// globals, not through any constructor argument.
 		$auth_admin = new \auth_admin();
 		$auth_admin->acl_set('user', 0, $admin_user_id, array('m_ban' => ACL_YES), 0, true);
 	}
