@@ -341,6 +341,11 @@ class banhammer_listener implements EventSubscriberInterface
 			$message .= ($hidden_fields['sfs_report'] && $curl_exists)			? $this->user->lang['BH_SUBMIT_SFS'] . '<br>' : '';
 
 			confirm_box(false, $message, build_hidden_fields($hidden_fields));
+
+			// confirm_box(false, ...) above only returns instead of exiting
+			// when the request was actually a cancellation (POST 'cancel'),
+			// in which case we must not fall through to the ban below.
+			return;
 		}
 
 		// We have a user to ban.
@@ -538,6 +543,11 @@ class banhammer_listener implements EventSubscriberInterface
 			$message .= ($length) ? '<br><br>' . $this->user->lang('BH_RESTRICT_FOR', $length) : '<br><br>' . $this->user->lang['BH_RESTRICT_PERM'];
 
 			confirm_box(false, $message, $hidden_fields);
+
+			// confirm_box(false, ...) above only returns instead of exiting
+			// when the request was actually a cancellation (POST 'cancel'),
+			// in which case we must not fall through to the restriction below.
+			return;
 		}
 
 		if (!function_exists('group_user_add'))
