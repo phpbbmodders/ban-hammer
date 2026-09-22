@@ -67,7 +67,7 @@ class restriction_expiry extends \phpbb\cron\task\base
 	{
 		$this->config->set('bh_restrict_last_run', time(), false);
 
-		$sql = 'SELECT restrict_id, user_id, original_group_id
+		$sql = 'SELECT restrict_id, user_id, original_group_id, restrict_group_id
 			FROM ' . $this->restrict_table . '
 			WHERE restrict_until > 0
 				AND restrict_until <= ' . time();
@@ -86,17 +86,20 @@ class restriction_expiry extends \phpbb\cron\task\base
 			return;
 		}
 
-		if (!function_exists('group_user_add') || !function_exists('group_user_del'))
+		if (!function_exists('group_user_del') || !function_exists('group_user_attributes'))
 		{
 			include($this->root_path . 'includes/functions_user.' . $this->php_ext);
 		}
-
-		$restrict_group_id = (int) $this->config['bh_restrict_group_id'];
 
 		foreach ($expired as $row)
 		{
 			$user_id = (int) $row['user_id'];
 			$original_group_id = (int) $row['original_group_id'];
+			// The group actually applied when this restriction was created,
+			// not the current ACP setting: an admin may have changed it
+			// since, and removing the wrong (or no) group would strand the
+			// user in whatever group they were actually restricted into.
+			$restrict_group_id = (int) $row['restrict_group_id'];
 
 			if ($restrict_group_id)
 			{
@@ -105,7 +108,11 @@ class restriction_expiry extends \phpbb\cron\task\base
 
 			if ($original_group_id)
 			{
-				group_user_add($original_group_id, array($user_id), false, false, true);
+				// Not group_user_add(..., true): the user was never removed
+				// from their original group while restricted, so it would
+				// see them as already a member and return GROUP_USERS_EXIST
+				// before reaching the code that sets the default group.
+				group_user_attributes('default', $original_group_id, array($user_id));
 			}
 
 			$this->db->sql_query('DELETE FROM ' . $this->restrict_table . ' WHERE restrict_id = ' . (int) $row['restrict_id']);

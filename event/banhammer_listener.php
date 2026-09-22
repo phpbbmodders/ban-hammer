@@ -133,10 +133,14 @@ class banhammer_listener implements EventSubscriberInterface
 
 		if ($post_info['user_type'] != USER_FOUNDER && $target_user_id != $this->user->data['user_id'] && $target_user_id > 0)
 		{
+			// Deliberately not 'bh' => 1: that shortcut jumps straight to the
+			// confirmation step with none of the ban options set (permanent,
+			// no email/IP ban, no deletions, no group move, no SFS report),
+			// silently ignoring the ACP-configured defaults. Link to the
+			// profile page instead, which shows the real options form.
 			$params = array(
 				'mode'	=> 'viewprofile',
 				'u'		=> $target_user_id,
-				'bh'	=> 1,
 			);
 
 			$template_vars['S_MCP_SHOW_BANHAMMER'] = true;
@@ -234,7 +238,7 @@ class banhammer_listener implements EventSubscriberInterface
 				}
 
 				$this->template->assign_vars(array(
-					'BH_STYLE'		=> (($bh_result == 'success') ? 'green' : '#a92c2c') . '; color: white;"',
+					'BH_STYLE'		=> (($bh_result == 'success') ? 'green' : '#a92c2c') . '; color: white;',
 					'BH_MESSAGE'	=> $bh_message,
 				));
 			}
@@ -341,6 +345,11 @@ class banhammer_listener implements EventSubscriberInterface
 			$message .= ($hidden_fields['sfs_report'] && $curl_exists)			? $this->user->lang['BH_SUBMIT_SFS'] . '<br>' : '';
 
 			confirm_box(false, $message, build_hidden_fields($hidden_fields));
+
+			// confirm_box(false, ...) above only returns instead of exiting
+			// when the request was actually a cancellation (POST 'cancel'),
+			// in which case we must not fall through to the ban below.
+			return;
 		}
 
 		// We have a user to ban.
@@ -538,6 +547,11 @@ class banhammer_listener implements EventSubscriberInterface
 			$message .= ($length) ? '<br><br>' . $this->user->lang('BH_RESTRICT_FOR', $length) : '<br><br>' . $this->user->lang['BH_RESTRICT_PERM'];
 
 			confirm_box(false, $message, $hidden_fields);
+
+			// confirm_box(false, ...) above only returns instead of exiting
+			// when the request was actually a cancellation (POST 'cancel'),
+			// in which case we must not fall through to the restriction below.
+			return;
 		}
 
 		if (!function_exists('group_user_add'))
@@ -554,6 +568,7 @@ class banhammer_listener implements EventSubscriberInterface
 		$sql_ary = array(
 			'user_id'			=> $user_id,
 			'original_group_id'	=> $original_group_id,
+			'restrict_group_id'	=> $restrict_group_id,
 			'restrict_until'	=> $restrict_until,
 		);
 		$sql = 'INSERT INTO ' . $this->restrict_table . ' ' . $this->db->sql_build_array('INSERT', $sql_ary);
@@ -605,6 +620,15 @@ class banhammer_listener implements EventSubscriberInterface
 
 			if ($group_id)
 			{
+				// The ban and restrict groups can be configured to be the
+				// same group. A restricted (not banned) user deliberately
+				// sits in it, so leave their membership alone while the
+				// restriction is still active instead of undoing it here.
+				if ((int) $this->config['bh_restrict_group_id'] === (int) $this->config['bh_group_id'] && $this->active_restriction($this->user->data['user_id']) !== null)
+				{
+					return;
+				}
+
 				// Remove the user from the banned group set in the ACP
 				if (!function_exists('group_user_del'))
 				{
@@ -619,31 +643,22 @@ class banhammer_listener implements EventSubscriberInterface
 	{
 		$user_id = $this->user_id;
 
-		// Get private messages
-		$sql = 'SELECT msg_id, author_id FROM ' . PRIVMSGS_TABLE . "
-				WHERE author_id = $user_id";
-		$result = $this->db->sql_query($sql);
-
-		$privmsgs_ary = array();
-		while ($row = $this->db->sql_fetchrow($result))
+		// phpBB's own bulk PM cleanup (used when deleting a user account
+		// entirely): correctly adjusts recipients' unread/new counts,
+		// removes attachments and notifications, and anonymizes already-
+		// delivered sent messages instead of deleting them out from under
+		// their recipients. A hand-rolled DELETE here previously left all
+		// of that bookkeeping inconsistent.
+		if (!function_exists('phpbb_delete_users_pms'))
 		{
-			$privmsgs_ary[] = $row['msg_id'];
+			include($this->root_path . 'includes/functions_privmsgs.' . $this->php_ext);
 		}
-		$this->db->sql_freeresult($result);
+		phpbb_delete_users_pms(array($user_id));
 
-		if (!empty($privmsgs_ary))
-		{
-			// And now close eventual reports.
-			$sql = 'UPDATE ' . REPORTS_TABLE . '
-					SET report_closed = 1
-					WHERE ' . $this->db->sql_in_set('pm_id', $privmsgs_ary);
-			$this->db->sql_query($sql);
-		}
-
-		$this->db->sql_query('DELETE FROM ' . PRIVMSGS_TABLE .			" WHERE author_id = $user_id");
+		// The account itself isn't deleted, only its own folder structure
+		// and rules, which don't affect any other user.
 		$this->db->sql_query('DELETE FROM ' . PRIVMSGS_FOLDER_TABLE .	" WHERE user_id = $user_id");
 		$this->db->sql_query('DELETE FROM ' . PRIVMSGS_RULES_TABLE .	" WHERE user_id = $user_id");
-		$this->db->sql_query('DELETE FROM ' . PRIVMSGS_TO_TABLE .		" WHERE user_id = $user_id OR author_id = $user_id");
 	}
 
 	private function bh_del_posts()
@@ -671,6 +686,24 @@ class banhammer_listener implements EventSubscriberInterface
 			}
 		}
 		$this->db->sql_freeresult($result);
+
+		// m_ban alone doesn't grant delete rights in every forum; only the
+		// extension's own explicit permission does. Without it, only touch
+		// posts in forums the acting moderator could delete in anyway.
+		if (!$this->auth->acl_get('m_banhammer_del_posts_all'))
+		{
+			foreach ($posts as $post_id => $post_row)
+			{
+				if (!$this->auth->acl_get('m_delete', (int) $post_row['forum_id']))
+				{
+					// Only gates $posts: the report-closing loop below only
+					// ever reads $topics through a $posts[$post_id] lookup,
+					// so leaving a stale count here for a topic we're no
+					// longer touching has no effect.
+					unset($posts[$post_id]);
+				}
+			}
+		}
 
 		// And now handle the reports.
 		$sql = 'SELECT report_id, post_id, report_closed
@@ -729,7 +762,10 @@ class banhammer_listener implements EventSubscriberInterface
 		$this->db->sql_query('DELETE FROM ' . FORUMS_WATCH_TABLE . " WHERE user_id = $user_id");
 		$this->db->sql_query('DELETE FROM ' . MODERATOR_CACHE_TABLE . " WHERE user_id = $user_id");
 		$this->db->sql_query('DELETE FROM ' . NOTIFICATIONS_TABLE .	" WHERE user_id = $user_id");
-		$this->db->sql_query('DELETE FROM ' . POLL_VOTES_TABLE . " WHERE vote_user_id = $user_id");
+		// Poll votes are deliberately left alone, same as phpBB's own
+		// user_delete() (which doesn't touch POLL_VOTES_TABLE either):
+		// removing them here without decrementing poll_option_total would
+		// corrupt the poll's totals and let the user vote again later.
 		$this->db->sql_query('DELETE FROM ' . TOPICS_POSTED_TABLE . " WHERE user_id = $user_id");
 		$this->db->sql_query('DELETE FROM ' . TOPICS_TRACK_TABLE . " WHERE user_id = $user_id");
 		$this->db->sql_query('DELETE FROM ' . TOPICS_WATCH_TABLE . " WHERE user_id = $user_id");
@@ -744,12 +780,14 @@ class banhammer_listener implements EventSubscriberInterface
 		curl_setopt($ch, CURLOPT_URL, $url);
 		curl_setopt($ch, CURLOPT_TIMEOUT, 5);
 		curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 5);
-		curl_exec($ch);
+		$response = curl_exec($ch);
 		$httpcode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
 		curl_close($ch);
 
-		// if nothing is returned (SFS is down)
-		if ($httpcode != 200)
+		// curl_exec() returns false on a transport failure (e.g. the
+		// connection dropped after headers were already sent), which the
+		// HTTP code alone would not catch.
+		if ($response === false || $httpcode != 200)
 		{
 			return false;
 		}
