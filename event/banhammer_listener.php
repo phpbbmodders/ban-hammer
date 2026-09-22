@@ -238,7 +238,7 @@ class banhammer_listener implements EventSubscriberInterface
 				}
 
 				$this->template->assign_vars(array(
-					'BH_STYLE'		=> (($bh_result == 'success') ? 'green' : '#a92c2c') . '; color: white;"',
+					'BH_STYLE'		=> (($bh_result == 'success') ? 'green' : '#a92c2c') . '; color: white;',
 					'BH_MESSAGE'	=> $bh_message,
 				));
 			}
