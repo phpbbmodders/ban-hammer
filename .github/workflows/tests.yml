@@ -55,13 +55,15 @@ jobs:
       RUN_PGSQL_JOBS: 0
 
       # Run MSSQL and SQLite3 tests? 1 (yes) or 0 (no)
-      RUN_MSSQL_JOBS: 0
+      # Needed to actually run the PHPUnit suite under tests/ (SQLite3 is
+      # bundled into this job group); MySQL/PostgreSQL stay off for now.
+      RUN_MSSQL_JOBS: 1
 
       # Run Windows IIS & PostgreSQL tests? 1 (yes) or 0 (no)
       RUN_WINDOWS_JOBS: 0
 
       # Run functional tests if you have them? 1 (yes) or 0 (no)
-      RUN_FUNCTIONAL_TESTS: 0
+      RUN_FUNCTIONAL_TESTS: 1
 
       # Install npm dependencies (if your extension relies on them)? 1 (yes) or 0 (no)
       RUN_NPM_INSTALL: 0

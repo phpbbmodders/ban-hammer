@@ -1,0 +1,150 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<dataset>
+	<!--
+		Two independent restrictions, using two different restrict groups,
+		to prove restriction_expiry reads the group applied to each row
+		(restrict_group_id) rather than a single shared value:
+
+		- user 2: restriction expired (restrict_until in the past) - should
+		  be removed from group 8 and have their default restored to their
+		  original group, 7.
+		- user 3: restriction NOT expired (restrict_until far in the
+		  future) - must be left completely alone.
+	-->
+	<table name="phpbb_groups">
+		<column>group_id</column>
+		<column>group_name</column>
+		<column>group_type</column>
+		<row>
+			<value>1</value>
+			<value>ADMINISTRATORS</value>
+			<value>3</value>
+		</row>
+		<row>
+			<value>2</value>
+			<value>GLOBAL_MODERATORS</value>
+			<value>3</value>
+		</row>
+		<row>
+			<value>3</value>
+			<value>NEWLY_REGISTERED</value>
+			<value>3</value>
+		</row>
+		<row>
+			<value>4</value>
+			<value>REGISTERED</value>
+			<value>3</value>
+		</row>
+		<row>
+			<value>5</value>
+			<value>BOTS</value>
+			<value>3</value>
+		</row>
+		<row>
+			<value>6</value>
+			<value>GUESTS</value>
+			<value>3</value>
+		</row>
+		<row>
+			<value>7</value>
+			<value>ORIGINALGROUP1</value>
+			<value>0</value>
+		</row>
+		<row>
+			<value>8</value>
+			<value>RESTRICTGROUP1</value>
+			<value>0</value>
+		</row>
+		<row>
+			<value>9</value>
+			<value>RESTRICTGROUP2</value>
+			<value>0</value>
+		</row>
+		<row>
+			<value>10</value>
+			<value>ORIGINALGROUP2</value>
+			<value>0</value>
+		</row>
+	</table>
+	<table name="phpbb_users">
+		<column>user_id</column>
+		<column>group_id</column>
+		<column>user_avatar</column>
+		<column>user_rank</column>
+		<column>username</column>
+		<column>username_clean</column>
+		<column>user_permissions</column>
+		<column>user_sig</column>
+		<row>
+			<value>2</value>
+			<value>8</value>
+			<value></value>
+			<value>0</value>
+			<value>restricted user</value>
+			<value>restricteduser</value>
+			<value></value>
+			<value></value>
+		</row>
+		<row>
+			<value>3</value>
+			<value>9</value>
+			<value></value>
+			<value>0</value>
+			<value>still restricted user</value>
+			<value>stillrestricteduser</value>
+			<value></value>
+			<value></value>
+		</row>
+	</table>
+	<table name="phpbb_user_group">
+		<column>user_id</column>
+		<column>group_id</column>
+		<column>group_leader</column>
+		<column>user_pending</column>
+		<row>
+			<value>2</value>
+			<value>7</value>
+			<value>0</value>
+			<value>0</value>
+		</row>
+		<row>
+			<value>2</value>
+			<value>8</value>
+			<value>0</value>
+			<value>0</value>
+		</row>
+		<row>
+			<value>3</value>
+			<value>10</value>
+			<value>0</value>
+			<value>0</value>
+		</row>
+		<row>
+			<value>3</value>
+			<value>9</value>
+			<value>0</value>
+			<value>0</value>
+		</row>
+	</table>
+	<table name="phpbb_banhammer_restrict">
+		<column>restrict_id</column>
+		<column>user_id</column>
+		<column>original_group_id</column>
+		<column>restrict_group_id</column>
+		<column>restrict_until</column>
+		<row>
+			<value>1</value>
+			<value>2</value>
+			<value>7</value>
+			<value>8</value>
+			<value>1</value>
+		</row>
+		<row>
+			<value>2</value>
+			<value>3</value>
+			<value>10</value>
+			<value>9</value>
+			<value>9999999999</value>
+		</row>
+	</table>
+</dataset>
