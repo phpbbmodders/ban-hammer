@@ -786,6 +786,8 @@ class banhammer_listener implements EventSubscriberInterface
 		// posts in forums the acting moderator could delete in anyway.
 		if (!$this->auth->acl_get('m_banhammer_del_posts_all'))
 		{
+			$had_posts = !empty($posts);
+
 			foreach ($posts as $post_id => $post_row)
 			{
 				if (!$this->auth->acl_get('m_delete', (int) $post_row['forum_id']))
@@ -796,6 +798,15 @@ class banhammer_listener implements EventSubscriberInterface
 					// longer touching has no effect.
 					unset($posts[$post_id]);
 				}
+			}
+
+			if ($had_posts && empty($posts))
+			{
+				// There were posts to consider, but no permission to touch
+				// any of them: stop here rather than still wiping unrelated
+				// account data (bookmarks, drafts, notifications, ...)
+				// below for an action that had no actual effect on posts.
+				return;
 			}
 		}
 
