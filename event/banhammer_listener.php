@@ -105,7 +105,26 @@ class banhammer_listener implements EventSubscriberInterface
 			),
 			'core.session_set_custom_ban'				=> 'undo_bh_group',
 			'core.mcp_queue_approve_details_template'	=> 'add_mcp_queue_banhammer_link',
+			'core.permissions'							=> 'add_permission',
 		));
+	}
+
+	/**
+	 * Register m_banhammer_del_posts_all with phpBB's permission system.
+	 * Without this, \phpbb\permissions::permission_defined() never
+	 * recognises it, and the ACP permission editor filters it out of
+	 * every screen - the migration-granted permission would work but be
+	 * invisible and unrevokable through the normal UI.
+	 *
+	 * @param \phpbb\event\data $event The event object
+	 * @return void
+	 * @access public
+	 */
+	public function add_permission($event)
+	{
+		$permissions = $event['permissions'];
+		$permissions['m_banhammer_del_posts_all'] = array('lang' => 'ACL_M_BANHAMMER_DEL_POSTS_ALL', 'cat' => 'misc');
+		$event['permissions'] = $permissions;
 	}
 
 	/**
