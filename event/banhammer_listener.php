@@ -270,19 +270,14 @@ class banhammer_listener implements EventSubscriberInterface
 			return;
 		}
 
-		if ($this->config['bh_group_id'])
-		{
-			// Get group name for banned users, if any.
-			$sql = 'SELECT group_id, group_name FROM ' . GROUPS_TABLE . '
-					WHERE group_id = ' . (int) $this->config['bh_group_id'];
-			$result = $this->db->sql_query($sql);
-			$group_name = $this->db->sql_fetchfield('group_name');
-			$this->db->sql_freeresult($result);
+		// Re-validated here, not just trusted from when it was saved in the
+		// ACP: the group may have been deleted, or made founder-managed,
+		// since then.
+		$group_name = $this->safe_group_name($this->config['bh_group_id']);
 
-			if (empty($group_name))
-			{
-				$this->config['bh_group_id'] = 0;
-			}
+		if ($group_name === '')
+		{
+			$this->config['bh_group_id'] = 0;
 		}
 
 		if (!$this->request->is_set('bh') || ($this->request->is_set('bh') && $this->request->is_set('confirm_key') && !confirm_box(true)))
@@ -505,6 +500,13 @@ class banhammer_listener implements EventSubscriberInterface
 		$user_id = (int) $data['user_id'];
 		$restrict_group_id = (int) $this->config['bh_restrict_group_id'];
 
+		// Re-validated here, not just trusted from ACP-save time: the group
+		// may have been deleted, or made founder-managed, since then.
+		if ($restrict_group_id && $this->safe_group_name($restrict_group_id) === '')
+		{
+			$restrict_group_id = 0;
+		}
+
 		if (!$this->auth->acl_get('m_ban') || $data['user_type'] == USER_FOUNDER || $user_id == $this->user->data['user_id'] || !$restrict_group_id)
 		{
 			// Nothing to see here, move on. No group configured in the ACP
@@ -622,6 +624,38 @@ class banhammer_listener implements EventSubscriberInterface
 		$this->db->sql_freeresult($result);
 
 		return ($row) ?: null;
+	}
+
+	/**
+	 * A configured move/restrict group's name, re-validated at the point
+	 * it's about to be used rather than trusted from ACP-save time: the
+	 * group may have been deleted, or made founder-managed, since then.
+	 *
+	 * @param int $group_id
+	 * @return string Group name, or '' if unset, gone, or founder-managed
+	 *                and the acting moderator isn't the founder.
+	 * @access protected
+	 */
+	protected function safe_group_name($group_id)
+	{
+		if (!$group_id)
+		{
+			return '';
+		}
+
+		$sql = 'SELECT group_name, group_founder_manage
+			FROM ' . GROUPS_TABLE . '
+			WHERE group_id = ' . (int) $group_id;
+		$result = $this->db->sql_query($sql);
+		$row = $this->db->sql_fetchrow($result);
+		$this->db->sql_freeresult($result);
+
+		if (!$row || ($this->user->data['user_type'] != USER_FOUNDER && $row['group_founder_manage']))
+		{
+			return '';
+		}
+
+		return $row['group_name'];
 	}
 
 	// Once a ban is cleared try and remove the user from the banned group set in the ACP of the extension
