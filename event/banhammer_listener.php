@@ -825,19 +825,19 @@ class banhammer_listener implements EventSubscriberInterface
 					unset($posts[$post_id]);
 				}
 			}
+		}
 
-			if (empty($posts))
-			{
-				// No posts left to delete - either there were none to begin
-				// with, or permission filtered out all of them. Either way,
-				// stop here rather than still wiping unrelated account data
-				// (bookmarks, drafts, notifications, ...) below for a
-				// del_posts request with no legitimate post-deletion
-				// authority behind it at all. A moderator with authority
-				// over at least one of the target's posts still gets the
-				// full account cleanup, same as always.
-				return;
-			}
+		if (empty($posts))
+		{
+			// No posts to delete - either there were none to begin with, or
+			// permission filtered out all of them. Either way, stop here
+			// rather than still wiping unrelated account data (bookmarks,
+			// drafts, notifications, ...) below for a del_posts request
+			// that has nothing to actually act on, regardless of which
+			// permission granted access. A moderator whose authority
+			// covers at least one of the target's posts still gets the
+			// full account cleanup, same as always.
+			return;
 		}
 
 		// And now handle the reports.
@@ -901,7 +901,12 @@ class banhammer_listener implements EventSubscriberInterface
 		// user_delete() (which doesn't touch POLL_VOTES_TABLE either):
 		// removing them here without decrementing poll_option_total would
 		// corrupt the poll's totals and let the user vote again later.
-		$this->db->sql_query('DELETE FROM ' . TOPICS_POSTED_TABLE . " WHERE user_id = $user_id");
+		// TOPICS_POSTED_TABLE is also deliberately left alone: delete_posts()
+		// above already calls update_posted_info() to rebuild it correctly
+		// for the topics it actually touched. A blanket delete here would
+		// also wipe the "posted in this topic" marker for topics where the
+		// user's post survived (not deletable in this pass), which
+		// delete_posts() never touched and has no reason to be wrong.
 		$this->db->sql_query('DELETE FROM ' . TOPICS_TRACK_TABLE . " WHERE user_id = $user_id");
 		$this->db->sql_query('DELETE FROM ' . TOPICS_WATCH_TABLE . " WHERE user_id = $user_id");
 		$this->db->sql_query('DELETE FROM ' . USER_NOTIFICATIONS_TABLE . " WHERE user_id = $user_id");
