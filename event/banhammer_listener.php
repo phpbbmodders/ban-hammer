@@ -501,8 +501,10 @@ class banhammer_listener implements EventSubscriberInterface
 		$restrict_group_id = (int) $this->config['bh_restrict_group_id'];
 
 		// Re-validated here, not just trusted from ACP-save time: the group
-		// may have been deleted, or made founder-managed, since then.
-		if ($restrict_group_id && $this->safe_group_name($restrict_group_id) === '')
+		// may have been deleted, made founder-managed, or turned into an
+		// Open/Free group (which would let the restricted user just resign
+		// via UCP - see includes/ucp/ucp_groups.php) since then.
+		if ($restrict_group_id && $this->safe_group_name($restrict_group_id, true) === '')
 		{
 			$restrict_group_id = 0;
 		}
@@ -665,28 +667,34 @@ class banhammer_listener implements EventSubscriberInterface
 	/**
 	 * A configured move/restrict group's name, re-validated at the point
 	 * it's about to be used rather than trusted from ACP-save time: the
-	 * group may have been deleted, or made founder-managed, since then.
+	 * group may have been deleted, made founder-managed, or (when
+	 * $reject_self_service is set) turned into an Open/Free group, since
+	 * then.
 	 *
 	 * @param int $group_id
-	 * @return string Group name, or '' if unset, gone, or founder-managed
-	 *                and the acting moderator isn't the founder.
+	 * @param bool $reject_self_service
+	 * @return string Group name, or '' if unset, gone, founder-managed and
+	 *                the acting moderator isn't the founder, or (when
+	 *                $reject_self_service is set) Open/Free.
 	 * @access protected
 	 */
-	protected function safe_group_name($group_id)
+	protected function safe_group_name($group_id, $reject_self_service = false)
 	{
 		if (!$group_id)
 		{
 			return '';
 		}
 
-		$sql = 'SELECT group_name, group_founder_manage
+		$sql = 'SELECT group_name, group_type, group_founder_manage
 			FROM ' . GROUPS_TABLE . '
 			WHERE group_id = ' . (int) $group_id;
 		$result = $this->db->sql_query($sql);
 		$row = $this->db->sql_fetchrow($result);
 		$this->db->sql_freeresult($result);
 
-		if (!$row || ($this->user->data['user_type'] != USER_FOUNDER && $row['group_founder_manage']))
+		if (!$row
+			|| ($this->user->data['user_type'] != USER_FOUNDER && $row['group_founder_manage'])
+			|| ($reject_self_service && ($row['group_type'] == GROUP_OPEN || $row['group_type'] == GROUP_FREE)))
 		{
 			return '';
 		}
