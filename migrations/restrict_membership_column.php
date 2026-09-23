@@ -36,11 +36,17 @@ class restrict_membership_column extends \phpbb\db\migration\migration
 		return array(
 			'add_columns' => array(
 				$this->table_prefix . 'banhammer_restrict' => array(
-					// Existing rows predate this column and were all
-					// created before GROUP_USERS_EXIST was even handled, so
-					// they always resulted in a fresh membership - default
-					// of 1 (true) is accurate for them, not just a filler.
-					'restrict_new_membership' => array('BOOL', 1),
+					// Existing rows predate this column. Before this fix's
+					// own group_user_add() result check existed, the
+					// tracking row was inserted unconditionally regardless
+					// of whether the user was already a member - so a
+					// legacy row could represent either case, and there's
+					// no way to tell which after the fact. Default to 0
+					// (don't remove membership): leaving a genuinely
+					// ban-hammer-created membership in place a little too
+					// long is a much smaller problem than stripping a
+					// membership this restriction never granted.
+					'restrict_new_membership' => array('BOOL', 0),
 				),
 			),
 		);
