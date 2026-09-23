@@ -26,7 +26,11 @@ class restrict_unique_user extends \phpbb\db\migration\migration
 
 	static public function depends_on()
 	{
-		return array('\phpbbmodders\banhammer\migrations\permission_del_posts_all');
+		// restrict_dedupe removes any leftover duplicate user_id rows from
+		// the concurrent-restriction race this index closes off; without
+		// running first, creating a unique index over pre-existing
+		// duplicates would fail outright.
+		return array('\phpbbmodders\banhammer\migrations\restrict_dedupe');
 	}
 
 	public function update_schema()
