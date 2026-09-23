@@ -61,18 +61,6 @@ class restrict_group_id_column extends \phpbb\db\migration\migration
 		);
 	}
 
-	public function revert_data()
-	{
-		return array(
-			// A purge is about to drop this tracking (this column, then the
-			// whole table once restrict_group.php itself reverts next).
-			// Restore anyone still actively restricted now, while the data
-			// needed to do it correctly is still here, rather than
-			// stranding them mid-restriction with no way back.
-			array('custom', array(array($this, 'restore_active_restrictions'))),
-		);
-	}
-
 	/**
 	 * @return void
 	 * @access public
@@ -90,41 +78,5 @@ class restrict_group_id_column extends \phpbb\db\migration\migration
 			SET restrict_group_id = ' . $restrict_group_id . '
 			WHERE restrict_group_id = 0';
 		$this->sql_query($sql);
-	}
-
-	/**
-	 * @return void
-	 * @access public
-	 */
-	public function restore_active_restrictions()
-	{
-		if (!function_exists('group_user_del') || !function_exists('group_user_attributes'))
-		{
-			include($this->phpbb_root_path . 'includes/functions_user.' . $this->php_ext);
-		}
-
-		$sql = 'SELECT user_id, original_group_id, restrict_group_id
-			FROM ' . $this->table_prefix . 'banhammer_restrict';
-		$result = $this->db->sql_query($sql);
-
-		while ($row = $this->db->sql_fetchrow($result))
-		{
-			$user_id = (int) $row['user_id'];
-			$restrict_group_id = (int) $row['restrict_group_id'];
-			$original_group_id = (int) $row['original_group_id'];
-
-			if ($restrict_group_id)
-			{
-				group_user_del($restrict_group_id, array($user_id));
-			}
-
-			if ($original_group_id)
-			{
-				group_user_attributes('default', $original_group_id, array($user_id));
-			}
-		}
-		$this->db->sql_freeresult($result);
-
-		$this->sql_query('DELETE FROM ' . $this->table_prefix . 'banhammer_restrict');
 	}
 }

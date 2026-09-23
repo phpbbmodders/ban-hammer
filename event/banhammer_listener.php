@@ -593,6 +593,9 @@ class banhammer_listener implements EventSubscriberInterface
 			'original_group_id'	=> $original_group_id,
 			'restrict_group_id'	=> $restrict_group_id,
 			'restrict_until'	=> $restrict_until,
+			// Corrected below to 0 if group_user_add() finds the user
+			// already a member; default of 1 matches the common case.
+			'restrict_new_membership'	=> 1,
 		);
 		$sql = 'INSERT INTO ' . $this->restrict_table . ' ' . $this->db->sql_build_array('INSERT', $sql_ary);
 
@@ -615,21 +618,38 @@ class banhammer_listener implements EventSubscriberInterface
 		}
 
 		$result = group_user_add($restrict_group_id, array($user_id), false, false, true);
+		$group_action_failed = ($result !== false);
 
 		if ($result === 'GROUP_USERS_EXIST')
 		{
 			// Already a member for some unrelated reason: group_user_add()
 			// returns before setting the default group in that case (see
-			// the same fix in restriction_expiry's restore path), so set
-			// it directly instead.
-			group_user_attributes('default', $restrict_group_id, array($user_id));
+			// the same fix in restriction_expiry's restore path), so set it
+			// directly instead - but only approved members can be made a
+			// default group (see group_user_attributes()'s 'default' case);
+			// a pending join request returns NO_USERS and changes nothing,
+			// which is still a failure to actually apply the restriction.
+			$group_action_failed = (group_user_attributes('default', $restrict_group_id, array($user_id)) !== false);
+
+			if (!$group_action_failed)
+			{
+				// The membership predates this restriction; don't let
+				// expiry/purge remove it later on this restriction's
+				// account - only the default-group change and the
+				// tracking row itself belong to it.
+				$this->db->sql_query('UPDATE ' . $this->restrict_table . '
+					SET restrict_new_membership = 0
+					WHERE user_id = ' . $user_id);
+			}
 		}
-		else if ($result !== false)
+
+		if ($group_action_failed)
 		{
-			// NO_USER / GROUP_USERS_INVALID: the group action never took
-			// effect (shouldn't happen - $user_id comes from the profile
-			// this event fired for). Don't leave a tracking row behind for
-			// a restriction that isn't actually in place.
+			// The group action never took effect - pending membership,
+			// or NO_USER/GROUP_USERS_INVALID (shouldn't happen; $user_id
+			// comes from the profile this event fired for). Don't leave a
+			// tracking row behind for a restriction that isn't actually in
+			// place.
 			$this->db->sql_query('DELETE FROM ' . $this->restrict_table . ' WHERE user_id = ' . $user_id);
 
 			return;
