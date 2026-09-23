@@ -109,7 +109,7 @@ class admin_controller
 			'DEL_PROFILE'	=> (!empty($this->config['bh_del_profile'])) ? true : false,
 			'DEL_SIGNATURE'	=> (!empty($this->config['bh_del_signature'])) ? true : false,
 			'MOVE_GROUP'		=> $this->get_groups($this->request->variable('move_group', $this->config['bh_group_id'])),
-			'RESTRICT_GROUP'	=> $this->get_groups($this->request->variable('restrict_group', $this->config['bh_restrict_group_id'])),
+			'RESTRICT_GROUP'	=> $this->get_groups($this->request->variable('restrict_group', $this->config['bh_restrict_group_id']), true),
 			'SFS_ALLOW_HTTP'	=> (!empty($this->config['bh_sfs_allow_http'])) ? true : false,
 			'SFS_API_KEY'		=> (!empty($this->config['bh_sfs_api_key'])) ? $this->config['bh_sfs_api_key'] : '',
 			'SFS_CURL'			=> (function_exists('curl_init')) ? true : false,
@@ -208,8 +208,14 @@ class admin_controller
 
 	/**
 	 * function to return groups that are allowed
+	 *
+	 * @param int $group_selected
+	 * @param bool $reject_self_service Hide Open/Free groups too (see
+	 *                                  validate_group()); used for the
+	 *                                  restrict-group dropdown, not the
+	 *                                  ban move-to-group one.
 	 */
-	private function get_groups($group_selected)
+	private function get_groups($group_selected, $reject_self_service = false)
 	{
 		$this->user->add_lang('acp/groups');
 
@@ -230,6 +236,13 @@ class admin_controller
 			// Same rule as phpBB's own acp_users.php: don't offer a group a
 			// non-founder isn't allowed to manage.
 			if ($this->user->data['user_type'] != USER_FOUNDER && $row['group_founder_manage'])
+			{
+				continue;
+			}
+
+			// Open/Free groups let a member resign unilaterally via UCP,
+			// which would let a restricted user just leave the restriction.
+			if ($reject_self_service && ($row['group_type'] == GROUP_OPEN || $row['group_type'] == GROUP_FREE))
 			{
 				continue;
 			}
