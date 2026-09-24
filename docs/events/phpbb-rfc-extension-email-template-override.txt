@@ -1,0 +1,50 @@
+PROJECT: phpBB (PHPBB)
+ISSUE TYPE: Improvement
+SUMMARY: Allow an enabled extension to override a core notification email
+	.txt template
+PRIORITY: Minor
+COMPONENT: Events
+AFFECTS VERSION: 3.3.17
+
+TYPE
+====
+PHP event
+
+LOCATION
+========
+includes/functions_messenger.php, messenger::template(), before
+set_template_paths() is called.
+
+(Alternatively, as an extension of
+\phpbb\template\twig\twig::set_custom_style()'s existing per-extension
+discovery loop, which already walks all_enabled() extensions but only
+ever looks under styles/<name>/template|theme/, never
+language/<lang>/email/.)
+
+PURPOSE
+=======
+Let an enabled extension supply its own copy of a core notification email
+template (e.g. language/en/email/post_in_queue.txt), so it can customize
+the rendered content of an existing core notification without patching
+core or duplicating the whole notification type.
+
+USE CASE
+========
+Originates from a request to add the recipient's email address to the
+post_in_queue admin-approval email. Extensions can already add data via
+get_email_template_variables(), but nothing resolves email templates from
+an extension's own directory, so there's no way to reference that new
+data in the email body.
+
+core.notification_message_email technically allows rewriting the
+fully-rendered $subject/$msg post-template, but only as opaque string
+surgery on already-composed text — no variable placeholder, no
+per-language file — not a substitute for template-level customization.
+
+VARIABLES
+=========
+- template_lang (string, read-only) — language being resolved
+- template_dir_prefix (string, read-only) — subdirectory prefix in play
+- template_paths (array, MODIFIABLE) — filesystem paths searched for the
+  template file; a listener appends its own extension-owned directory
+  here
