@@ -4,7 +4,7 @@ SUMMARY: Allow an enabled extension to override a core notification email
 	.txt template
 PRIORITY: Minor
 COMPONENT: Events
-AFFECTS VERSION: 3.3.17
+AFFECTS VERSION: 3.3.18
 
 TYPE
 ====
