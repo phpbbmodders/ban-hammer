@@ -109,7 +109,7 @@ class admin_controller
 			'DEL_PROFILE'	=> (!empty($this->config['bh_del_profile'])) ? true : false,
 			'DEL_SIGNATURE'	=> (!empty($this->config['bh_del_signature'])) ? true : false,
 			'MOVE_GROUP'		=> $this->get_groups($this->request->variable('move_group', $this->config['bh_group_id'])),
-			'RESTRICT_GROUP'	=> $this->get_groups($this->request->variable('restrict_group', $this->config['bh_restrict_group_id'])),
+			'RESTRICT_GROUP'	=> $this->get_groups($this->request->variable('restrict_group', $this->config['bh_restrict_group_id']), true),
 			'SFS_ALLOW_HTTP'	=> (!empty($this->config['bh_sfs_allow_http'])) ? true : false,
 			'SFS_API_KEY'		=> (!empty($this->config['bh_sfs_api_key'])) ? $this->config['bh_sfs_api_key'] : '',
 			'SFS_CURL'			=> (function_exists('curl_init')) ? true : false,
@@ -130,7 +130,11 @@ class admin_controller
 		$restrict_group = $this->request->variable('restrict_group', 0);
 
 		$this->validate_group($move_group);
-		$this->validate_group($restrict_group);
+		// Open/Free groups let a member resign from them unilaterally via
+		// UCP (see includes/ucp/ucp_groups.php), which would let a
+		// restricted user simply leave the restriction. A banned user
+		// can't log in to do the same, so this only applies here.
+		$this->validate_group($restrict_group, true);
 
 		$this->config->set('bh_ban_email', $this->request->variable('ban_email', 0));
 		$this->config->set('bh_ban_ip', $this->request->variable('ban_ip', 0));
@@ -141,37 +145,51 @@ class admin_controller
 		$this->config->set('bh_del_signature', $this->request->variable('del_signature', 0));
 		$this->config->set('bh_group_id', $move_group);
 		$this->config->set('bh_restrict_group_id', $restrict_group);
-		$this->config->set('bh_sfs_api_key', $this->request->variable('sfs_api_key', '', true));
-		$this->config->set('bh_sfs_allow_http', $this->request->variable('sfs_allow_http', 0));
+
+		if (function_exists('curl_init'))
+		{
+			// Both fields are hidden from the form when cURL isn't
+			// available (see the template), so they're absent from the
+			// submitted data - writing them unconditionally would silently
+			// blank the stored SFS key on any unrelated settings save.
+			$this->config->set('bh_sfs_api_key', $this->request->variable('sfs_api_key', '', true));
+			$this->config->set('bh_sfs_allow_http', $this->request->variable('sfs_allow_http', 0));
+		}
+
 		$this->config->set('bh_ban_time', $this->request->variable('ban_time', 0));
 	}
 
 	/**
 	 * Reject a submitted group id that isn't a valid choice: one of the
 	 * special groups excluded from the dropdown (get_groups() only hides
-	 * them client-side, a crafted submission can still send their id), or a
+	 * them client-side, a crafted submission can still send their id), a
 	 * founder-managed group the current admin isn't allowed to assign users
-	 * into (phpBB's own acp_users.php enforces the same rule).
+	 * into (phpBB's own acp_users.php enforces the same rule), or - when
+	 * $reject_self_service is set - an Open/Free group.
 	 *
 	 * @param int $group_id
+	 * @param bool $reject_self_service
 	 * @return void
 	 * @access private
 	 */
-	private function validate_group($group_id)
+	private function validate_group($group_id, $reject_self_service = false)
 	{
 		if (!$group_id)
 		{
 			return;
 		}
 
-		$sql = 'SELECT group_name, group_founder_manage
+		$sql = 'SELECT group_name, group_type, group_founder_manage
 			FROM ' . GROUPS_TABLE . '
 			WHERE group_id = ' . (int) $group_id;
 		$result = $this->db->sql_query($sql);
 		$row = $this->db->sql_fetchrow($result);
 		$this->db->sql_freeresult($result);
 
-		if (!$row || in_array($row['group_name'], $this->ignored_groups(), true) || ($this->user->data['user_type'] != USER_FOUNDER && $row['group_founder_manage']))
+		if (!$row
+			|| in_array($row['group_name'], $this->ignored_groups(), true)
+			|| ($this->user->data['user_type'] != USER_FOUNDER && $row['group_founder_manage'])
+			|| ($reject_self_service && ($row['group_type'] == GROUP_OPEN || $row['group_type'] == GROUP_FREE)))
 		{
 			trigger_error($this->user->lang['FORM_INVALID'] . adm_back_link($this->u_action), E_USER_WARNING);
 		}
@@ -190,8 +208,14 @@ class admin_controller
 
 	/**
 	 * function to return groups that are allowed
+	 *
+	 * @param int $group_selected
+	 * @param bool $reject_self_service Hide Open/Free groups too (see
+	 *                                  validate_group()); used for the
+	 *                                  restrict-group dropdown, not the
+	 *                                  ban move-to-group one.
 	 */
-	private function get_groups($group_selected)
+	private function get_groups($group_selected, $reject_self_service = false)
 	{
 		$this->user->add_lang('acp/groups');
 
@@ -212,6 +236,13 @@ class admin_controller
 			// Same rule as phpBB's own acp_users.php: don't offer a group a
 			// non-founder isn't allowed to manage.
 			if ($this->user->data['user_type'] != USER_FOUNDER && $row['group_founder_manage'])
+			{
+				continue;
+			}
+
+			// Open/Free groups let a member resign unilaterally via UCP,
+			// which would let a restricted user just leave the restriction.
+			if ($reject_self_service && ($row['group_type'] == GROUP_OPEN || $row['group_type'] == GROUP_FREE))
 			{
 				continue;
 			}

@@ -67,6 +67,9 @@ class banhammer_listener implements EventSubscriberInterface
 	/** @var string */
 	protected $restrict_table;
 
+	/** @var string */
+	protected $ban_group_table;
+
 	public function __construct(
 		\phpbb\auth\auth $auth,
 		\phpbb\cache\driver\driver_interface $cache,
@@ -79,7 +82,8 @@ class banhammer_listener implements EventSubscriberInterface
 		$root_path,
 		$phpExt,
 		ContainerInterface $container,
-		$restrict_table
+		$restrict_table,
+		$ban_group_table
 	)
 	{
 		$this->auth			= $auth;
@@ -94,6 +98,7 @@ class banhammer_listener implements EventSubscriberInterface
 		$this->php_ext		= $phpExt;
 		$this->container	= $container;
 		$this->restrict_table	= $restrict_table;
+		$this->ban_group_table	= $ban_group_table;
 	}
 
 	static public function getSubscribedEvents()
@@ -105,7 +110,26 @@ class banhammer_listener implements EventSubscriberInterface
 			),
 			'core.session_set_custom_ban'				=> 'undo_bh_group',
 			'core.mcp_queue_approve_details_template'	=> 'add_mcp_queue_banhammer_link',
+			'core.permissions'							=> 'add_permission',
 		));
+	}
+
+	/**
+	 * Register m_banhammer_del_posts_all with phpBB's permission system.
+	 * Without this, \phpbb\permissions::permission_defined() never
+	 * recognises it, and the ACP permission editor filters it out of
+	 * every screen - the migration-granted permission would work but be
+	 * invisible and unrevokable through the normal UI.
+	 *
+	 * @param \phpbb\event\data $event The event object
+	 * @return void
+	 * @access public
+	 */
+	public function add_permission($event)
+	{
+		$permissions = $event['permissions'];
+		$permissions['m_banhammer_del_posts_all'] = array('lang' => 'ACL_M_BANHAMMER_DEL_POSTS_ALL', 'cat' => 'misc');
+		$event['permissions'] = $permissions;
 	}
 
 	/**
@@ -251,19 +275,14 @@ class banhammer_listener implements EventSubscriberInterface
 			return;
 		}
 
-		if ($this->config['bh_group_id'])
-		{
-			// Get group name for banned users, if any.
-			$sql = 'SELECT group_id, group_name FROM ' . GROUPS_TABLE . '
-					WHERE group_id = ' . (int) $this->config['bh_group_id'];
-			$result = $this->db->sql_query($sql);
-			$group_name = $this->db->sql_fetchfield('group_name');
-			$this->db->sql_freeresult($result);
+		// Re-validated here, not just trusted from when it was saved in the
+		// ACP: the group may have been deleted, or made founder-managed,
+		// since then.
+		$group_name = $this->safe_group_name($this->config['bh_group_id']);
 
-			if (empty($group_name))
-			{
-				$this->config['bh_group_id'] = 0;
-			}
+		if ($group_name === '')
+		{
+			$this->config['bh_group_id'] = 0;
 		}
 
 		if (!$this->request->is_set('bh') || ($this->request->is_set('bh') && $this->request->is_set('confirm_key') && !confirm_box(true)))
@@ -423,11 +442,46 @@ class banhammer_listener implements EventSubscriberInterface
 
 		if ($this->request->variable('move_group', 0) && !empty($group_name))
 		{
-			$return = group_user_add($this->config['bh_group_id'], array($this->user_id), array($this->data['username']), $group_name, true);
+			$move_group_id = (int) $this->config['bh_group_id'];
+			$return = group_user_add($move_group_id, array($this->user_id), array($this->data['username']), $group_name, true);
+			$move_new_membership = 1;
 
-			if ($return != false)
+			if ($return === 'GROUP_USERS_EXIST')
+			{
+				// Already a member for some unrelated reason: group_user_add()
+				// returns before setting the default group in that case, so
+				// set it directly instead (same fix as do_restrict_stuff()'s
+				// equivalent case).
+				$return = group_user_attributes('default', $move_group_id, array($this->user_id));
+				$move_new_membership = 0;
+			}
+
+			if ($return !== false)
 			{
 				$error[] = 'ERROR_MOVE_GROUP';
+			}
+			else
+			{
+				// Record which group this ban actually moved them into (and
+				// whether that membership was newly created or pre-existing),
+				// and their default group beforehand, so undo_bh_group() can
+				// clean up precisely this action later instead of comparing
+				// against the *current* ACP setting.
+				$sql_ary = array(
+					'user_id'				=> $this->user_id,
+					'original_group_id'	=> (int) $this->data['group_id'],
+					'move_group_id'			=> $move_group_id,
+					'move_new_membership'	=> $move_new_membership,
+				);
+				$sql = 'INSERT INTO ' . $this->ban_group_table . ' ' . $this->db->sql_build_array('INSERT', $sql_ary);
+
+				// A second ban+move on the same already-banned user is
+				// blocked well before this point (see the banned-user check
+				// above), but guard the unique index anyway rather than let
+				// a genuine race surface as an uncaught SQL error.
+				$this->db->sql_return_on_error(true);
+				$this->db->sql_query($sql);
+				$this->db->sql_return_on_error(false);
 			}
 		}
 
@@ -485,6 +539,15 @@ class banhammer_listener implements EventSubscriberInterface
 		$data = $event['member'];
 		$user_id = (int) $data['user_id'];
 		$restrict_group_id = (int) $this->config['bh_restrict_group_id'];
+
+		// Re-validated here, not just trusted from ACP-save time: the group
+		// may have been deleted, made founder-managed, or turned into an
+		// Open/Free group (which would let the restricted user just resign
+		// via UCP - see includes/ucp/ucp_groups.php) since then.
+		if ($restrict_group_id && $this->safe_group_name($restrict_group_id, true) === '')
+		{
+			$restrict_group_id = 0;
+		}
 
 		if (!$this->auth->acl_get('m_ban') || $data['user_type'] == USER_FOUNDER || $user_id == $this->user->data['user_id'] || !$restrict_group_id)
 		{
@@ -554,7 +617,7 @@ class banhammer_listener implements EventSubscriberInterface
 			return;
 		}
 
-		if (!function_exists('group_user_add'))
+		if (!function_exists('group_user_add') || !function_exists('group_user_attributes'))
 		{
 			include($this->root_path . 'includes/functions_user.' . $this->php_ext);
 		}
@@ -570,11 +633,67 @@ class banhammer_listener implements EventSubscriberInterface
 			'original_group_id'	=> $original_group_id,
 			'restrict_group_id'	=> $restrict_group_id,
 			'restrict_until'	=> $restrict_until,
+			// Corrected below to 0 if group_user_add() finds the user
+			// already a member; default of 1 matches the common case.
+			'restrict_new_membership'	=> 1,
 		);
 		$sql = 'INSERT INTO ' . $this->restrict_table . ' ' . $this->db->sql_build_array('INSERT', $sql_ary);
-		$this->db->sql_query($sql);
 
-		group_user_add($restrict_group_id, array($user_id), false, false, true);
+		// Two moderators confirming a restriction on the same user at
+		// nearly the same moment could both pass the active_restriction()
+		// check above before either commits. The unique index on user_id
+		// (see the restrict_unique_user migration) turns the loser's
+		// insert into a caught error here instead of a second, silently
+		// conflicting tracking row.
+		$this->db->sql_return_on_error(true);
+		$this->db->sql_query($sql);
+		$insert_failed = (bool) $this->db->get_sql_error_triggered();
+		$this->db->sql_return_on_error(false);
+
+		if ($insert_failed)
+		{
+			$this->template->assign_var('RESTRICT_MESSAGE', $this->user->lang['BH_ALREADY_RESTRICTED']);
+
+			return;
+		}
+
+		$result = group_user_add($restrict_group_id, array($user_id), false, false, true);
+		$group_action_failed = ($result !== false);
+
+		if ($result === 'GROUP_USERS_EXIST')
+		{
+			// Already a member for some unrelated reason: group_user_add()
+			// returns before setting the default group in that case (see
+			// the same fix in restriction_expiry's restore path), so set it
+			// directly instead - but only approved members can be made a
+			// default group (see group_user_attributes()'s 'default' case);
+			// a pending join request returns NO_USERS and changes nothing,
+			// which is still a failure to actually apply the restriction.
+			$group_action_failed = (group_user_attributes('default', $restrict_group_id, array($user_id)) !== false);
+
+			if (!$group_action_failed)
+			{
+				// The membership predates this restriction; don't let
+				// expiry/purge remove it later on this restriction's
+				// account - only the default-group change and the
+				// tracking row itself belong to it.
+				$this->db->sql_query('UPDATE ' . $this->restrict_table . '
+					SET restrict_new_membership = 0
+					WHERE user_id = ' . $user_id);
+			}
+		}
+
+		if ($group_action_failed)
+		{
+			// The group action never took effect - pending membership,
+			// or NO_USER/GROUP_USERS_INVALID (shouldn't happen; $user_id
+			// comes from the profile this event fired for). Don't leave a
+			// tracking row behind for a restriction that isn't actually in
+			// place.
+			$this->db->sql_query('DELETE FROM ' . $this->restrict_table . ' WHERE user_id = ' . $user_id);
+
+			return;
+		}
 
 		$args = array(
 			'mode'	=> 'viewprofile',
@@ -595,7 +714,7 @@ class banhammer_listener implements EventSubscriberInterface
 	 */
 	protected function active_restriction($user_id)
 	{
-		$sql = 'SELECT restrict_id
+		$sql = 'SELECT restrict_id, restrict_group_id
 			FROM ' . $this->restrict_table . '
 			WHERE user_id = ' . (int) $user_id;
 		$result = $this->db->sql_query_limit($sql, 1);
@@ -605,38 +724,115 @@ class banhammer_listener implements EventSubscriberInterface
 		return ($row) ?: null;
 	}
 
-	// Once a ban is cleared try and remove the user from the banned group set in the ACP of the extension
+	/**
+	 * The group-move tracking row for a user's currently active ban, if any.
+	 *
+	 * @param int $user_id
+	 * @return array|null The tracking row, or null when there is none.
+	 * @access protected
+	 */
+	protected function active_ban_group($user_id)
+	{
+		$sql = 'SELECT ban_id, original_group_id, move_group_id, move_new_membership
+			FROM ' . $this->ban_group_table . '
+			WHERE user_id = ' . (int) $user_id;
+		$result = $this->db->sql_query_limit($sql, 1);
+		$row = $this->db->sql_fetchrow($result);
+		$this->db->sql_freeresult($result);
+
+		return ($row) ?: null;
+	}
+
+	/**
+	 * A configured move/restrict group's name, re-validated at the point
+	 * it's about to be used rather than trusted from ACP-save time: the
+	 * group may have been deleted, made founder-managed, or (when
+	 * $reject_self_service is set) turned into an Open/Free group, since
+	 * then.
+	 *
+	 * @param int $group_id
+	 * @param bool $reject_self_service
+	 * @return string Group name, or '' if unset, gone, founder-managed and
+	 *                the acting moderator isn't the founder, or (when
+	 *                $reject_self_service is set) Open/Free.
+	 * @access protected
+	 */
+	protected function safe_group_name($group_id, $reject_self_service = false)
+	{
+		if (!$group_id)
+		{
+			return '';
+		}
+
+		$sql = 'SELECT group_name, group_type, group_founder_manage
+			FROM ' . GROUPS_TABLE . '
+			WHERE group_id = ' . (int) $group_id;
+		$result = $this->db->sql_query($sql);
+		$row = $this->db->sql_fetchrow($result);
+		$this->db->sql_freeresult($result);
+
+		if (!$row
+			|| ($this->user->data['user_type'] != USER_FOUNDER && $row['group_founder_manage'])
+			|| ($reject_self_service && ($row['group_type'] == GROUP_OPEN || $row['group_type'] == GROUP_FREE)))
+		{
+			return '';
+		}
+
+		return $row['group_name'];
+	}
+
+	/**
+	 * Once a ban is cleared, undo whatever group move that specific ban
+	 * actually made - not "the group currently configured in the ACP",
+	 * which may have changed since, or matter to some other, unrelated
+	 * group membership entirely.
+	 *
+	 * @param \phpbb\event\data $event The event object
+	 * @return void
+	 * @access public
+	 */
 	public function undo_bh_group($event)
 	{
-		if (!empty($this->config['bh_group_id']) && !$event['banned'] && $this->user->data['user_type'] != USER_IGNORE)
+		if ($event['banned'] || $this->user->data['user_type'] == USER_IGNORE)
 		{
-			// determine if the user is in the ban hammer group set in the ACP
-			$sql = 'SELECT group_id FROM ' . USER_GROUP_TABLE . '
-					WHERE group_id = ' . (int) $this->config['bh_group_id'] . '
-						AND user_id = ' . (int) $this->user->data['user_id'];
-			$result = $this->db->sql_query($sql);
-			$group_id = $this->db->sql_fetchfield('group_id');
-			$this->db->sql_freeresult($result);
+			return;
+		}
 
-			if ($group_id)
+		$ban_group = $this->active_ban_group($this->user->data['user_id']);
+
+		if ($ban_group === null)
+		{
+			return;
+		}
+
+		if (!function_exists('group_user_del') || !function_exists('group_user_attributes'))
+		{
+			include($this->root_path . 'includes/functions_user.' . $this->php_ext);
+		}
+
+		$move_group_id = (int) $ban_group['move_group_id'];
+
+		if ($move_group_id && $ban_group['move_new_membership'])
+		{
+			// A restriction can be configured to use the same group as a
+			// ban's move-to group. If this user also has an active
+			// restriction recorded against this exact group, leave their
+			// membership alone - it's still needed for the restriction,
+			// checked against its own recorded group, not current config.
+			$restriction = $this->active_restriction($this->user->data['user_id']);
+
+			if ($restriction === null || (int) $restriction['restrict_group_id'] !== $move_group_id)
 			{
-				// The ban and restrict groups can be configured to be the
-				// same group. A restricted (not banned) user deliberately
-				// sits in it, so leave their membership alone while the
-				// restriction is still active instead of undoing it here.
-				if ((int) $this->config['bh_restrict_group_id'] === (int) $this->config['bh_group_id'] && $this->active_restriction($this->user->data['user_id']) !== null)
-				{
-					return;
-				}
-
-				// Remove the user from the banned group set in the ACP
-				if (!function_exists('group_user_del'))
-				{
-					include($this->root_path . 'includes/functions_user.' . $this->php_ext);
-				}
-				group_user_del($this->config['bh_group_id'], array($this->user->data['user_id']));
+				group_user_del($move_group_id, array($this->user->data['user_id']));
 			}
 		}
+
+		if ($ban_group['original_group_id'])
+		{
+			group_user_attributes('default', (int) $ban_group['original_group_id'], array($this->user->data['user_id']));
+		}
+
+		$this->db->sql_query('DELETE FROM ' . $this->ban_group_table . ' WHERE ban_id = ' . (int) $ban_group['ban_id']);
 	}
 
 	private function bh_del_privmsgs()
@@ -705,6 +901,19 @@ class banhammer_listener implements EventSubscriberInterface
 			}
 		}
 
+		if (empty($posts))
+		{
+			// No posts to delete - either there were none to begin with, or
+			// permission filtered out all of them. Either way, stop here
+			// rather than still wiping unrelated account data (bookmarks,
+			// drafts, notifications, ...) below for a del_posts request
+			// that has nothing to actually act on, regardless of which
+			// permission granted access. A moderator whose authority
+			// covers at least one of the target's posts still gets the
+			// full account cleanup, same as always.
+			return;
+		}
+
 		// And now handle the reports.
 		$sql = 'SELECT report_id, post_id, report_closed
 				FROM ' . REPORTS_TABLE . '
@@ -766,7 +975,12 @@ class banhammer_listener implements EventSubscriberInterface
 		// user_delete() (which doesn't touch POLL_VOTES_TABLE either):
 		// removing them here without decrementing poll_option_total would
 		// corrupt the poll's totals and let the user vote again later.
-		$this->db->sql_query('DELETE FROM ' . TOPICS_POSTED_TABLE . " WHERE user_id = $user_id");
+		// TOPICS_POSTED_TABLE is also deliberately left alone: delete_posts()
+		// above already calls update_posted_info() to rebuild it correctly
+		// for the topics it actually touched. A blanket delete here would
+		// also wipe the "posted in this topic" marker for topics where the
+		// user's post survived (not deletable in this pass), which
+		// delete_posts() never touched and has no reason to be wrong.
 		$this->db->sql_query('DELETE FROM ' . TOPICS_TRACK_TABLE . " WHERE user_id = $user_id");
 		$this->db->sql_query('DELETE FROM ' . TOPICS_WATCH_TABLE . " WHERE user_id = $user_id");
 		$this->db->sql_query('DELETE FROM ' . USER_NOTIFICATIONS_TABLE . " WHERE user_id = $user_id");
