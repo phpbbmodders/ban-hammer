@@ -107,6 +107,14 @@ class restriction_expiry_test extends \phpbb_database_test_case
 		$this->assertTrue($this->is_group_member($db, 3, 9), 'User 3 should still be in their restrict group');
 		$this->assertEquals(9, $this->get_default_group($db, 3), "User 3's default group should be unchanged");
 		$this->assertEquals(1, $this->count_restrict_rows($db, 3), "User 3's tracking row should remain");
+
+		// User 4's restriction expired, but they were already in the
+		// restrict group beforehand (restrict_new_membership = 0): keep that
+		// membership, restore only the default group and drop the row.
+		$this->assertTrue($this->is_group_member($db, 4, 8), 'User 4 should keep their pre-existing restrict group membership');
+		$this->assertTrue($this->is_group_member($db, 4, 7), 'User 4 should still be in their original group');
+		$this->assertEquals(7, $this->get_default_group($db, 4), "User 4's default group should be restored to their original group");
+		$this->assertEquals(0, $this->count_restrict_rows($db, 4), "User 4's tracking row should be gone");
 	}
 
 	protected function is_group_member($db, $user_id, $group_id)
