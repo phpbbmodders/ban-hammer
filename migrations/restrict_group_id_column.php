@@ -64,12 +64,18 @@ class restrict_group_id_column extends \phpbb\db\migration\migration
 	public function revert_data()
 	{
 		return array(
-			// A purge is about to drop this tracking (this column, then the
-			// whole table once restrict_group.php itself reverts next).
-			// Restore anyone still actively restricted now, while the data
-			// needed to do it correctly is still here, rather than
-			// stranding them mid-restriction with no way back.
-			array('custom', array(array($this, 'restore_active_restrictions'))),
+			// Normally a no-op: restrict_membership_column's own
+			// revert_data() already restores every active restriction and
+			// empties this table before this migration's own revert runs
+			// (migrations revert newest-first). This is only a safety net
+			// for a purge that happens before restrict_membership_column
+			// was ever installed - e.g. the extension's files were
+			// upgraded to include it, then the extension was disabled and
+			// purged without being re-enabled first to actually run it.
+			// phpBB's migrator only reverts migrations recorded as
+			// installed, so a never-installed migration's revert_data()
+			// simply never runs.
+			array('custom', array(array($this, 'restore_active_restrictions_fallback'))),
 		);
 	}
 
@@ -96,14 +102,19 @@ class restrict_group_id_column extends \phpbb\db\migration\migration
 	 * @return void
 	 * @access public
 	 */
-	public function restore_active_restrictions()
+	public function restore_active_restrictions_fallback()
 	{
 		if (!function_exists('group_user_del') || !function_exists('group_user_attributes'))
 		{
 			include($this->phpbb_root_path . 'includes/functions_user.' . $this->php_ext);
 		}
 
-		$sql = 'SELECT user_id, original_group_id, restrict_group_id
+		// restrict_new_membership may or may not exist depending on
+		// whether restrict_membership_column ran - see revert_data() above.
+		$has_membership_column = $this->db_tools->sql_column_exists($this->table_prefix . 'banhammer_restrict', 'restrict_new_membership');
+
+		$sql = 'SELECT user_id, original_group_id, restrict_group_id'
+			. ($has_membership_column ? ', restrict_new_membership' : '') . '
 			FROM ' . $this->table_prefix . 'banhammer_restrict';
 		$result = $this->db->sql_query($sql);
 
@@ -113,7 +124,12 @@ class restrict_group_id_column extends \phpbb\db\migration\migration
 			$restrict_group_id = (int) $row['restrict_group_id'];
 			$original_group_id = (int) $row['original_group_id'];
 
-			if ($restrict_group_id)
+			// Without restrict_new_membership there's no way to tell
+			// whether this restriction created the membership or found it
+			// pre-existing; conservatively leave it alone rather than risk
+			// stripping a membership this restriction never granted (same
+			// reasoning as restrict_membership_column's own default).
+			if ($restrict_group_id && $has_membership_column && $row['restrict_new_membership'])
 			{
 				group_user_del($restrict_group_id, array($user_id));
 			}

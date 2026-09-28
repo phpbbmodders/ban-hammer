@@ -10,6 +10,14 @@
 		  original group, 7.
 		- user 3: restriction NOT expired (restrict_until far in the
 		  future) - must be left completely alone.
+		- user 4: restriction expired, but user 4 was already a member of
+		  the restrict group (8) before being restricted
+		  (restrict_new_membership = 0) - that membership must be kept;
+		  only the default group is restored (to 7) and the tracking row
+		  removed.
+
+		Users 2 and 3 were added to their restrict group by the
+		restriction itself, so restrict_new_membership = 1.
 	-->
 	<table name="phpbb_groups">
 		<column>group_id</column>
@@ -95,6 +103,16 @@
 			<value></value>
 			<value></value>
 		</row>
+		<row>
+			<value>4</value>
+			<value>8</value>
+			<value></value>
+			<value>0</value>
+			<value>existing member user</value>
+			<value>existingmemberuser</value>
+			<value></value>
+			<value></value>
+		</row>
 	</table>
 	<table name="phpbb_user_group">
 		<column>user_id</column>
@@ -125,6 +143,18 @@
 			<value>0</value>
 			<value>0</value>
 		</row>
+		<row>
+			<value>4</value>
+			<value>7</value>
+			<value>0</value>
+			<value>0</value>
+		</row>
+		<row>
+			<value>4</value>
+			<value>8</value>
+			<value>0</value>
+			<value>0</value>
+		</row>
 	</table>
 	<table name="phpbb_banhammer_restrict">
 		<column>restrict_id</column>
@@ -132,11 +162,13 @@
 		<column>original_group_id</column>
 		<column>restrict_group_id</column>
 		<column>restrict_until</column>
+		<column>restrict_new_membership</column>
 		<row>
 			<value>1</value>
 			<value>2</value>
 			<value>7</value>
 			<value>8</value>
+			<value>1</value>
 			<value>1</value>
 		</row>
 		<row>
@@ -145,6 +177,15 @@
 			<value>10</value>
 			<value>9</value>
 			<value>2000000000</value>
+			<value>1</value>
+		</row>
+		<row>
+			<value>3</value>
+			<value>4</value>
+			<value>7</value>
+			<value>8</value>
+			<value>1</value>
+			<value>0</value>
 		</row>
 	</table>
 </dataset>

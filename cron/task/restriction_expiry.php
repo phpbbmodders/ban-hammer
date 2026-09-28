@@ -67,7 +67,7 @@ class restriction_expiry extends \phpbb\cron\task\base
 	{
 		$this->config->set('bh_restrict_last_run', time(), false);
 
-		$sql = 'SELECT restrict_id, user_id, original_group_id, restrict_group_id
+		$sql = 'SELECT restrict_id, user_id, original_group_id, restrict_group_id, restrict_new_membership
 			FROM ' . $this->restrict_table . '
 			WHERE restrict_until > 0
 				AND restrict_until <= ' . time();
@@ -101,7 +101,13 @@ class restriction_expiry extends \phpbb\cron\task\base
 			// user in whatever group they were actually restricted into.
 			$restrict_group_id = (int) $row['restrict_group_id'];
 
-			if ($restrict_group_id)
+			// Only remove group membership the restriction itself created.
+			// If the user already belonged to the restrict group for an
+			// unrelated reason (do_restrict_stuff() found GROUP_USERS_EXIST
+			// and recorded restrict_new_membership = 0), that membership
+			// predates this restriction and isn't the restriction's to take
+			// away - only the default-group change and the tracking row are.
+			if ($restrict_group_id && $row['restrict_new_membership'])
 			{
 				group_user_del($restrict_group_id, array($user_id));
 			}
