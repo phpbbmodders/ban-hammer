@@ -1,0 +1,169 @@
+name: Functional test debug
+
+# Diagnoses the intermittent empty-page failures in the functional tests
+# (see docs/TODO.md). Mirrors the SQLite/MSSQL job of
+# phpbb-extensions/test-framework, but turns on PHP error logging in
+# php-fpm, runs the functional tests several times, and uploads the PHP,
+# php-fpm and nginx logs so a failing run shows its cause.
+#
+# Runs only when started by hand (Actions -> Functional test debug ->
+# Run workflow) or when this file changes in a pull request, so it never
+# slows down or blocks normal CI.
+on:
+  workflow_dispatch:
+    inputs:
+      db:
+        description: Database to test against
+        type: choice
+        options:
+          - mssql-2022
+          - mssql-2019
+          - sqlite3
+        default: mssql-2022
+      runs:
+        description: How many times to run the functional tests
+        default: '10'
+  pull_request:
+    branches:
+      - master
+    paths:
+      - .github/workflows/functional-debug.yml
+
+permissions:
+  contents: read
+
+env:
+  EXTNAME: phpbbmodders/banhammer
+  PHPBB_BRANCH: 3.3.x
+  PHP_VERSION: '7.4'
+  DB_CHOICE: ${{ inputs.db || 'mssql-2022' }}
+  RUNS: ${{ inputs.runs || '10' }}
+
+jobs:
+  functional-debug:
+    name: Functional tests x${{ inputs.runs || '10' }} - ${{ inputs.db || 'mssql-2022' }}
+    runs-on: ubuntu-22.04
+
+    services:
+      mssql:
+        image: ${{ (inputs.db || 'mssql-2022') == 'mssql-2019' && 'mcr.microsoft.com/mssql/server:2019-CU27-ubuntu-20.04' || 'mcr.microsoft.com/mssql/server:2022-CU13-ubuntu-22.04' }}
+        env:
+          SA_PASSWORD: "Pssw0rd_12"
+          ACCEPT_EULA: "y"
+        ports:
+          - 1433:1433
+        options: >-
+          --health-cmd="/opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P 'Pssw0rd_12' -Q \"Use [master]; CREATE DATABASE [phpbb_tests] COLLATE Latin1_General_CI_AS\" || exit 1"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+          --health-start-period 10s
+
+      redis:
+        image: redis
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 6379:6379
+
+    steps:
+      - name: Checkout phpBB
+        uses: actions/checkout@v4
+        with:
+          repository: phpbb/phpbb
+          ref: ${{ env.PHPBB_BRANCH }}
+          path: phpBB3
+
+      - name: Checkout extension
+        uses: actions/checkout@v4
+        with:
+          path: phpBB3/phpBB/ext/${{ env.EXTNAME }}
+
+      - name: Set database type
+        id: database-type
+        run: |
+          case "$DB_CHOICE" in
+            mssql-*) echo "db=mssql" >> "$GITHUB_OUTPUT" ;;
+            *)       echo "db=$DB_CHOICE" >> "$GITHUB_OUTPUT" ;;
+          esac
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ env.PHP_VERSION }}
+          extensions: dom, curl, libxml, mbstring, zip, pcntl, pdo, mysqli, sqlite, pdo_sqlite, intl, gd, exif, iconv, sqlsrv, pdo_sqlsrv, ldap
+          coverage: none
+
+      - name: Setup environment for phpBB
+        env:
+          DB: ${{ steps.database-type.outputs.db }}
+        run: .github/setup-phpbb.sh "$DB" "$PHP_VERSION" 0
+        working-directory: ./phpBB3
+
+      - name: Setup database
+        env:
+          DB: ${{ steps.database-type.outputs.db }}
+        run: .github/setup-database.sh "$DB" 0
+        working-directory: ./phpBB3
+
+      - name: Turn on PHP error logging in php-fpm
+        run: |
+          # setup-webserver.sh started php-fpm with .github/php-fpm.conf and no
+          # error logging; add it and restart php-fpm with the same pool.
+          CONF=.github/php-fpm.conf
+          sed -i 's/^\s*\[global\]\s*$/[global]\nerror_log = \/tmp\/php-fpm.log\nlog_level = notice/' "$CONF"
+          printf '\tcatch_workers_output = yes\n\tphp_admin_flag[log_errors] = on\n\tphp_admin_value[error_log] = /tmp/php-errors.log\n' >> "$CONF"
+          cat "$CONF"
+          PHP_FPM_BIN="/usr/sbin/php-fpm$PHP_VERSION"
+          [ -f "$PHP_FPM_BIN" ] || PHP_FPM_BIN=/usr/bin/php-fpm
+          sudo pkill -f "php-fpm: master" || true
+          sleep 2
+          sudo "$PHP_FPM_BIN" --fpm-config "$CONF"
+          sleep 1
+          pgrep -a php-fpm
+          curl -s -o /dev/null -w 'board URL answers: %{http_code}\n' http://localhost/ || true
+        working-directory: ./phpBB3
+
+      - name: Setup PHPUnit files
+        run: mkdir -p "phpBB/ext/$EXTNAME/.github" && cp .github/phpunit* "$_"
+        working-directory: ./phpBB3
+
+      - name: Run the functional tests ${{ env.RUNS }} times
+        env:
+          DB: ${{ steps.database-type.outputs.db }}
+        run: |
+          failed=0
+          for i in $(seq 1 "$RUNS"); do
+            echo "::group::Run $i of $RUNS"
+            if ! phpBB/vendor/bin/phpunit \
+                --configuration "phpBB/ext/$EXTNAME/.github/phpunit-$DB-github.xml" \
+                --bootstrap ./tests/bootstrap.php \
+                --testsuite "phpBB Functional Tests"; then
+              failed=$((failed + 1))
+              echo "::warning::Functional run $i of $RUNS failed"
+            fi
+            echo "::endgroup::"
+          done
+          echo "Functional runs failed: $failed of $RUNS"
+          [ "$failed" -eq 0 ]
+        working-directory: ./phpBB3
+
+      - name: Collect logs
+        if: always()
+        run: |
+          mkdir -p debug-logs
+          sudo cp /tmp/php-fpm.log /tmp/php-errors.log debug-logs/ 2>/dev/null || true
+          sudo cp /var/log/nginx/*.log debug-logs/ 2>/dev/null || true
+          sudo chown -R "$(whoami)" debug-logs
+          for f in debug-logs/*; do echo "== $f ($(wc -l < "$f") lines)"; tail -n 40 "$f"; done
+
+      - name: Upload logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: functional-debug-logs-${{ env.DB_CHOICE }}
+          path: debug-logs/
+          if-no-files-found: warn
