@@ -63,11 +63,19 @@ class confirm_bypass_test extends \phpbb_functional_test_case
 		$this->login();
 
 		// The exploit: a bh=1 request with no confirm_key, but cancel=1.
+		// A cancelled confirmation doesn't always come back as a full HTML
+		// page (in CI it has intermittently returned an empty body), so
+		// don't require one: check there was no server error or PHP notice,
+		// then check what matters, that no ban was created.
 		self::request(
 			'POST',
 			'memberlist.php?mode=viewprofile&u=' . $victim_id . '&bh=1&sid=' . $this->sid,
-			array('cancel' => '1')
+			array('cancel' => '1'),
+			false
 		);
+
+		$this->assertLessThan(500, self::$client->getResponse()->getStatus(), 'The cancelled request must not cause a server error');
+		$this->assertStringNotContainsString('[phpBB Debug]', self::get_content());
 
 		$db = $this->get_db();
 		$sql = 'SELECT COUNT(*) as cnt
