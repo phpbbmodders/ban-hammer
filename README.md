@@ -1,23 +1,48 @@
-# ban-hammer
-Ban Hammer for phpBB 3.3.x line (was One Click Ban)
+# Ban Hammer
 
-Gives moderators a one-click way to ban a user directly from their profile or from the MCP post-approval queue: ban the username, email, and/or IP, delete their posts, private messages, avatar, signature, and profile fields, optionally move them into a group, and optionally report them to Stop Forum Spam. As an alternative to banning outright, a moderator can instead restrict a user into a heavily-limited group for a set time (or permanently), with their original group automatically restored once the restriction expires. A "Ban email domain" action is also available from the MCP approve-details page.
+[![Tests](https://github.com/phpbbmodders/ban-hammer/actions/workflows/tests.yml/badge.svg)](https://github.com/phpbbmodders/ban-hammer/actions/workflows/tests.yml) [![Lint](https://github.com/phpbbmodders/ban-hammer/actions/workflows/lint.yml/badge.svg)](https://github.com/phpbbmodders/ban-hammer/actions/workflows/lint.yml)
 
-Requires PHP 7.4+ and phpBB 3.3.17+.
+Ban a user straight from their profile, with options to clean up their content and report them to Stop Forum Spam.
+
+## Features
+
+- **Ban Hammer** form on member profiles, and on the MCP post-approval queue, for moderators with the right permissions.
+- Ban by username, and optionally by email and IP.
+- Optionally delete the user's avatar, posts and topics, private messages, signature and profile fields.
+- Optionally move banned users into a chosen group.
+- Instead of banning, restrict a user to a limited group for a set time (or permanently); their original group comes back automatically when it ends.
+- A **Ban email domain** action on the MCP approve-details page.
+- Optionally report the user to Stop Forum Spam (API key set in the ACP).
+
+## Requirements
+
+- phpBB 3.3.17 or later
+- PHP 7.4 or later
 
 ## Installation
 
-1. Copy (or clone) this extension to `phpBB/ext/phpbbmodders/banhammer`.
-2. In the ACP, go to Customise → Manage Extensions and enable Ban Hammer.
-3. Configure it under ACP → Ban Hammer: what a ban deletes, an optional group to move banned users into, an optional group to restrict users into instead of banning, ban length options, and (optionally) a Stop Forum Spam API key.
+1. Copy the extension to `/ext/phpbbmodders/banhammer`
+2. In the Administration Control Panel, go to **Customise → Manage extensions**
+3. Enable the **Ban Hammer** extension
+4. Choose the defaults under **ACP → Extensions → Ban Hammer**
 
-## Automated testing
+## Contributing
 
-We use automated unit tests to prevent regressions. Check out our build below:
+Contributions are welcome!
 
-[![Tests](https://github.com/phpbbmodders/ban-hammer/actions/workflows/tests.yml/badge.svg)](https://github.com/phpbbmodders/ban-hammer/actions/workflows/tests.yml)
+- **Bug reports**: [Open an issue](https://github.com/phpbbmodders/ban-hammer/issues).
+- **Everything else** (questions, feature requests, ideas, general discussion): [Use Discussions](https://github.com/orgs/phpbbmodders/discussions), or the [community forum](https://www.phpbbmodders.com/community/).
+- Pull requests are welcome for bug fixes or discussed features.
 
 ## Acknowledgments
 
+- Based on the phpBB 3.0 **One Click Ban** MOD by phpbbmodders.net (co-authors Kailey and bonelifer; contributors EXreaction, RMcGirr83, Sniper_E and tumba25).
+- Converted to a phpBB extension by Rich McGirr ([RMcGirr83](https://github.com/rmcgirr83)) and Jari Kanerva (tumba25).
 - The avatar-deletion modernization ([PR #21](https://github.com/phpbbmodders/ban-hammer/pull/21)) is based on a fix by [Rich McGirr](https://github.com/rmcgirr83) in his fork, routing avatar deletion through phpBB's `avatar.manager` service instead of the legacy `avatar_delete()` function.
 - Code review, bug fixes, and documentation assisted by [Claude](https://www.anthropic.com/claude).
+
+## License
+
+This extension is licensed under the **GNU General Public License v2.0**.
+
+See [license.txt](license.txt) for more information.
