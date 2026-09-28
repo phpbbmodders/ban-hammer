@@ -48,5 +48,7 @@ services:
             - '%core.table_prefix%banhammer_restrict'
             - '%core.root_path%'
             - '%core.php_ext%'
+        calls:
+            - [set_name, [cron.task.phpbbmodders.banhammer.restriction_expiry]]
         tags:
             - { name: cron.task }

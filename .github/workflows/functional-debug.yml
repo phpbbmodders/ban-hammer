@@ -22,7 +22,7 @@ on:
         default: mssql-2022
       runs:
         description: How many times to run the functional tests
-        default: '5'
+        default: '10'
   pull_request:
     branches:
       - master
@@ -37,11 +37,11 @@ env:
   PHPBB_BRANCH: 3.3.x
   PHP_VERSION: '7.4'
   DB_CHOICE: ${{ inputs.db || 'mssql-2022' }}
-  RUNS: ${{ inputs.runs || '5' }}
+  RUNS: ${{ inputs.runs || '10' }}
 
 jobs:
   functional-debug:
-    name: Functional tests x${{ inputs.runs || '5' }} - ${{ inputs.db || 'mssql-2022' }}
+    name: Functional tests x${{ inputs.runs || '10' }} - ${{ inputs.db || 'mssql-2022' }}
     runs-on: ubuntu-22.04
 
     services:
