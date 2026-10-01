@@ -23,55 +23,66 @@
 		<column>group_id</column>
 		<column>group_name</column>
 		<column>group_type</column>
+		<column>group_desc</column>
 		<row>
 			<value>1</value>
 			<value>ADMINISTRATORS</value>
 			<value>3</value>
+			<value></value>
 		</row>
 		<row>
 			<value>2</value>
 			<value>GLOBAL_MODERATORS</value>
 			<value>3</value>
+			<value></value>
 		</row>
 		<row>
 			<value>3</value>
 			<value>NEWLY_REGISTERED</value>
 			<value>3</value>
+			<value></value>
 		</row>
 		<row>
 			<value>4</value>
 			<value>REGISTERED</value>
 			<value>3</value>
+			<value></value>
 		</row>
 		<row>
 			<value>5</value>
 			<value>BOTS</value>
 			<value>3</value>
+			<value></value>
 		</row>
 		<row>
 			<value>6</value>
 			<value>GUESTS</value>
 			<value>3</value>
+			<value></value>
 		</row>
 		<row>
 			<value>7</value>
 			<value>ORIGINALGROUP1</value>
 			<value>0</value>
+			<value></value>
 		</row>
 		<row>
 			<value>8</value>
 			<value>RESTRICTGROUP1</value>
 			<value>0</value>
+			<value></value>
 		</row>
 		<row>
 			<value>9</value>
 			<value>RESTRICTGROUP2</value>
 			<value>0</value>
+			<value></value>
 		</row>
 		<row>
 			<value>10</value>
 			<value>ORIGINALGROUP2</value>
 			<value>0</value>
+			<value></value>
 		</row>
 	</table>
 	<table name="phpbb_users">
