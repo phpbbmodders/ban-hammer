@@ -12,7 +12,6 @@ on:
     # or remove this branches section to run tests on all your branches
     branches:
       - master    # Legacy or alternative main branch
-      - ci/full-framework-matrix
 
   pull_request:
     # Run tests when pull requests are made on these branches in your repo,
