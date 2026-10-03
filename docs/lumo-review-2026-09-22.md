@@ -7,7 +7,7 @@ repository's source (all `git ls-files` content, concatenated with
 own in this setup, so it worked from that one paste rather than reading the
 repository directly).
 
-**Read this alongside the same day's [Codex review](codex-review-2026-09-22.md).**
+**Read this alongside the same day's [archived Codex review](TODO/archive/archive1.md#codex-review-2026-09-22).**
 Lumo's output was considerably less reliable: its headline "High"
 severity finding is a confirmed false positive (see below), and several
 other findings visibly reverse themselves mid-answer ("Correction:",

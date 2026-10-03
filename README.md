@@ -26,6 +26,10 @@ Ban a user straight from their profile, with options to clean up their content a
 3. Enable the **Ban Hammer** extension
 4. Choose the defaults under **ACP → Extensions → Ban Hammer**
 
+## TODO
+
+Project TODOs and archived reviews: [docs/TODO.md](docs/TODO.md).
+
 ## Contributing
 
 Contributions are welcome!
