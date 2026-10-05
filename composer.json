@@ -3,7 +3,7 @@
     "type": "phpbb-extension",
     "description": "Ban a user straight from their profile, with options to clean up their content and report them to Stop Forum Spam.",
     "homepage": "https://www.phpbbmodders.com/",
-    "version": "1.0.8",
+    "version": "1.0.9-dev",
     "time": "2018-07-26",
     "keywords": [
         "phpbb",
