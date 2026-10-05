@@ -35,5 +35,5 @@ if (empty($lang) || !is_array($lang))
 //
 
 $lang = array_merge($lang, [
-	'BANHAMMER_NOT_ENABLEABLE'	=> 'Ban Hammer could not be enabled. The minimum requirements of phpBB 3.3.17 and/or PHP 7.4.0 were not satisfied.',
+	'BANHAMMER_NOT_ENABLEABLE'	=> 'Ban Hammer could not be enabled. The minimum requirements of phpBB 3.3.19 and/or PHP 7.4.0 were not satisfied.',
 ]);

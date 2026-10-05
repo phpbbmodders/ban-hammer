@@ -16,7 +16,7 @@ Ban a user straight from their profile, with options to clean up their content a
 
 ## Requirements
 
-- phpBB 3.3.17 or later
+- phpBB 3.3.19 or later
 - PHP 7.4 or later
 
 ## Installation
