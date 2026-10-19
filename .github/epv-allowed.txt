@@ -1,0 +1,12 @@
+# EPV findings this extension keeps on purpose, checked by the epv job in
+# .github/workflows/tests.yml. One finding per line as EPV prints it, without
+# "on line N", with paths relative to the extension; give the reason above it.
+
+# The ban-domain value is escaped with ENT_QUOTES on purpose (see the comment
+# above it); utf8_htmlspecialchars() would only use ENT_COMPAT.
+Error: Using htmlspecialchars in /event/banhammer_listener.php
+
+# Released migration: reads the extension's own banhammer_settings config_text
+# from its previous version, with allowed_classes off. Released migrations must
+# not be changed.
+Error: Using unserialize in /migrations/v101_data.php
