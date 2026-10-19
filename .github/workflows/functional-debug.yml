@@ -42,7 +42,7 @@ env:
 jobs:
   functional-debug:
     name: Functional tests x${{ inputs.runs || '10' }} - ${{ inputs.db || 'mssql-2022' }}
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
 
     services:
       mssql:
@@ -89,6 +89,19 @@ jobs:
             mssql-*) echo "db=mssql" >> "$GITHUB_OUTPUT" ;;
             *)       echo "db=$DB_CHOICE" >> "$GITHUB_OUTPUT" ;;
           esac
+
+      # Ubuntu 24.04's runner image, unlike 22.04's, doesn't include Microsoft's
+      # ODBC driver, which PHP's sqlsrv and pdo_sqlsrv need to reach SQL Server.
+      # Version 17: version 18 encrypts by default and rejects the test
+      # container's self-signed certificate.
+      - name: Install the Microsoft ODBC driver for SQL Server
+        if: steps.database-type.outputs.db == 'mssql'
+        run: |
+          curl -fsSL -o packages-microsoft-prod.deb "https://packages.microsoft.com/config/ubuntu/$(. /etc/os-release && echo "$VERSION_ID")/packages-microsoft-prod.deb"
+          sudo dpkg -i packages-microsoft-prod.deb
+          rm packages-microsoft-prod.deb
+          sudo apt-get update
+          sudo ACCEPT_EULA=Y apt-get install -y msodbcsql17
 
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
