@@ -15,10 +15,7 @@ Kept separate: [phpbbmodders/groupwarn](https://github.com/phpbbmodders/groupwar
 
 Bugs in phpBB itself, found on the seed-forum test boards. Each needs a tracker ticket and a phpBB pull request; nothing to change in Ban Hammer.
 
-- **Unban log entries break the ACP log on phpBB 4.0** (found 10/20/2026, not reported yet). Every unban on 4.0, including the ACP's own unban page, writes admin and moderator log entries whose data holds an array, so showing the log (for example the ACP front page) gives `PHP Warning: Array to string conversion` in `phpbb/language/language.php`. Cause, in `\phpbb\ban\manager::unban()` on master:
-  - It logs `[$unbanned_users]`, an array, where `ban()` logs `implode(', ', $items)`. For email and IP bans that array is always empty, so the log doesn't even name what was unbanned. Fix: log the unbanned items joined into a string, the way `ban()` does.
-  - For username bans `after_unban()` returns user id => username, but the user-notes loop does `foreach ($unbanned_users as $user_id)`, so it uses the usernames as user ids and the "unbanned" note never reaches the right user. Fix: loop over the keys.
-  - phpBB 3.3's `user_unban()` logs a joined string, so this only affects 4.0. Tracker: affects version 4.0.0-b1, component ACP; fix goes in a `master` PR with a test.
+- **Unban log entries break the ACP log on phpBB 4.0**: `\phpbb\ban\manager::unban()` logged an array where `ban()` logs a string, giving `Array to string conversion` when the admin or moderator log is shown, and filed unban notes under the wrong user. Reported as [PHPBB-17753](https://tracker.phpbb.com/browse/PHPBB-17753), fix in [phpbb/phpbb#7102](https://github.com/phpbb/phpbb/pull/7102). Doesn't block anything in Ban Hammer.
 - **Undefined `$avatar_img` in three MCP template events on master**: reported as [PHPBB-17752](https://tracker.phpbb.com/browse/PHPBB-17752), fix in [phpbb/phpbb#7101](https://github.com/phpbb/phpbb/pull/7101). Blocks #52.
 
 ## Validation Considerations
