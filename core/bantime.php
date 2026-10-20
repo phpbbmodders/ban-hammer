@@ -49,6 +49,10 @@ class bantime
 	*/
 	public function ban_length_options()
 	{
+		// The length names live in phpBB's acp/ban language file; load it
+		// here too, as not every caller goes through display_ban_time().
+		$this->user->add_lang('acp/ban');
+
 		$ban_text = array(
 			0 => $this->user->lang['PERMANENT'],
 			30 => $this->user->lang['30_MINS'],

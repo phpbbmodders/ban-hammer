@@ -127,6 +127,8 @@ class banhammer_listener implements EventSubscriberInterface
 			'core.mcp_queue_approve_details_template'	=> 'add_mcp_queue_banhammer_link',
 			'core.permissions'							=> 'add_permission',
 			'core.page_header'							=> 'add_banlist_link',
+			'core.mcp_warn_post_after'					=> 'autoban_after_warning',
+			'core.mcp_warn_user_after'					=> 'autoban_after_warning',
 		));
 	}
 
@@ -167,6 +169,64 @@ class banhammer_listener implements EventSubscriberInterface
 		$this->user->add_lang_ext('phpbbmodders/banhammer', 'banlist');
 
 		$this->template->assign_var('U_BH_BANLIST', $this->helper->route('phpbbmodders_banhammer_banlist'));
+	}
+
+	/**
+	 * Ban a user automatically once a warning brings them to the number of
+	 * warnings set in the ACP. Off while that number is 0.
+	 *
+	 * The ban goes through phpBB's own ban code, so it is logged to the
+	 * admin and moderator logs and the user's notes like any other ban,
+	 * with a reason that says it was automatic.
+	 *
+	 * @param \phpbb\event\data $event The event object
+	 * @return void
+	 * @access public
+	 */
+	public function autoban_after_warning($event)
+	{
+		$threshold = (int) $this->config['bh_autoban_warnings'];
+		$user_row = $event['user_row'];
+		$user_id = (int) $user_row['user_id'];
+
+		if ($threshold <= 0 || $user_row['user_type'] == USER_FOUNDER)
+		{
+			return;
+		}
+
+		// add_warning() has just raised the count in the database; the
+		// event's user_row still holds the count from before.
+		$sql = 'SELECT user_warnings
+			FROM ' . USERS_TABLE . '
+			WHERE user_id = ' . $user_id;
+		$result = $this->db->sql_query($sql);
+		$warnings = (int) $this->db->sql_fetchfield('user_warnings');
+		$this->db->sql_freeresult($result);
+
+		if ($warnings < $threshold)
+		{
+			return;
+		}
+
+		if (!function_exists('phpbb_get_banned_user_ids'))
+		{
+			include($this->root_path . 'includes/functions_user.' . $this->php_ext);
+		}
+
+		if (!empty(phpbb_get_banned_user_ids(array($user_id))))
+		{
+			return;
+		}
+
+		$this->user->add_lang_ext('phpbbmodders/banhammer', 'banhammer');
+
+		$staff_reason = $this->user->lang('BH_AUTOBAN_REASON', $warnings);
+		$user_reason = ($this->config['bh_autoban_reason'] !== '') ? $this->config['bh_autoban_reason'] : $staff_reason;
+
+		if ($this->ban_helper->ban('user', $user_row['username'], (int) $this->config['bh_autoban_time'], $staff_reason, $user_reason))
+		{
+			$event['message'] .= '<br /><br />' . $this->user->lang('BH_AUTOBAN_DONE', $warnings);
+		}
 	}
 
 	/**

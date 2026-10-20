@@ -93,6 +93,19 @@
 			</dd>
 		</dl>
 
+		<dl>
+			<dt><label for="autoban_warnings">{L_ACP_AUTOBAN_WARNINGS}{L_COLON}</label><br /><span>{L_ACP_AUTOBAN_WARNINGS_EXPLAIN}</span></dt>
+			<dd><input type="number" class="tiny" name="autoban_warnings" id="autoban_warnings" min="0" max="999" value="{AUTOBAN_WARNINGS}" /></dd>
+		</dl>
+		<dl>
+			<dt><label for="autoban_time">{L_ACP_AUTOBAN_TIME}{L_COLON}</label></dt>
+			<dd><select name="autoban_time" id="autoban_time">{AUTOBAN_TIME}</select></dd>
+		</dl>
+		<dl>
+			<dt><label for="autoban_reason">{L_ACP_AUTOBAN_REASON}{L_COLON}</label><br /><span>{L_ACP_AUTOBAN_REASON_EXPLAIN}</span></dt>
+			<dd><input type="text" class="inputbox" name="autoban_reason" id="autoban_reason" maxlength="255" value="{AUTOBAN_REASON}" /></dd>
+		</dl>
+
 		<p class="submit-buttons">
 			<input class="button1" type="submit" id="submit" name="submit" value="{L_SUBMIT}" />&nbsp;
 			<input class="button2" type="reset" id="reset" name="reset" value="{L_RESET}" />
