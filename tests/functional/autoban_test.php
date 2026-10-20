@@ -13,7 +13,8 @@ namespace phpbbmodders\banhammer\tests\functional;
 /**
  * The automatic ban after a number of warnings, on both phpBB 3.3 and 4.0:
  * with the limit at 2, the first MCP warning leaves the user alone and the
- * second bans them, with a reason saying it was automatic.
+ * second bans them, with a reason saying it was automatic, and with the
+ * move-to-group option on, moves them into the Ban Hammer group.
  *
  * @group functional
  */
@@ -56,20 +57,69 @@ class autoban_test extends \phpbb_functional_test_case
 		$victim_id = $this->create_user('bhautobanvictim');
 
 		$db = $this->get_db();
-		$db->sql_query('UPDATE ' . CONFIG_TABLE . "
-			SET config_value = '2'
-			WHERE config_name = 'bh_autoban_warnings'");
+
+		// Any group the move code accepts will do; the ACP only lets admins
+		// pick their own groups, but the test install has none.
+		$sql = 'SELECT group_id
+			FROM ' . GROUPS_TABLE . "
+			WHERE group_name = 'NEWLY_REGISTERED'";
+		$result = $db->sql_query($sql);
+		$move_group_id = (int) $db->sql_fetchfield('group_id');
+		$db->sql_freeresult($result);
+
+		$this->set_config('bh_autoban_warnings', 2);
+		$this->set_config('bh_autoban_move_group', 1);
+		$this->set_config('bh_group_id', $move_group_id);
 		$this->purge_cache();
 
 		$this->login();
 
+		// An expired warning that phpBB's cleanup task hasn't removed yet:
+		// it is still in users.user_warnings, but must not count.
+		$db->sql_query('INSERT INTO ' . WARNINGS_TABLE . ' ' . $db->sql_build_array('INSERT', array(
+			'user_id'		=> (int) $victim_id,
+			'post_id'		=> 0,
+			'log_id'		=> 0,
+			'warning_time'	=> time() - 400 * 86400,
+		)));
+		$db->sql_query('UPDATE ' . USERS_TABLE . '
+			SET user_warnings = 1
+			WHERE user_id = ' . (int) $victim_id);
+
 		$this->warn($victim_id);
-		$this->assertSame(array(), $this->user_ban_reasons($victim_id), 'One warning is below the limit: no ban');
+		$this->assertSame(array(), $this->user_ban_reasons($victim_id), 'One active warning (plus one expired) is below the limit: no ban');
 
 		$this->warn($victim_id);
 		$reasons = $this->user_ban_reasons($victim_id);
 		$this->assertCount(1, $reasons, 'The second warning reaches the limit: banned');
 		$this->assertStringContainsString('2', $reasons[0], 'The reason names the number of warnings');
+
+		$sql = 'SELECT u.group_id, b.original_group_id
+			FROM ' . USERS_TABLE . ' u
+			LEFT JOIN phpbb_banhammer_ban_group b
+				ON b.user_id = u.user_id
+			WHERE u.user_id = ' . (int) $victim_id;
+		$result = $db->sql_query($sql);
+		$row = $db->sql_fetchrow($result);
+		$db->sql_freeresult($result);
+
+		$this->assertSame($move_group_id, (int) $row['group_id'], 'Moved into the ban group as their default group');
+		$this->assertGreaterThan(0, (int) $row['original_group_id'], 'The move is tracked, with the group to restore');
+	}
+
+	/**
+	 * Set a config value directly in the database.
+	 *
+	 * @param string	$name
+	 * @param int		$value
+	 * @return void
+	 */
+	protected function set_config($name, $value)
+	{
+		$db = $this->get_db();
+		$db->sql_query('UPDATE ' . CONFIG_TABLE . "
+			SET config_value = '" . $db->sql_escape((string) $value) . "'
+			WHERE config_name = '" . $db->sql_escape($name) . "'");
 	}
 
 	/**

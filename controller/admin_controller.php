@@ -102,6 +102,7 @@ class admin_controller
 		$this->template->assign_vars(array(
 			'BAN_EMAIL'		=> (!empty($this->config['bh_ban_email'])) ? true : false,
 			'BAN_IP'		=> (!empty($this->config['bh_ban_ip'])) ? true : false,
+			'AUTOBAN_MOVE_GROUP'	=> (!empty($this->config['bh_autoban_move_group'])) ? true : false,
 			'AUTOBAN_REASON'	=> $this->config['bh_autoban_reason'],
 			'AUTOBAN_TIME'		=> $this->bantime->display_ban_time($this->config['bh_autoban_time']),
 			'AUTOBAN_WARNINGS'	=> (int) $this->config['bh_autoban_warnings'],
@@ -170,6 +171,7 @@ class admin_controller
 		}
 		$this->config->set('bh_autoban_warnings', max(0, min(999, $this->request->variable('autoban_warnings', 0))));
 		$this->config->set('bh_autoban_time', $autoban_time);
+		$this->config->set('bh_autoban_move_group', $this->request->variable('autoban_move_group', 0));
 		$this->config->set('bh_autoban_reason', utf8_substr(trim($this->request->variable('autoban_reason', '', true)), 0, 255));
 	}
 

@@ -32,6 +32,7 @@ class autoban extends \phpbb\db\migration\migration
 			array('config.add', array('bh_autoban_warnings', 0)),
 			array('config.add', array('bh_autoban_time', 0)),
 			array('config.add', array('bh_autoban_reason', '')),
+			array('config.add', array('bh_autoban_move_group', 0)),
 		);
 	}
 }
