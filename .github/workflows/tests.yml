@@ -21,7 +21,7 @@ on:
 
 jobs:
   call-tests:
-    name: Extension tests
+    name: Extension tests (phpBB 3.3.x)
     uses: phpbb-extensions/test-framework/.github/workflows/tests.yml@3.3.x
     with:
       EXTNAME: phpbbmodders/banhammer   # Your extension vendor/package name (required)
@@ -83,9 +83,32 @@ jobs:
       # Generate a code coverage report (see documentation below)? 1 (yes) or 0 (no)
       CODECOV: 0
 
+  call-tests-master:
+    name: Extension tests (phpBB master / 4.0)
+    uses: phpbb-extensions/test-framework/.github/workflows/tests.yml@master
+    with:
+      EXTNAME: phpbbmodders/banhammer
+      PHPBB_BRANCH: 'master'
+      EPV: 0
+      EXECUTABLE_FILES: 1
+      IMAGE_ICC: 1
+      SNIFF: 1
+      RUN_MYSQL_JOBS: 1
+      RUN_PGSQL_JOBS: 1
+      RUN_MSSQL_JOBS: 1
+      RUN_WINDOWS_JOBS: 1
+      RUN_FUNCTIONAL_TESTS: 1
+      RUN_NPM_INSTALL: 0
+      RUN_COMPOSER_INSTALL: 0
+      # phpBB 4.0 needs PHP 8.2 or later.
+      PRIMARY_PHP_VERSION: '8.2'
+      PHP_VERSION_MATRIX: '["8.2", "8.3", "8.4"]'
+      CODECOV: 0
+
   # EPV (Extension Pre Validator), failing on any Fatal or Error finding not
   # listed in .github/epv-allowed.txt
   epv:
     uses: phpbbmodders/.github/.github/workflows/epv.yml@v1
     with:
       EXTNAME: phpbbmodders/banhammer
+      PHPBB_BRANCHES: '["3.3.x", "master"]'

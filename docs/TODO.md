@@ -1,5 +1,16 @@
 # TODO
 
+## Planned Features
+
+Agreed 10/20/2026, built one pull request at a time. Every new feature is off by default and works on phpBB 3.3.19+ and 4.0.
+
+1. **phpBB 4.0 support** for Ban Hammer as it is (bans through 4.0's ban manager, group restore by cron task).
+2. **Ban list** as an ACP setting, moved in from [phpbbmodders/banlist](https://github.com/phpbbmodders/banlist); that repo is archived afterwards.
+3. **Automatic ban after X warnings**: number of warnings, permanent or temporary length, and ban reason set in the ACP. Logged to the admin and moderator logs and the user's notes, like any other ban.
+4. **Ban export/import** as CSV: email, username and IP bans with reason and end date. Import shows a preview first and skips bans the board already has. Requested in [Export/Import banned email list](https://www.phpbb.com/community/viewtopic.php?t=2669812).
+
+Kept separate: [phpbbmodders/groupwarn](https://github.com/phpbbmodders/groupwarn).
+
 ## Validation Considerations
 
 The [archived September 22 validation](TODO/archive/archive1.md#ai-validation-review-2026-09-22) recorded two informational caveats, not denial findings. Archiving does not mark these resolved:

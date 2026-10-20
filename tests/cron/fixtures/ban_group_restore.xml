@@ -1,0 +1,315 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<dataset>
+	<!--
+		Six users a ban moved into the ban group (8). The test adds the bans
+		itself, because phpBB 3.3 and 4.0 keep bans in different tables:
+
+		- user 2: no longer banned, membership created by the ban - should
+		  be removed from group 8 and have their default restored to 7.
+		- user 3: still banned by username - must be left completely alone.
+		- user 4: no longer banned, but already a member of group 8 before
+		  the ban (move_new_membership = 0) - keeps that membership; only
+		  the default group is restored (to 7) and the tracking row removed.
+		- user 5: no longer banned, but also restricted into the same group
+		  8 - keeps the membership the restriction still needs; the default
+		  group is restored and the ban tracking row removed.
+		- user 6: username ban lifted, but their email domain (*@spam.example)
+		  is still banned - must be left completely alone.
+		- user 7: username ban lifted; their registration IP (198.51.100.7)
+		  is still in a banned range, but that is not where they visit from
+		  now - restored like user 2.
+	-->
+	<table name="phpbb_groups">
+		<column>group_id</column>
+		<column>group_name</column>
+		<column>group_type</column>
+		<column>group_desc</column>
+		<row>
+			<value>1</value>
+			<value>ADMINISTRATORS</value>
+			<value>3</value>
+			<value></value>
+		</row>
+		<row>
+			<value>2</value>
+			<value>GLOBAL_MODERATORS</value>
+			<value>3</value>
+			<value></value>
+		</row>
+		<row>
+			<value>3</value>
+			<value>NEWLY_REGISTERED</value>
+			<value>3</value>
+			<value></value>
+		</row>
+		<row>
+			<value>4</value>
+			<value>REGISTERED</value>
+			<value>3</value>
+			<value></value>
+		</row>
+		<row>
+			<value>5</value>
+			<value>BOTS</value>
+			<value>3</value>
+			<value></value>
+		</row>
+		<row>
+			<value>6</value>
+			<value>GUESTS</value>
+			<value>3</value>
+			<value></value>
+		</row>
+		<row>
+			<value>7</value>
+			<value>ORIGINALGROUP1</value>
+			<value>0</value>
+			<value></value>
+		</row>
+		<row>
+			<value>8</value>
+			<value>BANGROUP</value>
+			<value>0</value>
+			<value></value>
+		</row>
+		<row>
+			<value>9</value>
+			<value>UNUSEDGROUP</value>
+			<value>0</value>
+			<value></value>
+		</row>
+		<row>
+			<value>10</value>
+			<value>ORIGINALGROUP2</value>
+			<value>0</value>
+			<value></value>
+		</row>
+	</table>
+	<table name="phpbb_users">
+		<column>user_id</column>
+		<column>group_id</column>
+		<column>user_avatar</column>
+		<column>user_rank</column>
+		<column>username</column>
+		<column>username_clean</column>
+		<column>user_permissions</column>
+		<column>user_sig</column>
+		<column>user_email</column>
+		<column>user_ip</column>
+		<row>
+			<value>2</value>
+			<value>8</value>
+			<value></value>
+			<value>0</value>
+			<value>unbanned user</value>
+			<value>unbanneduser</value>
+			<value></value>
+			<value></value>
+			<value>unbanned@example.com</value>
+			<value>192.0.2.2</value>
+		</row>
+		<row>
+			<value>3</value>
+			<value>8</value>
+			<value></value>
+			<value>0</value>
+			<value>still banned user</value>
+			<value>stillbanneduser</value>
+			<value></value>
+			<value></value>
+			<value>stillbanned@example.com</value>
+			<value>192.0.2.3</value>
+		</row>
+		<row>
+			<value>4</value>
+			<value>8</value>
+			<value></value>
+			<value>0</value>
+			<value>existing member user</value>
+			<value>existingmemberuser</value>
+			<value></value>
+			<value></value>
+			<value>existing@example.com</value>
+			<value>192.0.2.4</value>
+		</row>
+		<row>
+			<value>5</value>
+			<value>8</value>
+			<value></value>
+			<value>0</value>
+			<value>restricted user</value>
+			<value>restricteduser</value>
+			<value></value>
+			<value></value>
+			<value>restricted@example.com</value>
+			<value>192.0.2.5</value>
+		</row>
+		<row>
+			<value>6</value>
+			<value>8</value>
+			<value></value>
+			<value>0</value>
+			<value>email banned user</value>
+			<value>emailbanneduser</value>
+			<value></value>
+			<value></value>
+			<value>someone@spam.example</value>
+			<value>192.0.2.6</value>
+		</row>
+		<row>
+			<value>7</value>
+			<value>8</value>
+			<value></value>
+			<value>0</value>
+			<value>ip banned user</value>
+			<value>ipbanneduser</value>
+			<value></value>
+			<value></value>
+			<value>ipbanned@example.com</value>
+			<value>198.51.100.7</value>
+		</row>
+	</table>
+	<table name="phpbb_user_group">
+		<column>user_id</column>
+		<column>group_id</column>
+		<column>group_leader</column>
+		<column>user_pending</column>
+		<row>
+			<value>2</value>
+			<value>7</value>
+			<value>0</value>
+			<value>0</value>
+		</row>
+		<row>
+			<value>2</value>
+			<value>8</value>
+			<value>0</value>
+			<value>0</value>
+		</row>
+		<row>
+			<value>3</value>
+			<value>10</value>
+			<value>0</value>
+			<value>0</value>
+		</row>
+		<row>
+			<value>3</value>
+			<value>8</value>
+			<value>0</value>
+			<value>0</value>
+		</row>
+		<row>
+			<value>4</value>
+			<value>7</value>
+			<value>0</value>
+			<value>0</value>
+		</row>
+		<row>
+			<value>4</value>
+			<value>8</value>
+			<value>0</value>
+			<value>0</value>
+		</row>
+		<row>
+			<value>5</value>
+			<value>7</value>
+			<value>0</value>
+			<value>0</value>
+		</row>
+		<row>
+			<value>5</value>
+			<value>8</value>
+			<value>0</value>
+			<value>0</value>
+		</row>
+		<row>
+			<value>6</value>
+			<value>7</value>
+			<value>0</value>
+			<value>0</value>
+		</row>
+		<row>
+			<value>6</value>
+			<value>8</value>
+			<value>0</value>
+			<value>0</value>
+		</row>
+		<row>
+			<value>7</value>
+			<value>7</value>
+			<value>0</value>
+			<value>0</value>
+		</row>
+		<row>
+			<value>7</value>
+			<value>8</value>
+			<value>0</value>
+			<value>0</value>
+		</row>
+	</table>
+	<table name="phpbb_banhammer_ban_group">
+		<column>ban_id</column>
+		<column>user_id</column>
+		<column>original_group_id</column>
+		<column>move_group_id</column>
+		<column>move_new_membership</column>
+		<row>
+			<value>1</value>
+			<value>2</value>
+			<value>7</value>
+			<value>8</value>
+			<value>1</value>
+		</row>
+		<row>
+			<value>2</value>
+			<value>3</value>
+			<value>10</value>
+			<value>8</value>
+			<value>1</value>
+		</row>
+		<row>
+			<value>3</value>
+			<value>4</value>
+			<value>7</value>
+			<value>8</value>
+			<value>0</value>
+		</row>
+		<row>
+			<value>4</value>
+			<value>5</value>
+			<value>7</value>
+			<value>8</value>
+			<value>1</value>
+		</row>
+		<row>
+			<value>5</value>
+			<value>6</value>
+			<value>7</value>
+			<value>8</value>
+			<value>1</value>
+		</row>
+		<row>
+			<value>6</value>
+			<value>7</value>
+			<value>7</value>
+			<value>8</value>
+			<value>1</value>
+		</row>
+	</table>
+	<table name="phpbb_banhammer_restrict">
+		<column>restrict_id</column>
+		<column>user_id</column>
+		<column>original_group_id</column>
+		<column>restrict_group_id</column>
+		<column>restrict_until</column>
+		<column>restrict_new_membership</column>
+		<row>
+			<value>1</value>
+			<value>5</value>
+			<value>7</value>
+			<value>8</value>
+			<value>2000000000</value>
+			<value>1</value>
+		</row>
+	</table>
+</dataset>

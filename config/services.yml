@@ -6,10 +6,13 @@ services:
             - '@cache.driver'
             - '@config'
             - '@dbal.conn'
+            - '@controller.helper'
             - '@request'
             - '@template'
             - '@user'
             - '@phpbbmodders.banhammer.core.bantime'
+            - '@phpbbmodders.banhammer.core.ban_helper'
+            - '@phpbbmodders.banhammer.core.ban_group_restore'
             - '%core.root_path%'
             - '%core.php_ext%'
             - '@service_container'
@@ -31,6 +34,20 @@ services:
         class:  phpbbmodders\banhammer\core\bantime
         arguments:
             - '@user'
+    phpbbmodders.banhammer.core.ban_helper:
+        class: phpbbmodders\banhammer\core\ban_helper
+        arguments:
+            - '@service_container'
+            - '%core.root_path%'
+            - '%core.php_ext%'
+    phpbbmodders.banhammer.core.ban_group_restore:
+        class: phpbbmodders\banhammer\core\ban_group_restore
+        arguments:
+            - '@dbal.conn'
+            - '%core.root_path%'
+            - '%core.php_ext%'
+            - '%core.table_prefix%banhammer_restrict'
+            - '%core.table_prefix%banhammer_ban_group'
     phpbbmodders.banhammer.controller.ban_domain:
         class: phpbbmodders\banhammer\controller\ban_domain_controller
         arguments:
@@ -38,8 +55,7 @@ services:
             - '@language'
             - '@request'
             - '@user'
-            - '%core.root_path%'
-            - '%core.php_ext%'
+            - '@phpbbmodders.banhammer.core.ban_helper'
     phpbbmodders.banhammer.cron.restriction_expiry:
         class: phpbbmodders\banhammer\cron\task\restriction_expiry
         arguments:
@@ -50,5 +66,14 @@ services:
             - '%core.php_ext%'
         calls:
             - [set_name, [cron.task.phpbbmodders.banhammer.restriction_expiry]]
+        tags:
+            - { name: cron.task }
+    phpbbmodders.banhammer.cron.ban_group_restore:
+        class: phpbbmodders\banhammer\cron\task\ban_group_restore
+        arguments:
+            - '@config'
+            - '@phpbbmodders.banhammer.core.ban_group_restore'
+        calls:
+            - [set_name, [cron.task.phpbbmodders.banhammer.ban_group_restore]]
         tags:
             - { name: cron.task }
