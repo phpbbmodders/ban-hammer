@@ -19,7 +19,7 @@ use Symfony\Component\HttpFoundation\Response;
 * link (see event\banhammer_listener::add_mcp_queue_banhammer_link), never
 * from the notification email itself: phpBB's messenger has no supported
 * way for an extension to add a placeholder to a core .txt email template,
-* see docs/events/messenger_email_template_ext_override.txt.
+* see docs/events/phpbb-rfc-extension-email-template-override.txt.
 */
 class ban_domain_controller
 {
@@ -35,11 +35,8 @@ class ban_domain_controller
 	/** @var \phpbb\user */
 	protected $user;
 
-	/** @var string phpBB root path */
-	protected $root_path;
-
-	/** @var string phpEx */
-	protected $php_ext;
+	/** @var \phpbbmodders\banhammer\core\ban_helper */
+	protected $ban_helper;
 
 	/**
 	* Constructor
@@ -48,8 +45,7 @@ class ban_domain_controller
 	* @param \phpbb\language\language	$language	Language object
 	* @param \phpbb\request\request		$request	Request object
 	* @param \phpbb\user					$user		User object
-	* @param string							$root_path	phpBB root path
-	* @param string							$php_ext	PHP file extension
+	* @param \phpbbmodders\banhammer\core\ban_helper	$ban_helper	Version-aware ban helper
 	* @access public
 	*/
 	public function __construct(
@@ -57,16 +53,14 @@ class ban_domain_controller
 		\phpbb\language\language $language,
 		\phpbb\request\request $request,
 		\phpbb\user $user,
-		$root_path,
-		$php_ext
+		\phpbbmodders\banhammer\core\ban_helper $ban_helper
 	)
 	{
 		$this->auth		= $auth;
 		$this->language	= $language;
 		$this->request	= $request;
 		$this->user		= $user;
-		$this->root_path	= $root_path;
-		$this->php_ext		= $php_ext;
+		$this->ban_helper	= $ban_helper;
 	}
 
 	/**
@@ -105,12 +99,7 @@ class ban_domain_controller
 		{
 			$reason = $this->request->variable('bh_reason', '', true);
 
-			if (!function_exists('user_ban'))
-			{
-				include($this->root_path . 'includes/functions_user.' . $this->php_ext);
-			}
-
-			$success = user_ban('email', $ban_pattern, 0, '', false, $reason);
+			$success = $this->ban_helper->ban('email', $ban_pattern, 0, $reason);
 
 			if (!$success)
 			{

@@ -17,7 +17,7 @@ class restrict_group extends \phpbb\db\migration\migration
 		return $this->db_tools->sql_table_exists($this->table_prefix . 'banhammer_restrict');
 	}
 
-	static public function depends_on()
+	public static function depends_on()
 	{
 		return array('\phpbbmodders\banhammer\migrations\v104_data');
 	}

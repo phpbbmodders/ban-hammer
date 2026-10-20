@@ -43,6 +43,9 @@ class banhammer_listener implements EventSubscriberInterface
 	/** @var \phpbb\db\driver\driver */
 	protected $db;
 
+	/** @var \phpbb\controller\helper */
+	protected $helper;
+
 	/** @var \phpbb\request\request */
 	protected $request;
 
@@ -54,6 +57,12 @@ class banhammer_listener implements EventSubscriberInterface
 
 	/* @var \phpbbmodders\banhammer\core\bantime */
 	protected $bantime;
+
+	/** @var \phpbbmodders\banhammer\core\ban_helper */
+	protected $ban_helper;
+
+	/** @var \phpbbmodders\banhammer\core\ban_group_restore */
+	protected $ban_group_restore;
 
 	/** @var string phpBB root path */
 	protected $root_path;
@@ -75,10 +84,13 @@ class banhammer_listener implements EventSubscriberInterface
 		\phpbb\cache\driver\driver_interface $cache,
 		\phpbb\config\config $config,
 		\phpbb\db\driver\driver_interface $db,
+		\phpbb\controller\helper $helper,
 		\phpbb\request\request $request,
 		\phpbb\template\template $template,
 		\phpbb\user $user,
 		\phpbbmodders\banhammer\core\bantime $bantime,
+		\phpbbmodders\banhammer\core\ban_helper $ban_helper,
+		\phpbbmodders\banhammer\core\ban_group_restore $ban_group_restore,
 		$root_path,
 		$phpExt,
 		ContainerInterface $container,
@@ -90,10 +102,13 @@ class banhammer_listener implements EventSubscriberInterface
 		$this->cache		= $cache;
 		$this->config 		= $config;
 		$this->db			= $db;
+		$this->helper		= $helper;
 		$this->request		= $request;
 		$this->template		= $template;
 		$this->user			= $user;
 		$this->bantime		= $bantime;
+		$this->ban_helper	= $ban_helper;
+		$this->ban_group_restore	= $ban_group_restore;
 		$this->root_path	= $root_path;
 		$this->php_ext		= $phpExt;
 		$this->container	= $container;
@@ -101,7 +116,7 @@ class banhammer_listener implements EventSubscriberInterface
 		$this->ban_group_table	= $ban_group_table;
 	}
 
-	static public function getSubscribedEvents()
+	public static function getSubscribedEvents()
 	{
 		return(array(
 			'core.memberlist_view_profile'	=> array(
@@ -183,7 +198,9 @@ class banhammer_listener implements EventSubscriberInterface
 			// character-set restriction. EPV flags htmlspecialchars() as a
 			// blanket "review this" heuristic; here it's the correct call.
 			$template_vars['MCP_BAN_DOMAIN'] = htmlspecialchars($domain, ENT_QUOTES);
-			$template_vars['U_MCP_BAN_DOMAIN'] = append_sid(generate_board_url() . '/app.' . $this->php_ext . '/banhammer/ban_domain', 'domain=' . urlencode($domain));
+			// Through the controller helper, not a hand-built app.php URL:
+			// phpBB 4.0 no longer serves extension routes under app.php/.
+			$template_vars['U_MCP_BAN_DOMAIN'] = $this->helper->route('phpbbmodders_banhammer_ban_domain', array('domain' => $domain));
 		}
 
 		if (!empty($template_vars))
@@ -386,7 +403,7 @@ class banhammer_listener implements EventSubscriberInterface
 		$ban_time		= $this->request->variable('ban_time', 0);
 
 		// The username is the user so it's always banned.
-		$success = user_ban('user', $this->data['username'], $ban_time, '', false, $bh_reason, $bh_reason_user);
+		$success = $this->ban_helper->ban('user', $this->data['username'], $ban_time, $bh_reason, $bh_reason_user);
 
 		if (!$success)
 		{
@@ -395,7 +412,7 @@ class banhammer_listener implements EventSubscriberInterface
 
 		if ($this->request->variable('ban_email', 0))
 		{
-			$success = user_ban('email', $this->data['user_email'], $ban_time, '', false, $bh_reason, $bh_reason_user);
+			$success = $this->ban_helper->ban('email', $this->data['user_email'], $ban_time, $bh_reason, $bh_reason_user);
 
 			if (!$success)
 			{
@@ -405,7 +422,7 @@ class banhammer_listener implements EventSubscriberInterface
 
 		if ($this->request->variable('ban_ip', 0) && !empty($this->data['user_ip']))
 		{
-			$success = user_ban('ip', $this->data['user_ip'], $ban_time, '', false, $bh_reason, $bh_reason_user);
+			$success = $this->ban_helper->ban('ip', $this->data['user_ip'], $ban_time, $bh_reason, $bh_reason_user);
 
 			if (!$success)
 			{
@@ -510,8 +527,12 @@ class banhammer_listener implements EventSubscriberInterface
 			}
 		}
 
-		// Need to purge the cache.
-		$this->cache->destroy('sql', BANLIST_TABLE);
+		// Need to purge the cache. phpBB 4.0's ban manager clears its own
+		// cache, and has no BANLIST_TABLE.
+		if (defined('BANLIST_TABLE'))
+		{
+			$this->cache->destroy('sql', BANLIST_TABLE);
+		}
 
 		// The page needs to be reloaded to show the new banned status.
 		$args = array(
@@ -731,25 +752,6 @@ class banhammer_listener implements EventSubscriberInterface
 	}
 
 	/**
-	 * The group-move tracking row for a user's currently active ban, if any.
-	 *
-	 * @param int $user_id
-	 * @return array|null The tracking row, or null when there is none.
-	 * @access protected
-	 */
-	protected function active_ban_group($user_id)
-	{
-		$sql = 'SELECT ban_id, original_group_id, move_group_id, move_new_membership
-			FROM ' . $this->ban_group_table . '
-			WHERE user_id = ' . (int) $user_id;
-		$result = $this->db->sql_query_limit($sql, 1);
-		$row = $this->db->sql_fetchrow($result);
-		$this->db->sql_freeresult($result);
-
-		return ($row) ?: null;
-	}
-
-	/**
 	 * A configured move/restrict group's name, re-validated at the point
 	 * it's about to be used rather than trusted from ACP-save time: the
 	 * group may have been deleted, made founder-managed, or (when
@@ -789,9 +791,9 @@ class banhammer_listener implements EventSubscriberInterface
 
 	/**
 	 * Once a ban is cleared, undo whatever group move that specific ban
-	 * actually made - not "the group currently configured in the ACP",
-	 * which may have changed since, or matter to some other, unrelated
-	 * group membership entirely.
+	 * actually made. On phpBB 3.3 this event runs on every ban check, so
+	 * the user is restored on their next visit; phpBB 4.0 only fires it for
+	 * banned users, so there the ban_group_restore cron task does it.
 	 *
 	 * @param \phpbb\event\data $event The event object
 	 * @return void
@@ -804,41 +806,7 @@ class banhammer_listener implements EventSubscriberInterface
 			return;
 		}
 
-		$ban_group = $this->active_ban_group($this->user->data['user_id']);
-
-		if ($ban_group === null)
-		{
-			return;
-		}
-
-		if (!function_exists('group_user_del') || !function_exists('group_user_attributes'))
-		{
-			include($this->root_path . 'includes/functions_user.' . $this->php_ext);
-		}
-
-		$move_group_id = (int) $ban_group['move_group_id'];
-
-		if ($move_group_id && $ban_group['move_new_membership'])
-		{
-			// A restriction can be configured to use the same group as a
-			// ban's move-to group. If this user also has an active
-			// restriction recorded against this exact group, leave their
-			// membership alone - it's still needed for the restriction,
-			// checked against its own recorded group, not current config.
-			$restriction = $this->active_restriction($this->user->data['user_id']);
-
-			if ($restriction === null || (int) $restriction['restrict_group_id'] !== $move_group_id)
-			{
-				group_user_del($move_group_id, array($this->user->data['user_id']));
-			}
-		}
-
-		if ($ban_group['original_group_id'])
-		{
-			group_user_attributes('default', (int) $ban_group['original_group_id'], array($this->user->data['user_id']));
-		}
-
-		$this->db->sql_query('DELETE FROM ' . $this->ban_group_table . ' WHERE ban_id = ' . (int) $ban_group['ban_id']);
+		$this->ban_group_restore->restore_user((int) $this->user->data['user_id']);
 	}
 
 	private function bh_del_privmsgs()

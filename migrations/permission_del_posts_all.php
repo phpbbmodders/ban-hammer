@@ -32,7 +32,7 @@ class permission_del_posts_all extends \phpbb\db\migration\migration
 		return (bool) $row;
 	}
 
-	static public function depends_on()
+	public static function depends_on()
 	{
 		return array('\phpbbmodders\banhammer\migrations\restrict_group_id_column');
 	}

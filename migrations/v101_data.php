@@ -19,7 +19,7 @@ class v101_data extends \phpbb\db\migration\container_aware_migration
 	/** @var array Unserialized legacy settings blob, keyed by setting name */
 	protected $settings;
 
-	static public function depends_on()
+	public static function depends_on()
 	{
 		return array('\phpbbmodders\banhammer\migrations\install_banhammer');
 	}

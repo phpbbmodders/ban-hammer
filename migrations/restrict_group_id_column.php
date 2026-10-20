@@ -24,7 +24,7 @@ class restrict_group_id_column extends \phpbb\db\migration\migration
 		return $this->db_tools->sql_column_exists($this->table_prefix . 'banhammer_restrict', 'restrict_group_id');
 	}
 
-	static public function depends_on()
+	public static function depends_on()
 	{
 		return array('\phpbbmodders\banhammer\migrations\restrict_group');
 	}

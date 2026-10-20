@@ -12,7 +12,7 @@ namespace phpbbmodders\banhammer\migrations;
 
 class remove_config extends \phpbb\db\migration\migration
 {
-	static public function depends_on()
+	public static function depends_on()
 	{
 		return(array('\phpbbmodders\banhammer\migrations\install_banhammer'));
 	}

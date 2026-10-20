@@ -30,7 +30,7 @@ class ban_group extends \phpbb\db\migration\migration
 		return $this->db_tools->sql_table_exists($this->table_prefix . 'banhammer_ban_group');
 	}
 
-	static public function depends_on()
+	public static function depends_on()
 	{
 		return array('\phpbbmodders\banhammer\migrations\restrict_membership_column');
 	}
@@ -99,11 +99,23 @@ class ban_group extends \phpbb\db\migration\migration
 		// restrict_membership_column's own legacy default: leaving a
 		// genuinely ban-created membership in place is a much smaller
 		// problem than stripping one the ban never granted.
+		// phpBB 4.0 replaced the banlist table (with its ban_exclude column)
+		// by a bans table, whose user bans are rows with ban_mode = 'user'.
+		if ($this->db_tools->sql_table_exists($this->table_prefix . 'bans'))
+		{
+			$sql_ban = 'FROM ' . USER_GROUP_TABLE . ' ug, ' . $this->table_prefix . "bans b
+				WHERE b.ban_mode = 'user'";
+		}
+		else
+		{
+			$sql_ban = 'FROM ' . USER_GROUP_TABLE . ' ug, ' . $this->table_prefix . 'banlist b
+				WHERE b.ban_exclude = 0';
+		}
+
 		$sql = 'SELECT DISTINCT ug.user_id
-			FROM ' . USER_GROUP_TABLE . ' ug, ' . BANLIST_TABLE . ' b
-			WHERE ug.group_id = ' . $move_group_id . '
+			' . $sql_ban . '
+				AND ug.group_id = ' . $move_group_id . '
 				AND b.ban_userid = ug.user_id
-				AND b.ban_exclude = 0
 				AND (b.ban_end = 0 OR b.ban_end > ' . time() . ')';
 		$result = $this->db->sql_query($sql);
 

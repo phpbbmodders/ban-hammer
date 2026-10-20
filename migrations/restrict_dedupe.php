@@ -22,7 +22,7 @@ namespace phpbbmodders\banhammer\migrations;
  */
 class restrict_dedupe extends \phpbb\db\migration\migration
 {
-	static public function depends_on()
+	public static function depends_on()
 	{
 		return array('\phpbbmodders\banhammer\migrations\permission_del_posts_all');
 	}

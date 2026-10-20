@@ -78,8 +78,9 @@ class confirm_bypass_test extends \phpbb_functional_test_case
 		$this->assertStringNotContainsString('[phpBB Debug]', self::get_content());
 
 		$db = $this->get_db();
+		// phpBB 4.0 renamed the banlist table to bans; both keep ban_userid.
 		$sql = 'SELECT COUNT(*) as cnt
-			FROM ' . BANLIST_TABLE . '
+			FROM ' . (defined('BANS_TABLE') ? BANS_TABLE : BANLIST_TABLE) . '
 			WHERE ban_userid = ' . $victim_id;
 		$result = $db->sql_query($sql);
 		$count = (int) $db->sql_fetchfield('cnt');

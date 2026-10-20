@@ -16,7 +16,7 @@ namespace phpbbmodders\banhammer\migrations;
 
 class v104_data extends \phpbb\db\migration\container_aware_migration
 {
-	static public function depends_on()
+	public static function depends_on()
 	{
 		return array('\phpbbmodders\banhammer\migrations\v101_data');
 	}

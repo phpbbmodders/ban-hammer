@@ -24,7 +24,7 @@ class restrict_unique_user extends \phpbb\db\migration\migration
 		return $this->db_tools->sql_unique_index_exists($this->table_prefix . 'banhammer_restrict', 'user_id');
 	}
 
-	static public function depends_on()
+	public static function depends_on()
 	{
 		// restrict_dedupe removes any leftover duplicate user_id rows from
 		// the concurrent-restriction race this index closes off; without
