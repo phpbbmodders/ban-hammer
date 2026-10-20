@@ -1,0 +1,58 @@
+{% include 'overall_header.html' %}
+
+<h2>{{ lang('BH_BANLIST') }}</h2>
+<p>{{ lang('BH_BANLIST_EXPLAIN') }}</p>
+
+<div class="action-bar bar-top">
+	<div class="pagination">
+		{{ TOTAL_BANNED }}
+		{% if pagination %}
+			{% include 'pagination.html' %}
+		{% endif %}
+	</div>
+</div>
+
+<div class="forumbg forumbg-table">
+	<div class="inner">
+		<table class="table1" id="bh-banlist">
+			<thead>
+				<tr>
+					<th class="name">{{ lang('USERNAME') }}</th>
+					<th class="info">{{ lang('BH_BANLIST_BAN_START') }}</th>
+					<th class="info">{{ lang('BH_BANLIST_BAN_END') }}</th>
+					<th class="posts">{{ lang('BH_BANLIST_WARNINGS') }}</th>
+					<th class="info">{{ lang('BH_BANLIST_REASON') }}</th>
+				</tr>
+			</thead>
+			<tbody>
+			{% for row in banlist_row %}
+				<tr class="{% if loop.index is even %}bg2{% else %}bg1{% endif %}">
+					<td>{{ row.USERNAME_FULL }}</td>
+					<td>{{ row.BAN_START }}</td>
+					<td>{{ row.BAN_END }}</td>
+					<td class="posts">
+						{{ row.WARNINGS }}
+						{% if row.LAST_WARNING %}<br><span class="small">{{ lang('BH_BANLIST_LAST_WARNING') ~ lang('COLON') }} {{ row.LAST_WARNING }}</span>{% endif %}
+					</td>
+					<td>{{ row.BAN_REASON }}</td>
+				</tr>
+			{% else %}
+				<tr class="bg1">
+					<td colspan="5">{{ lang('BH_BANLIST_NONE') }}</td>
+				</tr>
+			{% endfor %}
+			</tbody>
+		</table>
+	</div>
+</div>
+
+<div class="action-bar bar-bottom">
+	<div class="pagination">
+		{{ TOTAL_BANNED }}
+		{% if pagination %}
+			{% include 'pagination.html' %}
+		{% endif %}
+	</div>
+</div>
+
+{% include 'overall_footer.html' %}

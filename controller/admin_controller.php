@@ -103,6 +103,7 @@ class admin_controller
 			'BAN_EMAIL'		=> (!empty($this->config['bh_ban_email'])) ? true : false,
 			'BAN_IP'		=> (!empty($this->config['bh_ban_ip'])) ? true : false,
 			'BAN_TIME'		=> $this->bantime->display_ban_time($this->config['bh_ban_time']),
+			'BANLIST_ENABLE'	=> (!empty($this->config['bh_banlist_enable'])) ? true : false,
 			'DEL_AVATAR'	=> (!empty($this->config['bh_del_avatar'])) ? true : false,
 			'DEL_PRIVMSGS'	=> (!empty($this->config['bh_del_privmsgs'])) ? true : false,
 			'DEL_POSTS'		=> (!empty($this->config['bh_del_posts'])) ? true : false,
@@ -157,6 +158,7 @@ class admin_controller
 		}
 
 		$this->config->set('bh_ban_time', $this->request->variable('ban_time', 0));
+		$this->config->set('bh_banlist_enable', $this->request->variable('banlist_enable', 0));
 	}
 
 	/**
