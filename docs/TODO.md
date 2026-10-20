@@ -6,8 +6,8 @@ Agreed 10/20/2026, built one pull request at a time. Every new feature is off by
 
 1. ~~**phpBB 4.0 support**~~ - done in #50.
 2. ~~**Ban list**~~ - done in #51; phpbbmodders/banlist is archived.
-3. **Automatic ban after X warnings**: number of warnings, permanent or temporary length, and ban reason set in the ACP. Logged to the admin and moderator logs and the user's notes, like any other ban.
-4. **Ban export/import** as CSV: email, username and IP bans with reason and end date. Import shows a preview first and skips bans the board already has. Requested in [Export/Import banned email list](https://www.phpbb.com/community/viewtopic.php?t=2669812).
+3. **Automatic ban after X warnings** - in #52, on hold until phpBB merges [phpbb/phpbb#7101](https://github.com/phpbb/phpbb/pull/7101): phpBB master's MCP warn page shows a PHP warning that fails #52's 4.0 tests.
+4. **Ban export/import** as CSV: email, username and IP bans with reason and end date. Import shows a preview first and skips bans the board already has. Full plan: [todo-ban-export-import.md](TODO/todo-ban-export-import.md).
 
 Kept separate: [phpbbmodders/groupwarn](https://github.com/phpbbmodders/groupwarn).
 
