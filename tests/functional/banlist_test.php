@@ -62,7 +62,8 @@ class banlist_test extends \phpbb_functional_test_case
 	{
 		// phpBB 4.0 serves extension routes under index.php/, 3.3 under app.php/.
 		$route = defined('BANS_TABLE') ? 'index.php/banlist' : 'app.php/banlist';
-		$crawler = self::request('GET', $route . ($this->sid ? '?sid=' . $this->sid : ''), array(), false);
+		// phpBB 3.3's logout() unsets $sid, so check it with empty().
+		$crawler = self::request('GET', $route . (!empty($this->sid) ? '?sid=' . $this->sid : ''), array(), false);
 
 		// phpBB 4.0's newer BrowserKit renamed getStatus() to getStatusCode().
 		$response = self::$client->getResponse();
