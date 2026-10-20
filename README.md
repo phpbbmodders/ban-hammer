@@ -13,6 +13,7 @@ Ban a user straight from their profile, with options to clean up their content a
 - Instead of banning, restrict a user to a limited group for a set time (or permanently); their original group comes back automatically when it ends.
 - A **Ban email domain** action on the MCP approve-details page.
 - Optionally report the user to Stop Forum Spam (API key set in the ACP).
+- An optional **Ban list** page and header link listing users banned by username, with ban dates, the reason shown to the user, and their warnings. Off by default; turn it on in the ACP and give groups the *Can view the ban list* permission (the standard and full user roles have it).
 
 ## Requirements
 

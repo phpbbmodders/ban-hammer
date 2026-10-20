@@ -26,4 +26,5 @@ if (empty($lang) || !is_array($lang))
 
 $lang = array_merge($lang, array(
 	'ACL_M_BANHAMMER_DEL_POSTS_ALL'	=> 'Can delete a banned user\'s posts in every forum via Ban Hammer, not just forums they can otherwise delete posts in',
+	'ACL_U_BANHAMMER_VIEWBANLIST'	=> 'Can view the ban list',
 ));

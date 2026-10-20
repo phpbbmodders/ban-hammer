@@ -56,6 +56,19 @@ services:
             - '@request'
             - '@user'
             - '@phpbbmodders.banhammer.core.ban_helper'
+    phpbbmodders.banhammer.controller.banlist:
+        class: phpbbmodders\banhammer\controller\banlist_controller
+        arguments:
+            - '@auth'
+            - '@config'
+            - '@dbal.conn'
+            - '@controller.helper'
+            - '@language'
+            - '@pagination'
+            - '@request'
+            - '@template'
+            - '@user'
+            - '%core.table_prefix%'
     phpbbmodders.banhammer.cron.restriction_expiry:
         class: phpbbmodders\banhammer\cron\task\restriction_expiry
         arguments:

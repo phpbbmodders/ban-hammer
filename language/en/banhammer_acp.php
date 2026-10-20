@@ -40,6 +40,9 @@ $lang = array_merge($lang, array(
 	'ACP_BAN_IP'		=> 'Ban users IP address',
 	'ACP_BAN_IP_EXPLAIN'	=> '<strong>Be careful with this.</strong> Most home users have dynamic IP addresses and only need to reboot their router/modem to get a new IP address. The next day that IP address might be assigned to a user you want on your site. Spammers also use internet anonymity proxies or the Tor network making an IP ban pointless.',
 
+	'ACP_BANLIST_ENABLE'			=> 'Show the ban list',
+	'ACP_BANLIST_ENABLE_EXPLAIN'	=> 'Adds a <em>Ban list</em> page and header link listing every user banned by username, with the ban dates, the reason shown to the user, and their warnings. Only users with the <em>Can view the ban list</em> permission see it.',
+
 	'ACP_DEL_AVATAR'	=> 'Delete users avatar',
 	'ACP_DEL_PRIVMSGS'	=> 'Delete users private messages',
 	'ACP_DEL_POSTS'		=> 'Delete users posts',
