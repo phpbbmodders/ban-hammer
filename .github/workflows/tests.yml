@@ -71,14 +71,14 @@ jobs:
       RUN_COMPOSER_INSTALL: 0
 
       # CUSTOMISE PHP VERSIONS
-      # To override the default PHP versions tested (7.2 through 8.4):
+      # Test only PHP versions supported by the extension's security minimum.
 
       # Preferred PHP version used for all test jobs.
-      PRIMARY_PHP_VERSION: '7.4'
+      PRIMARY_PHP_VERSION: '8.3'
 
       # The MySQL and PostgreSQL jobs run tests across multiple PHP versions.
       # List the PHP versions you want your extension tested with.
-      PHP_VERSION_MATRIX: '["7.4", "8.0", "8.1","8.2", "8.3", "8.4"]'
+      PHP_VERSION_MATRIX: '["8.3", "8.4"]'
 
       # Generate a code coverage report (see documentation below)? 1 (yes) or 0 (no)
       CODECOV: 0
@@ -100,9 +100,9 @@ jobs:
       RUN_FUNCTIONAL_TESTS: 1
       RUN_NPM_INSTALL: 0
       RUN_COMPOSER_INSTALL: 0
-      # phpBB 4.0 needs PHP 8.2 or later.
-      PRIMARY_PHP_VERSION: '8.2'
-      PHP_VERSION_MATRIX: '["8.2", "8.3", "8.4"]'
+      # The extension requires PHP 8.3.36 or later, including on phpBB 4.0.
+      PRIMARY_PHP_VERSION: '8.3'
+      PHP_VERSION_MATRIX: '["8.3", "8.4"]'
       CODECOV: 0
 
   # EPV (Extension Pre Validator), failing on any Fatal or Error finding not
