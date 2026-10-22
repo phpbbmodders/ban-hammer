@@ -102,6 +102,10 @@ class admin_controller
 		$this->template->assign_vars(array(
 			'BAN_EMAIL'		=> (!empty($this->config['bh_ban_email'])) ? true : false,
 			'BAN_IP'		=> (!empty($this->config['bh_ban_ip'])) ? true : false,
+			'AUTOBAN_MOVE_GROUP'	=> (!empty($this->config['bh_autoban_move_group'])) ? true : false,
+			'AUTOBAN_REASON'	=> $this->config['bh_autoban_reason'],
+			'AUTOBAN_TIME'		=> $this->bantime->display_ban_time($this->config['bh_autoban_time']),
+			'AUTOBAN_WARNINGS'	=> (int) $this->config['bh_autoban_warnings'],
 			'BAN_TIME'		=> $this->bantime->display_ban_time($this->config['bh_ban_time']),
 			'BANLIST_ENABLE'	=> (!empty($this->config['bh_banlist_enable'])) ? true : false,
 			'DEL_AVATAR'	=> (!empty($this->config['bh_del_avatar'])) ? true : false,
@@ -159,6 +163,16 @@ class admin_controller
 
 		$this->config->set('bh_ban_time', $this->request->variable('ban_time', 0));
 		$this->config->set('bh_banlist_enable', $this->request->variable('banlist_enable', 0));
+
+		$autoban_time = $this->request->variable('autoban_time', 0);
+		if (!isset($this->bantime->ban_length_options()[$autoban_time]))
+		{
+			trigger_error($this->user->lang['FORM_INVALID'] . adm_back_link($this->u_action), E_USER_WARNING);
+		}
+		$this->config->set('bh_autoban_warnings', max(0, min(999, $this->request->variable('autoban_warnings', 0))));
+		$this->config->set('bh_autoban_time', $autoban_time);
+		$this->config->set('bh_autoban_move_group', $this->request->variable('autoban_move_group', 0));
+		$this->config->set('bh_autoban_reason', utf8_substr(trim($this->request->variable('autoban_reason', '', true)), 0, 255));
 	}
 
 	/**

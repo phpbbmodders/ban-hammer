@@ -1,0 +1,63 @@
+Filed:  https://tracker.phpbb.com/browse/PHPBB-17751 (10/20/2026)
+PRs:    https://github.com/phpbb/phpbb/pull/7099 into 3.3.x and
+        https://github.com/phpbb/phpbb/pull/7100 into master (open)
+
+PROJECT: phpBB (PHPBB)
+ISSUE TYPE: Improvement
+SUMMARY: Allow extensions to add template variables to a core notification
+	email
+PRIORITY: Minor
+COMPONENT: Events
+AFFECTS VERSION: 3.3.20-RC1
+
+TYPE
+====
+PHP event
+
+LOCATION
+========
+phpbb/notification/method/messenger_base.php, notify_using_messenger(),
+inside the loop over the queue, just before the messenger's assign_vars()
+call that merges USERNAME and U_NOTIFICATION_SETTINGS with
+$notification->get_email_template_variables().
+
+The same spot exists on 3.3.x and master (on master it is inside the loop
+over the messenger methods).
+
+PURPOSE
+=======
+Let an extension add or change the template variables of a core
+notification email, per notification and per recipient, before the email
+is rendered.
+
+USE CASE
+========
+Companion to PHPBB-17722 (core.messenger_template_paths), which lets an
+extension supply its own copy of a core notification email template. That
+copy can only use the variables the notification type already assigns, so
+it cannot show anything new.
+
+The request behind both: add the poster's email address, and a link to ban
+its email domain, to the post_in_queue email sent to moderators. Today the
+only ways are to replace the whole notification type service, or to rewrite
+the finished text in core.notification_message_email - string surgery on
+already-rendered text, with no placeholder and no per-language file.
+
+With this event, a listener checks the notification type, looks up the
+data it needs from the notification's item_id (the post id for
+post_in_queue), and adds its own variables, which its own template copy
+(via PHPBB-17722) then uses.
+
+VARIABLES
+=========
+- notification (\phpbb\notification\type\type_interface, read-only) - the
+  notification being sent; get_type(), item_id, item_parent_id and user_id
+  identify it
+- user (array, read-only) - the recipient's user row
+- template_vars (array, MODIFIABLE) - the variables about to be assigned
+  to the email template: USERNAME, U_NOTIFICATION_SETTINGS and everything
+  from get_email_template_variables()
+
+PROPOSED NAME
+=============
+core.notification_method_messenger_modify_template_vars
