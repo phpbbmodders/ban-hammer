@@ -22,6 +22,15 @@ if (empty($lang) || !is_array($lang))
 }
 
 $lang = array_merge($lang, array(
+	'BH_AUTOBAN_DONE'	=> array(
+		1	=> 'This user now has %d warning and was banned automatically.',
+		2	=> 'This user now has %d warnings and was banned automatically.',
+	),
+	'BH_AUTOBAN_REASON'	=> array(
+		1	=> 'Banned automatically after %d warning',
+		2	=> 'Banned automatically after %d warnings',
+	),
+
 	'BANNED_ERROR'		=> 'There was an error!',
 	'BANNED_SUCCESS'	=> 'All actions were performed correctly.',
 
