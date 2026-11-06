@@ -127,6 +127,8 @@ class banhammer_listener implements EventSubscriberInterface
 			'core.mcp_queue_approve_details_template'	=> 'add_mcp_queue_banhammer_link',
 			'core.permissions'							=> 'add_permission',
 			'core.page_header'							=> 'add_banlist_link',
+			'core.mcp_warn_post_after'					=> 'autoban_after_warning',
+			'core.mcp_warn_user_after'					=> 'autoban_after_warning',
 		));
 	}
 
@@ -167,6 +169,89 @@ class banhammer_listener implements EventSubscriberInterface
 		$this->user->add_lang_ext('phpbbmodders/banhammer', 'banlist');
 
 		$this->template->assign_var('U_BH_BANLIST', $this->helper->route('phpbbmodders_banhammer_banlist'));
+	}
+
+	/**
+	 * Ban a user automatically once a warning brings them to the number of
+	 * warnings set in the ACP. Off while that number is 0.
+	 *
+	 * The ban goes through phpBB's own ban code, so it is logged to the
+	 * admin and moderator logs and the user's notes like any other ban,
+	 * with a reason that says it was automatic. Optionally the user is also
+	 * moved into the Ban Hammer group, exactly like the profile ban's
+	 * "Move to group" option, and moved back once the ban is over.
+	 *
+	 * @param \phpbb\event\data $event The event object
+	 * @return void
+	 * @access public
+	 */
+	public function autoban_after_warning($event)
+	{
+		$threshold = (int) $this->config['bh_autoban_warnings'];
+		$user_row = $event['user_row'];
+		$user_id = (int) $user_row['user_id'];
+
+		if ($threshold <= 0 || $user_row['user_type'] == USER_FOUNDER)
+		{
+			return;
+		}
+
+		// Count the active warnings, including the one just added, from the
+		// warnings table: users.user_warnings still includes expired
+		// warnings until phpBB's tidy_warnings cron task removes them. Same
+		// expiry rule as tidy_warnings(); 0 days means they never expire.
+		$sql = 'SELECT COUNT(warning_id) AS warnings
+			FROM ' . WARNINGS_TABLE . '
+			WHERE user_id = ' . $user_id;
+
+		if ((int) $this->config['warnings_expire_days'] > 0)
+		{
+			$sql .= ' AND warning_time >= ' . (time() - ((int) $this->config['warnings_expire_days'] * 86400));
+		}
+		$result = $this->db->sql_query($sql);
+		$warnings = (int) $this->db->sql_fetchfield('warnings');
+		$this->db->sql_freeresult($result);
+
+		if ($warnings < $threshold)
+		{
+			return;
+		}
+
+		if (!function_exists('phpbb_get_banned_user_ids'))
+		{
+			include($this->root_path . 'includes/functions_user.' . $this->php_ext);
+		}
+
+		if (!empty(phpbb_get_banned_user_ids(array($user_id))))
+		{
+			return;
+		}
+
+		$this->user->add_lang_ext('phpbbmodders/banhammer', 'banhammer');
+
+		$staff_reason = $this->user->lang('BH_AUTOBAN_REASON', $warnings);
+		$user_reason = ($this->config['bh_autoban_reason'] !== '') ? $this->config['bh_autoban_reason'] : $staff_reason;
+
+		if (!$this->ban_helper->ban('user', $user_row['username'], (int) $this->config['bh_autoban_time'], $staff_reason, $user_reason))
+		{
+			return;
+		}
+
+		$message = $this->user->lang('BH_AUTOBAN_DONE', $warnings);
+
+		if (!empty($this->config['bh_autoban_move_group']))
+		{
+			// Re-validated at use, same as the profile ban: the group may
+			// have been deleted or made founder-managed since it was set.
+			$group_name = $this->safe_group_name($this->config['bh_group_id']);
+
+			if ($group_name === '' || !$this->move_to_ban_group($user_id, $user_row['username'], (int) $user_row['group_id'], $group_name))
+			{
+				$message .= '<br />' . $this->user->lang['ERROR_MOVE_GROUP'];
+			}
+		}
+
+		$event['message'] .= '<br /><br />' . $message;
 	}
 
 	/**
@@ -487,46 +572,9 @@ class banhammer_listener implements EventSubscriberInterface
 
 		if ($this->request->variable('move_group', 0) && !empty($group_name))
 		{
-			$move_group_id = (int) $this->config['bh_group_id'];
-			$return = group_user_add($move_group_id, array($this->user_id), array($this->data['username']), $group_name, true);
-			$move_new_membership = 1;
-
-			if ($return === 'GROUP_USERS_EXIST')
-			{
-				// Already a member for some unrelated reason: group_user_add()
-				// returns before setting the default group in that case, so
-				// set it directly instead (same fix as do_restrict_stuff()'s
-				// equivalent case).
-				$return = group_user_attributes('default', $move_group_id, array($this->user_id));
-				$move_new_membership = 0;
-			}
-
-			if ($return !== false)
+			if (!$this->move_to_ban_group($this->user_id, $this->data['username'], (int) $this->data['group_id'], $group_name))
 			{
 				$error[] = 'ERROR_MOVE_GROUP';
-			}
-			else
-			{
-				// Record which group this ban actually moved them into (and
-				// whether that membership was newly created or pre-existing),
-				// and their default group beforehand, so undo_bh_group() can
-				// clean up precisely this action later instead of comparing
-				// against the *current* ACP setting.
-				$sql_ary = array(
-					'user_id'				=> $this->user_id,
-					'original_group_id'	=> (int) $this->data['group_id'],
-					'move_group_id'			=> $move_group_id,
-					'move_new_membership'	=> $move_new_membership,
-				);
-				$sql = 'INSERT INTO ' . $this->ban_group_table . ' ' . $this->db->sql_build_array('INSERT', $sql_ary);
-
-				// A second ban+move on the same already-banned user is
-				// blocked well before this point (see the banned-user check
-				// above), but guard the unique index anyway rather than let
-				// a genuine race surface as an uncaught SQL error.
-				$this->db->sql_return_on_error(true);
-				$this->db->sql_query($sql);
-				$this->db->sql_return_on_error(false);
 			}
 		}
 
@@ -771,6 +819,69 @@ class banhammer_listener implements EventSubscriberInterface
 		$this->db->sql_freeresult($result);
 
 		return ($row) ?: null;
+	}
+
+	/**
+	 * Move a banned user into the Ban Hammer group (the ACP's "Move to
+	 * group") and make it their default group, recording what was done so
+	 * ban_group_restore can undo exactly this move once the ban is over.
+	 * Used by the profile ban and by the automatic ban.
+	 *
+	 * @param int		$user_id
+	 * @param string	$username
+	 * @param int		$original_group_id	Their default group before the ban
+	 * @param string	$group_name			The move-to group's name, from safe_group_name()
+	 * @return bool True if the move worked
+	 * @access protected
+	 */
+	protected function move_to_ban_group($user_id, $username, $original_group_id, $group_name)
+	{
+		if (!function_exists('group_user_add') || !function_exists('group_user_attributes'))
+		{
+			include($this->root_path . 'includes/functions_user.' . $this->php_ext);
+		}
+
+		$move_group_id = (int) $this->config['bh_group_id'];
+		$return = group_user_add($move_group_id, array($user_id), array($username), $group_name, true);
+		$move_new_membership = 1;
+
+		if ($return === 'GROUP_USERS_EXIST')
+		{
+			// Already a member for some unrelated reason: group_user_add()
+			// returns before setting the default group in that case, so
+			// set it directly instead (same fix as do_restrict_stuff()'s
+			// equivalent case).
+			$return = group_user_attributes('default', $move_group_id, array($user_id));
+			$move_new_membership = 0;
+		}
+
+		if ($return !== false)
+		{
+			return false;
+		}
+
+		// Record which group this ban actually moved them into (and
+		// whether that membership was newly created or pre-existing),
+		// and their default group beforehand, so the restore can clean up
+		// precisely this action later instead of comparing against the
+		// *current* ACP setting.
+		$sql_ary = array(
+			'user_id'				=> (int) $user_id,
+			'original_group_id'	=> (int) $original_group_id,
+			'move_group_id'			=> $move_group_id,
+			'move_new_membership'	=> $move_new_membership,
+		);
+		$sql = 'INSERT INTO ' . $this->ban_group_table . ' ' . $this->db->sql_build_array('INSERT', $sql_ary);
+
+		// A second ban+move on the same already-banned user is blocked
+		// before this point (both callers skip users who are already
+		// banned), but guard the unique index anyway rather than let a
+		// genuine race surface as an uncaught SQL error.
+		$this->db->sql_return_on_error(true);
+		$this->db->sql_query($sql);
+		$this->db->sql_return_on_error(false);
+
+		return true;
 	}
 
 	/**

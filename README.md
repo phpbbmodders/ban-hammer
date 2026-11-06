@@ -13,6 +13,7 @@ Ban a user straight from their profile, with options to clean up their content a
 - Instead of banning, restrict a user to a limited group for a set time (or permanently); their original group comes back automatically when it ends.
 - A **Ban email domain** action on the MCP approve-details page.
 - Optionally report the user to Stop Forum Spam (API key set in the ACP).
+- Optionally ban a user automatically when a warning brings them to a set number of warnings, for a set length, and optionally move them into the chosen group too. Off by default.
 - An optional **Ban list** page and header link listing users banned by username, with ban dates, the reason shown to the user, and their warnings. Off by default; turn it on in the ACP and give groups the *Can view the ban list* permission (the standard and full user roles have it).
 
 ## Requirements
@@ -43,6 +44,7 @@ Contributions are welcome!
 
 - Based on the phpBB 3.0 **One Click Ban** MOD by phpbbmodders.net (co-authors Kailey and bonelifer; contributors EXreaction, RMcGirr83, Sniper_E and tumba25).
 - Converted to a phpBB extension by Rich McGirr ([RMcGirr83](https://github.com/rmcgirr83)) and Jari Kanerva (tumba25).
+- The automatic ban after a number of warnings follows the idea of Kailey's [Auto Ban](https://github.com/kaileymsnay/autoban) extension.
 - The avatar-deletion modernization ([PR #21](https://github.com/phpbbmodders/ban-hammer/pull/21)) is based on a fix by [Rich McGirr](https://github.com/rmcgirr83) in his fork, routing avatar deletion through phpBB's `avatar.manager` service instead of the legacy `avatar_delete()` function.
 - Code review, bug fixes, and documentation assisted by [Claude](https://www.anthropic.com/claude).
 
