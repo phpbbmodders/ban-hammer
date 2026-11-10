@@ -10,3 +10,14 @@
 *.gif binary
 *.webp binary
 *.ico binary
+
+tests/			export-ignore
+docs/			export-ignore
+.github/		export-ignore
+.gitignore		export-ignore
+.gitattributes	export-ignore
+phpunit.xml.*	export-ignore
+build.xml		export-ignore
+composer.lock	export-ignore
+README.md		export-ignore
+.editorconfig	export-ignore
